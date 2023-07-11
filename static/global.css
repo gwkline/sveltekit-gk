@@ -1,0 +1,205 @@
+html,
+body {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  margin: 0;
+}
+
+:root {
+  font-synthesis: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-text-size-adjust: 100%;
+
+  /* --primary: #045996;
+	--primary-hover: #00355a; */
+  --primary: #0072bd;
+  --primary-hover: #005791;
+  --danger-red: #cf222e;
+  --danger-red-hover: #a40e26;
+  --success-green: #2da44e;
+  --success-green-hover: #1c6932;
+  --warning-yellow: #bf8700;
+  --warning-yellow-hover: #7e5801;
+
+  font-family: "Roboto", sans-serif;
+  --black: #ffffff;
+  --off-black: #fafafa;
+  --gray: #d5d5d8;
+  --light-gray-4: #82828b;
+  --light-gray-3: #4b4b58;
+  --light-gray-2: #3b3b49;
+  --light-gray-1: #323241;
+  /* --background: #2e2e3d; */
+  /* --background: #181829; */
+  /* --background: #1e1e22; */
+  --background: #1b1b1f;
+  --background-alt: #18181a;
+  --white: #ffffff;
+  color: var(--off-black);
+  background-color: var(--background-alt);
+  --sidebar-background: var(--background-alt);
+}
+
+[color-theme="light"] {
+  --black: #000000;
+  --off-black: #333333;
+  --gray: #757575;
+  --light-gray-4: #e0e0e0;
+  --light-gray-3: #e8e8e8;
+  --light-gray-2: #f2f2f2;
+  --light-gray-1: #fafafa;
+  --background: #ffffff;
+  --background-alt: #f7f7f7;
+
+  --white: #ffffff;
+  color: var(--off-black);
+  background-color: var(--background-alt);
+  --sidebar-background: var(--background);
+}
+
+text.xs {
+  color: inherit;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 10px;
+  line-height: 13px;
+}
+
+text.sm {
+  color: inherit;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 15px;
+}
+
+text {
+  color: inherit;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 16px;
+}
+
+text.lg {
+  color: inherit;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 15px;
+  line-height: 18px;
+}
+
+text.xl {
+  color: inherit;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 17px;
+  line-height: 20px;
+}
+
+p.xs {
+  color: inherit;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 10px;
+  line-height: 150%;
+}
+
+p.sm {
+  color: inherit;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 150%;
+}
+
+p {
+  color: inherit;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 150%;
+}
+
+p.lg {
+  color: inherit;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 15px;
+  line-height: 150%;
+}
+
+p.xl {
+  color: inherit;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 17px;
+  line-height: 150%;
+}
+
+h1 {
+  color: inherit;
+  font-style: normal;
+  font-weight: 500;
+  font-size: 35px;
+  line-height: 41px;
+}
+
+h2 {
+  color: inherit;
+  font-style: normal;
+  font-weight: 500;
+  font-size: 27px;
+  line-height: 32px;
+}
+
+h3 {
+  color: inherit;
+  font-style: normal;
+  font-weight: 500;
+  font-size: 23px;
+  line-height: 27px;
+}
+
+h4 {
+  color: inherit;
+  font-style: normal;
+  font-weight: 500;
+  font-size: 21px;
+  line-height: 25px;
+}
+
+h5 {
+  color: inherit;
+  font-style: normal;
+  font-weight: 600;
+  font-size: 17px;
+  line-height: 20px;
+}
+
+h6 {
+  color: inherit;
+  font-style: normal;
+  font-weight: 600;
+  font-size: 15px;
+  line-height: 18px;
+}
+
+.subtitle {
+  color: inherit;
+  font-style: normal;
+  font-weight: 500;
+  font-size: 12px;
+  line-height: 14px;
+}
+
+:root.purple {
+  --primary: #625bf6;
+  --primary-hover: #4842c4;
+}
