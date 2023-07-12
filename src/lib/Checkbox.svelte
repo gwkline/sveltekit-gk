@@ -55,7 +55,6 @@
 			cursor: pointer;
 			border: 2px solid var(--bc, var(--border));
 			background: var(--b, var(--background));
-			transition: background 0.3s, border-color 0.3s, box-shadow 0.2s;
 		}
 
 		@supports (-webkit-appearance: none) or (-moz-appearance: none) {

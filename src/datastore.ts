@@ -28,7 +28,6 @@ const persistentStore = <T>(key: string, startValue: T): Writable<T> => {
 export const isLoading = writable<Record<string, boolean>>({});
 export const settings = persistentStore<Settings | Record<string, never>>('settings', {});
 export const sidebarCollapsed = persistentStore('sidebarCollapsed', true);
-export const colorTheme = persistentStore('colorTheme', 'dark');
 
 export const shiftPressed = persistentStore('shiftPressed', false);
 export const showTags = persistentStore('showTags', false);
@@ -67,7 +66,7 @@ export const checkoutSettings = persistentStore('checkoutSettings', {
 
 // Define color mapping
 export const stateColors = {
-	Ready: '',
+	Ready: 'var(--light-gray-4)',
 	Queued: 'var(--warning-yellow)',
 	Starting: 'var(--primary-hover)',
 	Running: 'var(--primary)',

@@ -72,7 +72,7 @@
 			disabled: true
 		},
 		{
-			page: 'tracker',
+			page: 'winTracker',
 			text: 'Win Tracker',
 			icon: faTrophy,
 			disabled: true

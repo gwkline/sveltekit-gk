@@ -91,7 +91,6 @@
 		handleClick(event.detail.index);
 	};
 
-	let backgroundColor = '';
 	let size = '';
 	let taskId: number;
 	let state: State;
@@ -101,7 +100,6 @@
 		let thisTask = $verboseTasks.find((task) => task['account']['username'] === row['Account']);
 
 		state = thisTask ? thisTask['state'] : 'Ready';
-		backgroundColor = stateColors[state];
 		size = thisTask ? thisTask['product']['size'] : '';
 		taskId = thisTask ? thisTask['id'] : 0;
 		profileName = thisTask ? thisTask['account']['profile']['name'] : '';
@@ -164,12 +162,7 @@
 				{/if}
 			{:else if column === 'Status'}
 				<div class="status-content">
-					<div
-						class="state-color-icon"
-						style="background-color: {state == 'Ready'
-							? 'var(--light-gray-1)'
-							: stateColors[state]};"
-					>
+					<div class="state-color-icon" style="background-color: {stateColors[state]};">
 						<Fa icon={stateIconMapping[state]} class="fa-icon" color="var(--white)" size="xs" />
 					</div>
 					{value}
@@ -260,7 +253,7 @@
 	}
 
 	.fa-icon {
-		color: var(--white);
+		color: var(--off-black);
 		font-size: 10px; /* control the size of the icon within the square */
 	}
 
@@ -312,7 +305,7 @@
 	}
 	.Status {
 		padding: 3px 0;
-		color: var(--white);
+		color: var(--off-black);
 	}
 
 	.statusBubble {

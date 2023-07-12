@@ -77,7 +77,6 @@
 		outline: 1px solid var(--light-gray-4);
 		border: none;
 		border-radius: 6px;
-		transition: 0.3s;
 	}
 
 	textarea {

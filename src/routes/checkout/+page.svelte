@@ -92,10 +92,8 @@
 					}
 				}
 			};
-
 			return task;
 		});
-
 		verboseTasks.set(cleanedData);
 	});
 

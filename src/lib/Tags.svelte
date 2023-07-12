@@ -455,6 +455,8 @@
 		color: var(--off-black);
 		display: flex;
 		flex-wrap: nowrap;
+		white-space: nowrap;
+
 		align-items: center;
 		padding: 10px 0px;
 	}

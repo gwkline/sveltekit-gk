@@ -35,8 +35,6 @@
 		right: 0;
 		bottom: 0;
 		background-color: var(--light-gray-3);
-		-webkit-transition: 0.4s;
-		transition: 0.4s;
 	}
 
 	.slider:before {

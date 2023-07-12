@@ -215,3 +215,75 @@ export type State =
 	| 'Winning';
 
 export type TableRowType = Record<string, string>;
+
+export type WhopMembershipStatusType =
+	| 'trialing'
+	| 'active'
+	| 'past_due'
+	| 'completed'
+	| 'canceled'
+	| 'expired'
+	| 'unresolved';
+export type WhopPaymentProcessorType = 'free' | 'stripe' | 'coinbase' | 'crypto' | 'paypal';
+
+export type WhopDiscordObjectType = {
+	id: string;
+	username: string;
+	image_url: string;
+};
+
+export type WhopSmartContractType = {
+	contract_address: string;
+	contract_name: string;
+};
+export type WhopNFTTokensObjectType = {
+	token_id: string;
+	current_holder: string;
+	smart_contract: WhopSmartContractType;
+	balance: number;
+	metadata: Record<string, string | number | object>[];
+};
+
+export type WhopMembershipType = {
+	id: string;
+	product: string;
+	user: string;
+	plan: string;
+	promo_code: string;
+	email: string;
+	stripe_subscription_id: string;
+	stripe_customer_id: string;
+	status: WhopMembershipStatusType;
+	valid: boolean;
+	cancel_at_period_end: boolean;
+	payment_processor: WhopPaymentProcessorType;
+	quantity: number;
+	wallet_address: string;
+	custom_fields_responses: string[];
+	custom_fields_responses_v2: string[];
+	discord: WhopDiscordObjectType;
+	nft_tokens: WhopNFTTokensObjectType[];
+	metadata: Record<string, string | number | object>;
+	expires_at: number;
+	license_key: string;
+	renewal_period_start: number;
+	renewal_period_end: number;
+	created_at: number;
+	manage_url: string;
+	affiliate_page_url: string;
+	checkout_session: string;
+	access_pass: string;
+	deliveries: Record<string, string>[];
+	telegram_account_id: string;
+};
+
+export type WhopPaginationType = {
+	current_page: number;
+	total_page: number;
+	total_count: number;
+};
+
+export type WhopResponseBodyType = {
+	pagination: WhopPaginationType;
+	data: WhopMembershipType[];
+};

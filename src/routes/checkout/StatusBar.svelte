@@ -11,9 +11,10 @@
 	} from '@fortawesome/free-solid-svg-icons';
 	import { stateColors, verboseTasks, selectedState } from '../../datastore';
 	import Fa from 'svelte-fa';
+	import type { State, Task } from '../../types';
 
 	// Array of states in the desired order
-	const stateOrder = [
+	const stateOrder: State[] = [
 		'Ready',
 		'Queued',
 		'Starting',
@@ -24,13 +25,13 @@
 		'Winning'
 	];
 
-	const capitalizeFirstLetter = (str) => str.charAt(0).toUpperCase() + str.slice(1);
+	const capitalizeFirstLetter = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
 
 	$: orderedTasks = $verboseTasks
 		.slice()
 		.sort((a, b) => stateOrder.indexOf(a.state) - stateOrder.indexOf(b.state));
 
-	const countTasksByState = (tasks) => {
+	const countTasksByState = (tasks: Task[]): [State, number][] => {
 		const counts = {
 			Ready: 0,
 			Queued: 0,
@@ -44,7 +45,7 @@
 		tasks.forEach((task) => {
 			counts[task.state]++;
 		});
-		return Object.entries(counts); // Convert object to an array of [key, value] pairs
+		return Object.entries(counts) as [State, number][]; // Convert object to an array of [key, value] pairs
 	};
 
 	const stateIconMapping = {
@@ -59,7 +60,7 @@
 	};
 
 	// Function to select state
-	const selectState = (state) => {
+	const selectState = (state: State) => {
 		if ($selectedState === state) {
 			selectedState.set(''); // Deselect state
 		} else {
@@ -68,10 +69,9 @@
 	};
 </script>
 
-<!-- svelte-ignore a11y-click-events-have-key-events -->
 <div class="state-info">
 	{#each countTasksByState(orderedTasks) as [state, count] (state)}
-		<div
+		<button
 			class={`state-item ${state === $selectedState ? 'selected' : ''}`}
 			on:click={() => selectState(state)}
 		>
@@ -83,7 +83,7 @@
 			</div>
 			<span class="state-name">{capitalizeFirstLetter(state) + ':'}</span>
 			<span class="state-count">{count}</span>
-		</div>
+		</button>
 	{/each}
 </div>
 
@@ -103,7 +103,6 @@
 		width: 100%;
 		height: 20px;
 		background-color: var(--light-gray-1);
-		transition: 1s ease-in-out;
 		border-radius: 5px;
 		min-height: 20px; /* Added min-height */
 		flex-shrink: 0; /* Prevents shrinking */
@@ -113,7 +112,6 @@
 	.status-section {
 		flex-grow: 1;
 		text-align: center;
-		transition: 1s ease-in-out;
 		border-radius: 10px;
 	}
 
@@ -132,6 +130,9 @@
 		width: 105px;
 		margin: 3px 0px;
 		transition: border 0.3s ease; /* Added transition for smoother border change */
+		background-color: inherit;
+		border: none;
+		color: var(--off-black);
 	}
 
 	.state-item.selected {

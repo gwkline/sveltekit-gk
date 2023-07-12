@@ -90,7 +90,6 @@
 		font-weight: 400;
 		font-size: 14px;
 		border-radius: 6px;
-		transition: 0.3s;
 	}
 
 	input.sm {

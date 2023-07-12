@@ -1,49 +1,41 @@
 <script lang="ts">
 	import { faCircleHalfStroke } from '@fortawesome/free-solid-svg-icons';
-	import { colorTheme } from '../datastore';
-	import Button from './Button.svelte';
-	import { browser } from '$app/environment';
+	import { enhance } from '$app/forms';
+	import { page } from '$app/stores';
+	import Fa from 'svelte-fa';
 	let icon = faCircleHalfStroke;
 
-	export let toggle = () => {
-		if (browser) {
-			if ($colorTheme === 'light') {
-				// light theme has been selected
-				document.body.removeAttribute('color-theme');
-				$colorTheme = 'dark';
-				// save theme selection
-			} else {
-				document.body.setAttribute('color-theme', 'light');
-				$colorTheme = 'light';
-				// reset theme selection
-			}
-		}
-	};
-
-	const initTheme = () => {
-		$colorTheme === 'light'
-			? document.body.setAttribute('color-theme', 'light')
-			: document.body.removeAttribute('color-theme');
-	};
-
-	if (browser) {
-		initTheme();
-	}
+	export const ssr = true;
 </script>
 
-<div class="container">
-	<Button
-		onclick={toggle}
-		variant={'default alternate'}
-		status={'active'}
-		size={'lg'}
-		outline={'outline'}
-		{icon}
-		shape={'circle'}
-	/>
-</div>
+<form
+	method="POST"
+	use:enhance={({ action }) => {
+		const theme = document.documentElement.getAttribute('color-theme');
+
+		if (theme === 'dark') {
+			document.documentElement.setAttribute('color-theme', 'light');
+		} else {
+			document.documentElement.setAttribute('color-theme', 'dark');
+		}
+	}}
+>
+	<div class="container">
+		<button formaction="/?/setTheme&redirectTo={$page.url.pathname}">
+			<Fa {icon} />
+		</button>
+	</div>
+</form>
 
 <style>
+	button {
+		height: 40px;
+		width: 40px;
+		border-radius: 100%;
+		border: none;
+		color: var(--background);
+		background: var(--off-black);
+	}
 	div {
 		z-index: 100;
 		position: fixed;
