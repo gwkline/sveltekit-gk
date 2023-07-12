@@ -129,14 +129,10 @@
 		});
 	};
 
-	const saveSettings = () => {
+	// Changes in saveSettings method
+	const saveSettings = (settingKey: string, value: string) => {
 		settings.update((curSettings) => {
-			curSettings['max_starting_tasks'] = maxStartingTaskCount
-				? parseInt(maxStartingTaskCount)
-				: curSettings['max_starting_tasks'];
-			curSettings['max_active_tasks'] = maxActiveTaskCount
-				? parseInt(maxActiveTaskCount)
-				: curSettings['max_active_tasks'];
+			curSettings[settingKey] = value ? parseInt(value) : curSettings[settingKey];
 			return curSettings;
 		});
 
@@ -173,20 +169,20 @@
 				}}
 				size="md"
 				icon={faPlus}
-				resizable={true}
+				resizable={false}
 				style="button">Create Tasks</Button
 			>
 		</div>
 	</div>
 	<div class="button-row">
-		<div class="button-group">
+		<div class="button-group left-button-group">
 			<Button
 				variant="primary"
 				onclick={() => handleTaskAction('start')}
 				isLoading={$isLoading.start}
 				size="md"
 				icon={faPlay}
-				resizable={true}
+				resizable={false}
 				style="button">Start {buttonTextCount} Tasks</Button
 			>
 
@@ -196,7 +192,7 @@
 				isLoading={$isLoading.stop}
 				size="md"
 				icon={faStop}
-				resizable={true}
+				resizable={false}
 				style="button">Stop {buttonTextCount} Tasks</Button
 			>
 
@@ -206,11 +202,11 @@
 				isLoading={$isLoading.delete}
 				size="md"
 				icon={faTrash}
-				resizable={true}
+				resizable={false}
 				style="button">Delete {buttonTextCount} Tasks</Button
 			>
 		</div>
-		<div class="button-group">
+		<div class="button-group right-button-group">
 			<Button
 				variant="default"
 				size="md"
@@ -219,7 +215,7 @@
 					modalTitle = `Edit ${buttonTextCount} Tasks`;
 					showModal = true;
 				}}
-				resizable={true}
+				resizable={false}
 				style="button">Edit {buttonTextCount} Tasks</Button
 			>
 
@@ -228,51 +224,34 @@
 				size="md"
 				icon={faCopy}
 				onclick={() => handleTaskAction('duplicate')}
-				resizable={true}
+				resizable={false}
 				style="button">Duplicate {buttonTextCount} Tasks</Button
 			>
 		</div>
 	</div>
-	<div class="third-row">
-		<div class="search-container">
+	<div class="button-row">
+		<div class="button-group left-button-group">
 			<Search size="md" />
 			<div class="toggle-container">
 				<Toggle bind:checked={$showTags} />
 				<span class="toggle-label">Show tags</span>
 			</div>
 		</div>
-		<div class="controls-container">
+		<div class="button-group right-button-group">
 			<div class="input-group">
 				<Input
-					placeholder="Max Starting Tasks"
+					placeholder="Max Starting Tasks: {$settings.max_starting_tasks}"
 					size="xs"
-					value={maxStartingTaskCount}
-					on:input={(event) => (maxStartingTaskCount = event.detail)}
+					bind:value={maxStartingTaskCount}
+					on:blur={() => saveSettings('max_starting_tasks', maxStartingTaskCount)}
 				/>
-				<Button icon={null} shape="square-button" variant="secondary" onclick={() => {}}
-					>{$settings.max_starting_tasks}</Button
-				>
 			</div>
 			<div class="input-group">
 				<Input
-					placeholder="Max Active Tasks"
+					placeholder="Max Active Tasks: {$settings.max_active_tasks}"
 					size="xs"
-					value={maxActiveTaskCount}
-					on:input={(event) => (maxActiveTaskCount = event.detail)}
-				/>
-				<Button shape="square-button" onclick={() => {}} variant="secondary"
-					>{$settings.max_active_tasks}</Button
-				>
-				<Button
-					onclick={() => {
-						isLoading.set({ saveSettings: true });
-						saveSettings().then(() => {
-							isLoading.set({ saveSettings: false });
-						});
-					}}
-					icon={faSave}
-					variant="default"
-					isLoading={$isLoading['saveSettings']}
+					bind:value={maxActiveTaskCount}
+					on:blur={() => saveSettings('max_active_tasks', maxActiveTaskCount)}
 				/>
 			</div>
 		</div>
@@ -292,27 +271,24 @@
 
 	.button-group {
 		display: flex;
+		flex-wrap: wrap;
+		justify-content: space-evenly;
 		align-items: center;
-	}
-	.third-row {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		width: 100%; /* Ensure third row takes up full width */
-		margin: 10px 0;
+		padding: 5px 0px;
 	}
 
-	.search-container {
-		display: flex;
-		align-items: center;
-		justify-content: space-between; /* space out search and toggle */
-		width: 30%; /* Adjust as needed */
+	.button-group.left-button-group {
+		justify-content: start;
+	}
+
+	.button-group.right-button-group {
+		justify-content: end;
 	}
 
 	.toggle-container {
 		display: flex;
-		align-items: center; /* Center the toggle vertically */
-		margin-left: 20px; /* Add some space between search and toggle */
+		align-items: center;
+		margin-left: 20px;
 	}
 
 	.toggle-label {
@@ -321,40 +297,10 @@
 		font-size: 14px;
 	}
 
-	.controls-container {
-		display: flex;
-		justify-content: flex-end; /* Spread the controls horizontally */
-		align-items: center;
-		width: 60%; /* Adjust as needed */
-	}
-
 	.input-group {
 		display: flex;
 		align-items: center;
-		margin-right: 10px; /* Add some spacing between input groups */
-	}
-
-	@media (max-width: 980px) {
-		.third-row {
-			flex-direction: column;
-			justify-content: flex-start;
-			align-items: flex-start;
-		}
-
-		.search-container,
-		.controls-container {
-			width: 100%; /* Ensure these containers take up full width */
-		}
-
-		.controls-container {
-			flex-direction: column;
-			align-items: flex-start;
-			justify-content: space-between;
-		}
-
-		.input-group {
-			width: 100%; /* Ensure input groups take up full width */
-			margin-top: 20px; /* Add some spacing between input groups on small screens */
-		}
+		margin-right: 10px;
+		justify-content: space-around;
 	}
 </style>

@@ -7,7 +7,7 @@
 		faPlay,
 		faPen,
 		faTrash,
-		faStop,
+		faPause,
 		faClover,
 		faHourglassHalf,
 		faRunning,
@@ -28,7 +28,7 @@
 	export let row: TableRowType;
 
 	const stateIconMapping = {
-		Ready: faStop,
+		Ready: faPause,
 		Queued: faClock,
 		Starting: faHourglassHalf,
 		Running: faRunning,
@@ -149,10 +149,14 @@
 </script>
 
 <tr on:click|stopPropagation={() => handleClick()} class={checked ? 'active' : ''}>
-	<div style="display: flex; align-items: center; width: 60px; justify-content: space-between;">
-		<div style="width: 10px; text-align: right; font-size:12px;">{index}</div>
-		<Checkbox {index} bind:checked on:change={handleDispatch} />
-	</div>
+	<td class="Count">
+		<div class="count-content">
+			<div style="width: 10px; text-align: right; font-size:12px;">{index}</div>
+			<div class="checkbox">
+				<Checkbox {index} bind:checked on:change={handleDispatch} />
+			</div>
+		</div>
+	</td>
 
 	{#each Object.entries(row) as [column, value]}
 		<td class={column}>
@@ -163,9 +167,9 @@
 			{:else if column === 'Status'}
 				<div class="status-content">
 					<div class="state-color-icon" style="background-color: {stateColors[state]};">
-						<Fa icon={stateIconMapping[state]} class="fa-icon" color="var(--white)" size="xs" />
+						<Fa icon={stateIconMapping[state]} color="var(--white)" size="md" />
 					</div>
-					{value}
+					<p>{value}</p>
 				</div>
 			{:else if column === 'SKU'}
 				<div>
@@ -206,7 +210,7 @@
 			{#if state === 'Ready'}
 				<Button icon={faPlay} onclick={handleStart} />
 			{:else}
-				<Button icon={faStop} onclick={handleStop} />
+				<Button icon={faPause} onclick={handleStop} />
 			{/if}
 			<Button icon={faPen} onclick={handleEdit} />
 			<Button icon={faTrash} onclick={handleDelete} />
@@ -219,16 +223,7 @@
 		height: 46px;
 		border-bottom: 1px solid var(--light-gray-3);
 		align-items: center;
-	}
-
-	.fa-icon-container {
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		width: 20px;
-		height: 20px;
-		border-radius: 5px;
-		margin-right: 5px;
+		vertical-align: middle;
 	}
 
 	.status-content {
@@ -244,26 +239,32 @@
 	}
 
 	.state-color-icon {
-		display: flex;
+		display: inline-flex;
 		align-items: center;
 		justify-content: center;
-		width: 20px; /* controls the width and height of the square */
-		height: 20px;
-		border-radius: 5px; /* rounded corners */
-	}
-
-	.fa-icon {
-		color: var(--off-black);
-		font-size: 10px; /* control the size of the icon within the square */
+		width: 30px;
+		height: 30px;
+		border-radius: 5px;
+		box-sizing: border-box;
 	}
 
 	.button-group {
 		display: flex;
-		margin-right: 10px;
+		flex-wrap: wrap; /* allows the buttons to wrap to next line */
 		justify-content: flex-end;
-		flex-grow: 0;
-		flex-shrink: 0;
-		flex-basis: 100px;
+		margin-right: 10px;
+	}
+
+	@media (max-width: 600px) {
+		.button-group {
+			flex-direction: column;
+		}
+	}
+
+	@media (max-width: 900px) {
+		.status-content > p {
+			display: none;
+		}
 	}
 
 	tr.active,
@@ -287,7 +288,13 @@
 	}
 
 	.checkbox {
-		padding-left: 5px;
+		padding-left: 23.5px;
+	}
+
+	.count-content {
+		display: flex;
+		align-items: center;
+		justify-content: start;
 	}
 
 	.SKU {

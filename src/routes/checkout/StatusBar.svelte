@@ -75,11 +75,8 @@
 			class={`state-item ${state === $selectedState ? 'selected' : ''}`}
 			on:click={() => selectState(state)}
 		>
-			<div
-				class="state-color-icon"
-				style="background-color: {state == 'Ready' ? 'var(--light-gray-1)' : stateColors[state]};"
-			>
-				<Fa icon={stateIconMapping[state]} class="fa-icon" color="var(--white)" size="xs" />
+			<div class="state-color-icon" style="background-color: {stateColors[state]};">
+				<Fa icon={stateIconMapping[state]} color="var(--white)" size="sm" />
 			</div>
 			<span class="state-name">{capitalizeFirstLetter(state) + ':'}</span>
 			<span class="state-count">{count}</span>
@@ -102,10 +99,9 @@
 		display: flex;
 		width: 100%;
 		height: 20px;
-		background-color: var(--light-gray-1);
 		border-radius: 5px;
-		min-height: 20px; /* Added min-height */
-		flex-shrink: 0; /* Prevents shrinking */
+		min-height: 20px;
+		flex-shrink: 0;
 		margin: 10px 0px;
 	}
 
@@ -116,20 +112,17 @@
 	}
 
 	.state-info {
-		display: flex; /* Changed from grid to flex */
-		flex-wrap: wrap; /* Wrap items to the next line if they run out of space */
-		justify-content: space-between; /* Aligns the items to the start of the container */
-		align-items: start; /* Aligns the items vertically to the start of the container */
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: space-evenly;
+		align-items: start;
 		margin: 10px 0px;
-		height: 30px;
 	}
 
 	.state-item {
 		display: flex;
 		align-items: center;
-		width: 105px;
 		margin: 3px 0px;
-		transition: border 0.3s ease; /* Added transition for smoother border change */
 		background-color: inherit;
 		border: none;
 		color: var(--off-black);
@@ -137,7 +130,7 @@
 
 	.state-item.selected {
 		border: 1px solid var(--light-gray-4);
-		border-radius: 5px; /* Optional: To round the border edges */
+		border-radius: 5px;
 		padding: 3px;
 	}
 
@@ -145,20 +138,19 @@
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
-		width: 20px;
-		height: 20px;
+		width: 30px;
+		height: 30px;
 		border-radius: 5px;
-		margin-right: 10px;
-		padding: 3px;
+		box-sizing: border-box;
 	}
 
-	.state-name {
-		margin-right: 5px;
+	.state-name,
+	.state-count {
+		margin-left: 10px; /* consistent 10px space after the icon */
 		font-size: small;
 	}
 
 	.state-count {
 		font-weight: bold;
-		font-size: small;
 	}
 </style>

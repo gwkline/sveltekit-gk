@@ -15,6 +15,7 @@ body {
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
 	-webkit-text-size-adjust: 100%;
+	font-family: 'Roboto', sans-serif;
 
 	/* --primary: #045996;
 	--primary-hover: #00355a; */
@@ -26,8 +27,8 @@ body {
 	--success-green-hover: #1c6932;
 	--warning-yellow: #bf8700;
 	--warning-yellow-hover: #7e5801;
+	--white: #ffffff;
 
-	font-family: 'Roboto', sans-serif;
 	--black: #ffffff;
 	--off-black: #fafafa;
 	--gray: #d5d5d8;
@@ -35,12 +36,8 @@ body {
 	--light-gray-3: #4b4b58;
 	--light-gray-2: #3b3b49;
 	--light-gray-1: #323241;
-	/* --background: #2e2e3d; */
-	/* --background: #181829; */
-	/* --background: #1e1e22; */
 	--background: #1b1b1f;
 	--background-alt: #18181a;
-	--white: #ffffff;
 	color: var(--off-black);
 	background-color: var(--background-alt);
 	--sidebar-background: var(--background-alt);
@@ -50,17 +47,12 @@ body {
 	--black: #000000;
 	--off-black: #333333;
 	--gray: #757575;
-	--light-gray-4: #e0e0e0;
-	--light-gray-3: #e8e8e8;
-	--light-gray-2: #f2f2f2;
-	--light-gray-1: #fafafa;
+	--light-gray-4: #6b6b6b;
+	--light-gray-3: #a3a3a3;
+	--light-gray-2: #ced3d7;
+	--light-gray-1: #e8e8e8;
 	--background: #ffffff;
-	--background-alt: #f7f7f7;
-
-	--white: #ffffff;
-	color: var(--off-black);
-	background-color: var(--background-alt);
-	--sidebar-background: var(--background);
+	--background-alt: #ffffff;
 }
 
 text.xs {

@@ -21,6 +21,9 @@
 		value = (event.target as HTMLInputElement).value;
 		dispatch('input', value);
 	}
+	function handleBlur(event: Event) {
+		dispatch('blur', (event.target as HTMLInputElement).value);
+	}
 </script>
 
 <link
@@ -38,6 +41,7 @@
 			{placeholder}
 			bind:value
 			on:input={handleChange}
+			on:blur={handleBlur}
 			{disabled}
 		/>
 	{:else}
@@ -45,6 +49,7 @@
 			type="text"
 			bind:value
 			on:input={handleChange}
+			on:blur={handleBlur}
 			class="box {type} {size} {outline}  {variant}"
 			{style}
 			{placeholder}

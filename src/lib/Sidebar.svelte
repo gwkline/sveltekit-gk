@@ -179,6 +179,7 @@
 		width: 225px;
 		height: 100vh;
 		border-right: 1px solid var(--light-gray-1);
+		background-color: var(--sidebar-background);
 	}
 
 	.collapsed {

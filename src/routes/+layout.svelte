@@ -3,6 +3,9 @@
 	import ThemeToggle from '../lib/ThemeToggle.svelte';
 	import { shiftPressed, sidebarCollapsed } from '../datastore';
 
+	export const ssr = false;
+	export const prerender = false;
+
 	const handleKeydown = (event: KeyboardEvent) => {
 		if (event.key === 'Shift') {
 			shiftPressed.set(true);
@@ -23,30 +26,32 @@
 <svelte:window on:keydown={handleKeydown} on:keyup={handleKeyup} />
 <Sidebar />
 <ThemeToggle />
-<div class="{$sidebarCollapsed ? 'collapsed' : ''} container">
+
+<div class="{$sidebarCollapsed ? 'collapsed' : ''} master-container">
 	<div class="border-card">
 		<slot />
 	</div>
 </div>
 
-<style>
+<style lang="css" global>
+	@import '/global.css';
 	* {
 		font-family: Roboto;
 	}
 
-	.container {
+	.master-container {
 		position: relative; /* Or absolute, or fixed, depending on your needs */
 		right: 0;
 		margin-left: 225px;
 		height: 100%;
 		width: calc(
 			100% - 230px
-		); /* This will ensure the width of container is always the full width minus the left margin */
+		); /* This will ensure the width of master-container is always the full width minus the left margin */
 		display: flex;
 		flex-direction: column;
 	}
 
-	.container.collapsed {
+	.master-container.collapsed {
 		margin-left: 50px;
 		width: calc(100% - 60px); /* Update this too, to take into account the changed left margin */
 	}
