@@ -1,6 +1,7 @@
 <script lang="ts">
-	import Button from './Button.svelte';
-	import Checkbox from './Checkbox.svelte';
+	import Button from '$lib/Button.svelte';
+	import Checkbox from '$lib/Checkbox.svelte';
+	import Input from '$lib/Input.svelte';
 	import { createEventDispatcher } from 'svelte';
 	import Fa from 'svelte-fa';
 	import {
@@ -15,21 +16,15 @@
 	export let open = false;
 	export let options: string[];
 
+	const dispatch = createEventDispatcher();
+	let buttonText: string;
+	let filterText = '';
+	let dropdownEl: HTMLElement;
+	let chevronIcon: IconDefinition;
 	let selectedOptions = options.reduce((acc: Record<string, boolean>, option: string) => {
 		acc[option] = false;
 		return acc;
 	}, {});
-
-	let buttonText: string;
-	$: buttonText = `${title} ${Object.keys(selectedOptions)
-		.filter((option) => selectedOptions[option])
-		.join(', ')}`;
-
-	$: if (status === 'disabled') {
-		open = false;
-	}
-
-	const dispatch = createEventDispatcher();
 
 	const toggleOption = (option: string) => {
 		selectedOptions[option] = !selectedOptions[option];
@@ -38,22 +33,22 @@
 		dispatch('update', { selected: selectedKeys });
 	};
 
-	let dropdownEl: HTMLElement;
-
-	function handleClickOutside(event: MouseEvent) {
+	const handleClickOutside = (event: MouseEvent) => {
 		if (!dropdownEl.contains(event.target as Node)) {
 			open = false;
 		}
-	}
+	};
 
-	let chevronIcon: IconDefinition;
 	$: chevronIcon = open ? faChevronUp : faChevronDown;
-
-	let filterText = '';
-
 	$: filteredOptions = Object.keys(selectedOptions).filter((option) =>
 		option.toLowerCase().includes(filterText.toLowerCase())
 	);
+	$: buttonText = `${title} ${Object.keys(selectedOptions)
+		.filter((option) => selectedOptions[option])
+		.join(', ')}`;
+	$: if (status === 'disabled') {
+		open = false;
+	}
 </script>
 
 <svelte:window on:click={handleClickOutside} />
@@ -68,7 +63,15 @@
 	</div>
 	{#if open}
 		<div class="dropdown-menu">
-			<input type="text" bind:value={filterText} placeholder="Filter options" />
+			<div class="input-container">
+				<Input
+					bind:value={filterText}
+					placeholder="Filter options"
+					style="width: 100%;"
+					variant="transparent"
+					outline="noOutline"
+				/>
+			</div>
 
 			{#each filteredOptions as option}
 				<!-- svelte-ignore a11y-no-noninteractive-tabindex -->
@@ -116,11 +119,6 @@
 		scroll-behavior: smooth;
 	}
 
-	.dropdown-menu input {
-		width: 100%;
-		margin-bottom: 10px;
-	}
-
 	.dropdown-item {
 		display: flex;
 		align-items: center;
@@ -135,5 +133,9 @@
 
 	.dropdown-item:hover {
 		background: var(--light-gray-4);
+	}
+
+	.input-container {
+		margin-bottom: 5px;
 	}
 </style>

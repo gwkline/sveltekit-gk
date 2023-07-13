@@ -4,13 +4,14 @@
 
 	type Size = 'xs' | 'sm' | 'md' | 'lg';
 	type Type = 'paragraph' | '';
-	type Variant = 'invalid' | 'valid' | 'disabled' | '';
+	type Variant = 'invalid' | 'valid' | 'disabled' | 'transparent' | '';
+	type Outline = 'outline' | 'noOutline';
 
 	export let type: Type = '';
 	export let size: Size = 'md';
-	export let placeholder: string = '';
 	export let variant: Variant = '';
-	export let outline: 'outline' | 'noOutline' = 'outline';
+	export let outline: Outline = 'outline';
+	export let placeholder: string = '';
 	export let style: string = '';
 	export let title: string = '';
 	export let value: string = '';
@@ -18,8 +19,7 @@
 	let disabled = variant == 'disabled';
 
 	function handleChange(event: Event) {
-		value = (event.target as HTMLInputElement).value;
-		dispatch('input', value);
+		dispatch('input', (event.target as HTMLInputElement).value);
 	}
 	function handleBlur(event: Event) {
 		dispatch('blur', (event.target as HTMLInputElement).value);
@@ -37,36 +37,43 @@
 	href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css"
 />
 
-<div style="position: relative;">
+<div class="container">
 	{#if title !== ''}
 		<label for={type} class="label">{title}</label>
 	{/if}
 	{#if type === 'paragraph'}
 		<textarea
-			class="{type} {size} {outline} {variant}"
+			class="{size} {outline} {variant}"
 			{placeholder}
 			bind:value
 			on:input={handleChange}
 			on:blur={handleBlur}
 			on:keydown={handleKeyDown}
 			{disabled}
+			{style}
 		/>
 	{:else}
 		<input
-			type="text"
+			class="{size} {outline} {variant}"
+			{placeholder}
 			bind:value
 			on:input={handleChange}
 			on:blur={handleBlur}
 			on:keydown={handleKeyDown}
-			class="box {type} {size} {outline}  {variant}"
-			{style}
-			{placeholder}
 			{disabled}
+			{style}
+			type="text"
 		/>
 	{/if}
 </div>
 
 <style>
+	.container {
+		display: flex;
+		flex-direction: column;
+		width: 100%;
+		justify-content: start;
+	}
 	label {
 		font-size: 0.8rem;
 		font-weight: 500;
@@ -79,47 +86,18 @@
 	}
 	input,
 	textarea {
+		box-sizing: border-box;
 		background: var(--light-gray-1);
 		color: var(--off-black);
 		font-family: inherit;
 		font-style: normal;
 		font-weight: 400;
 		font-size: 14px;
-		padding-left: 12px;
+		padding: 0px 12px;
 		resize: none;
 		outline: 1px solid var(--light-gray-4);
 		border: none;
 		border-radius: 6px;
-	}
-
-	textarea {
-		padding-top: 12px;
-	}
-
-	input.xs {
-		width: 150px;
-		height: 28px;
-	}
-
-	input.sm {
-		width: 180px;
-		height: 28px;
-	}
-
-	input.md {
-		width: 180px;
-		height: 32px;
-	}
-
-	input.lg {
-		width: 180px;
-		height: 40px;
-	}
-
-	textarea.paragraph {
-		width: 220px;
-		height: 176px;
-		vertical-align: top;
 	}
 
 	input.noOutline,
@@ -133,12 +111,15 @@
 		box-shadow: 0px 0px 0px 2px rgba(207, 34, 46, 0.32);
 	}
 
+	input.transparent,
+	textarea.transparent {
+		background: none;
+	}
+
 	input.valid,
 	textarea.valid {
 		outline: 1px solid var(--primary);
 		box-shadow: 0px 0px 0px 2px rgba(25, 78, 238, 0.32);
-		/* outline: 1px solid var(--success-green);
-    box-shadow: 0px 0px 0px 2px rgba(25, 238, 135, 0.32); */
 	}
 
 	input:focus,
@@ -160,5 +141,31 @@
 		color: var(--gray);
 		opacity: 0.3;
 		cursor: not-allowed;
+	}
+	input.xs {
+		width: 150px;
+		height: 28px;
+	}
+
+	input.sm {
+		width: 180px;
+		height: 28px;
+	}
+
+	input.md {
+		width: 180px;
+		height: 32px;
+	}
+
+	input.lg {
+		width: 180px;
+		height: 40px;
+	}
+
+	textarea {
+		padding-top: 12px;
+		width: 220px;
+		height: 176px;
+		vertical-align: top;
 	}
 </style>
