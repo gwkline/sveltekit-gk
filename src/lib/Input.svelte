@@ -24,6 +24,12 @@
 	function handleBlur(event: Event) {
 		dispatch('blur', (event.target as HTMLInputElement).value);
 	}
+
+	function handleKeyDown(event: KeyboardEvent) {
+		if (event.key === 'Enter') {
+			(event.target as HTMLInputElement).blur();
+		}
+	}
 </script>
 
 <link
@@ -42,6 +48,7 @@
 			bind:value
 			on:input={handleChange}
 			on:blur={handleBlur}
+			on:keydown={handleKeyDown}
 			{disabled}
 		/>
 	{:else}
@@ -50,6 +57,7 @@
 			bind:value
 			on:input={handleChange}
 			on:blur={handleBlur}
+			on:keydown={handleKeyDown}
 			class="box {type} {size} {outline}  {variant}"
 			{style}
 			{placeholder}

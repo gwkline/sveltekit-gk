@@ -291,3 +291,9 @@ export type HeaderConfigType<T> = {
 };
 
 export type TableRowType = Record<string, string>;
+
+export type WhopApiLoad = {
+	apiKey: string;
+	clientId: string;
+	secretId: string;
+};

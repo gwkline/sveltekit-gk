@@ -11,11 +11,14 @@
 	export let icon: IconDefinition | null = null;
 	export let outline = 'outline';
 	export let shape = '';
-	export let onclick: (event: MouseEvent) => void;
+	export let onclick: (event: MouseEvent) => void = () => {};
 	export let alternate = '';
 	export let style = '';
 	export let isLoading = false;
 	export let resizable = false;
+	export let type: ButtonTypes = 'button';
+
+	type ButtonTypes = 'button' | 'submit' | 'reset';
 
 	let open = false;
 	let innerWidth = 0;
@@ -43,6 +46,7 @@
 
 <div class="container">
 	<button
+		{type}
 		class="{variant} {size} {status} {isLoading || (icon && !$$slots.default) ? 'iconOnly' : ''} 
             {outline} {shape} {alternate} {resizable ? 'resizable' : ''}"
 		{style}
