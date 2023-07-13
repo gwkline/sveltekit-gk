@@ -214,8 +214,6 @@ export type State =
 	| 'Entered'
 	| 'Winning';
 
-export type TableRowType = Record<string, string>;
-
 export type WhopMembershipStatusType =
 	| 'trialing'
 	| 'active'
@@ -287,3 +285,9 @@ export type WhopResponseBodyType = {
 	pagination: WhopPaginationType;
 	data: WhopMembershipType[];
 };
+
+export type HeaderConfigType<T> = {
+	[key: string]: (object: T) => string;
+};
+
+export type TableRowType = Record<string, string>;

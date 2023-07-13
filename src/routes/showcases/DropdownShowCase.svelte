@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Dropdown from '../../lib/Dropdown.svelte';
+	import Dropdown from '$lib/Dropdown.svelte';
 	let variants = ['default', 'primary', 'secondary', 'danger'];
 	let sizes = ['sm', 'md', 'lg'];
 	let statuses = ['active', 'disabled'];

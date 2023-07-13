@@ -8,7 +8,7 @@
 		faPlus,
 		faSave
 	} from '@fortawesome/free-solid-svg-icons';
-	import { verboseTasks, selectedTags } from '../datastore';
+	import { verboseTasks, selectedTags, checkedCheckoutTasks } from '../datastore';
 	import { makeRequest } from '../helpers';
 	import { onMount, onDestroy } from 'svelte';
 	import Button from './Button.svelte';
@@ -215,16 +215,42 @@
 		isAddingTag = false;
 		selectedTags.set([]);
 	};
-	const startAddingTag = () => {
-		if (isAddingTag) {
+
+	type AddOrEdit = 'add' | 'edit';
+	type AddOrEditState = AddOrEdit | null;
+	let addOrEdit: AddOrEditState = null;
+	const startAddingTag = (setState: AddOrEdit) => {
+		if (isAddingTag && setState) {
+			addOrEdit = null;
 			isAddingTag = false;
 			newTagText = ''; // Clear the newTagText
 		} else {
+			addOrEdit = setState;
 			newTagText = '';
 			isAddingTag = true;
 		}
 	};
-
+	const addTagToTasks = () => {
+		//Do not proceed with the function if the newTagText is empty
+		if (newTagText.trim() === '') {
+			return;
+		}
+		let updatedTasks: Task[] = [];
+		verboseTasks.update((tasks) => {
+			return tasks.map((task) => {
+				if ($checkedCheckoutTasks.includes(task.id)) {
+					task.tags.push({ name: newTagText });
+					updatedTasks.push(task);
+				}
+				return task;
+			});
+		});
+		if (updatedTasks.length > 0) {
+			makeRequest('put', 'http://127.0.0.1:23432/tasks?type=checkout', updatedTasks, () => {});
+		}
+		newTagText = '';
+		isAddingTag = false;
+	};
 	$: {
 		allTags = $verboseTasks
 			.map((task) => task.tags)
@@ -282,14 +308,60 @@
 </script>
 
 <div class="container-wrapper">
-	<div class="selection-info" style="height: 40px;">
-		{$selectedTags.length}
-		{$selectedTags.length === 1 ? 'tag' : 'tags'} selected ({totalSelectedTasks}
-		total tasks)
+	<div class="selection-info">
+		<p class="count-info">
+			{$selectedTags.length}
+			{$selectedTags.length === 1 ? 'tag' : 'tags'} selected ({totalSelectedTasks}
+			total tasks)
+		</p>
 		<button class="clear-all" on:click={selectAllTags}>
 			<Fa icon={faCheck} size="sm" />
 			Select all tags
 		</button>
+		{#if $checkedCheckoutTasks.length > 0}
+			<div class="input-wrapper">
+				{#if isAddingTag && addOrEdit === 'add'}
+					<div class={isAddingTag ? 'input-container' : 'input-container hidden'}>
+						<input
+							type="text"
+							class="tag-add-input"
+							value={newTagText}
+							on:input={saveInput}
+							on:keydown={(e) => e.key === 'Enter' && addTagToTasks()}
+							on:blur={addTagToTasks}
+							on:focus|stopPropagation={selectInput}
+						/>
+						<Button
+							icon={faSave}
+							size="xs"
+							variant="primary"
+							onclick={() => {
+								addTagToTasks();
+							}}
+						/>
+						<Button
+							icon={faTimes}
+							size="xs"
+							variant="danger"
+							onclick={() => {
+								isAddingTag = false;
+							}}
+						/>
+					</div>
+				{:else}
+					<button
+						class="clear-all"
+						on:click={() => {
+							startAddingTag('add');
+						}}
+					>
+						<Fa icon={faPlus} size="sm" />
+						Add tags to selected tasks
+					</button>
+				{/if}
+			</div>
+		{/if}
+
 		{#if $selectedTags.length > 0}
 			<button class="clear-all" on:click={clearAll}>
 				<Fa icon={faTimes} size="sm" />
@@ -308,7 +380,7 @@
 				Delete selected tasks
 			</button>
 			<div class="input-wrapper">
-				{#if isAddingTag}
+				{#if isAddingTag && addOrEdit === 'edit'}
 					<div class={isAddingTag ? 'input-container' : 'input-container hidden'}>
 						<input
 							type="text"
@@ -337,7 +409,12 @@
 						/>
 					</div>
 				{:else}
-					<button class="clear-all" on:click={startAddingTag}>
+					<button
+						class="clear-all"
+						on:click={() => {
+							startAddingTag('edit');
+						}}
+					>
 						<Fa icon={faPlus} size="sm" />
 						Add additional tags
 					</button>
@@ -376,6 +453,10 @@
 </div>
 
 <style>
+	.count-info {
+		font-size: 12px;
+		margin-right: 1rem;
+	}
 	.input-wrapper {
 		display: flex;
 		align-items: center;
@@ -402,7 +483,7 @@
 	.clear-all {
 		cursor: pointer;
 		border: none;
-		margin-left: 1rem; /* Adds a bit of margin on the left to separate it from the selection info */
+		margin-right: 1rem; /* Adds a bit of margin on the left to separate it from the selection info */
 		font-size: 11px; /* adjust as needed */
 		display: inline; /* Ensure it is displayed inline */
 		background-color: inherit;
@@ -425,7 +506,6 @@
 	/* Create generic style for all new action links */
 	.selection-info > button {
 		cursor: pointer;
-		margin-left: 1rem;
 		font-size: 11px;
 		color: var(--off-black);
 		display: inline;
@@ -442,20 +522,20 @@
 		flex-wrap: wrap;
 	}
 	.container-wrapper {
-		padding-top: 25px;
 		position: relative; /* set the container wrapper as the reference point for absolute positioning */
 		padding-bottom: 10px;
+		display: flex;
+		flex-direction: column;
 	}
 
 	.selection-info {
-		position: absolute; /* position the selection-info absolutely within the container wrapper */
-		top: -20px; /* move it 20px above the top edge of the wrapper */
-		left: 0; /* align it with the left edge of the wrapper */
+		position: relative; /* position the selection-info absolutely within the container wrapper */
 		font-size: 12px;
 		color: var(--off-black);
 		display: flex;
-		flex-wrap: nowrap;
+		flex-wrap: wrap;
 		white-space: nowrap;
+		justify-content: start;
 
 		align-items: center;
 		padding: 10px 0px;

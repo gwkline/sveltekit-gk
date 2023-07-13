@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Button from '../../lib/Button.svelte';
+	import Button from '$lib/Button.svelte';
 	import { faStar, faPlay } from '@fortawesome/free-solid-svg-icons';
 
 	let variants = [

@@ -1,26 +1,27 @@
 <script lang="ts">
 	import TableHead from './TableHead.svelte';
 	import TableRow from './TableRow.svelte';
-	import type { Task } from '../types';
+	import type { HeaderConfigType, TableRowType, Task } from '../types';
+
 	export let tableData: any[];
 	export let style: string = '';
-
-	export let headerConfig: TaskHeaderConfigType;
-	export let headers = Object.keys(headerConfig);
-	type TaskHeaderConfigType = {
-		[header: string]: (task: Task) => string;
-	};
-
-	type TableRowType = Record<string, string>;
+	export let headerConfig: HeaderConfigType<Task>;
+	export let headers: string[] = [];
 
 	let tableDataShortened: TableRowType[] = [];
-	$: tableDataShortened = tableData.map((task) => {
-		const row: TableRowType = {};
-		for (const header of headers) {
-			row[header] = headerConfig[header](task);
-		}
-		return row;
-	});
+	let tableIds: number[] = [];
+	$: {
+		headers = Object.keys(headerConfig);
+		tableIds = [];
+		tableDataShortened = tableData.map((row) => {
+			const rowObject: TableRowType = {};
+			for (const header of headers) {
+				rowObject[header] = headerConfig[header](row);
+			}
+			tableIds.push(row.id);
+			return rowObject;
+		});
+	}
 </script>
 
 <table class={style}>
@@ -28,7 +29,7 @@
 
 	<tbody>
 		{#each Object.values(tableDataShortened) as row, index}
-			<TableRow {row} index={index + 1} />
+			<TableRow {row} index={index + 1} id={tableIds[index]} />
 		{/each}
 	</tbody>
 </table>

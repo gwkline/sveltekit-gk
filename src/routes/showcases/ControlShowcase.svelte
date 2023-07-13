@@ -1,7 +1,7 @@
 <script lang="ts">
-	import Toggle from '../../lib/Toggle.svelte';
-	import Radio from '../../lib/Radio.svelte';
-	import Checkbox from '../../lib/Checkbox.svelte';
+	import Toggle from '$lib/Toggle.svelte';
+	import Radio from '$lib/Radio.svelte';
+	import Checkbox from '$lib/Checkbox.svelte';
 </script>
 
 <main>

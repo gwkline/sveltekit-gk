@@ -3,12 +3,14 @@
 	import { checkedAllCheckoutTasks, checkedCheckoutTasks, verboseTasks } from '../datastore';
 	export let headers: string[];
 
+	export let store = verboseTasks;
+
 	const updateCheckedAll = (event: CustomEvent) => {
 		checkedAllCheckoutTasks.set(event.detail.checked);
 
 		if (event.detail.checked) {
-			let allIndexes = Array.from({ length: $verboseTasks.length }, (_, i) => i);
-			checkedCheckoutTasks.set(allIndexes);
+			let allIds = $store.map((task) => task.id);
+			checkedCheckoutTasks.set(allIds);
 		} else {
 			checkedCheckoutTasks.set([]);
 		}
@@ -20,7 +22,7 @@
 <thead>
 	<tr>
 		<th class="checkbox">
-			<Checkbox index={-1} {checked} on:change={updateCheckedAll} />
+			<Checkbox id={-1} {checked} on:change={updateCheckedAll} />
 		</th>
 		{#each headers as columnHeading}
 			<th class="column-heading">{columnHeading}</th>

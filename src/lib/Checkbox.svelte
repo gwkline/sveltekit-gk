@@ -2,16 +2,16 @@
 	import { createEventDispatcher } from 'svelte';
 	export let option: string = '';
 	export let style: string = '';
-	export let index: number | null = null;
+	export let id: number | null = null;
 	export let checked: boolean = false;
 
 	const dispatch = createEventDispatcher<{
-		click: { index: number | null };
+		click: { id: number | null };
 		change: { checked: boolean };
 	}>();
 
 	const handleClick = () => {
-		dispatch('click', { index: index });
+		dispatch('click', { id: id });
 	};
 
 	const handleChange = () => {

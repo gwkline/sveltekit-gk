@@ -1,8 +1,8 @@
 <script lang="ts">
+	import Fa from 'svelte-fa';
 	import Checkbox from './Checkbox.svelte';
 	import Button from './Button.svelte';
 	import { makeRequest } from '../helpers';
-	import type { State, TableRowType } from '../types';
 	import {
 		faPlay,
 		faPen,
@@ -15,17 +15,20 @@
 		faX,
 		faClock
 	} from '@fortawesome/free-solid-svg-icons';
-	import Fa from 'svelte-fa';
 	import {
 		stateColors,
 		verboseTasks,
 		shiftPressed,
 		checkedCheckoutTasks,
 		lastCheckedCheckoutTasks,
-		secondLastCheckedCheckoutTasks
+		secondLastCheckedCheckoutTasks,
+		selectedTags
 	} from '../datastore';
+	import type { State, TableRowType } from '../types';
+
 	export let index: number | null;
 	export let row: TableRowType;
+	export let id: number;
 
 	const stateIconMapping = {
 		Ready: faPause,
@@ -49,17 +52,39 @@
 		Edge: 'https://upload.wikimedia.org/wikipedia/commons/7/7e/Microsoft_Edge_logo_%282019%29.png'
 	};
 
+	let size = '';
+	let taskId: number;
+	let state: State;
+	let profileName: string;
+	let profileTags = '';
+	$: {
+		let thisTask = $verboseTasks.find((task) => task['id'] === id);
+		if (thisTask) {
+			state = thisTask['state'];
+			size = thisTask['product']['size'];
+			taskId = thisTask['id'];
+			profileName = thisTask['account']['profile']['name'];
+			profileTags = thisTask['account']['profile']['tags'].map((item) => item.name).join(', ');
+		}
+	}
+
+	let checked = false;
+	$: {
+		checked = $checkedCheckoutTasks.includes(id);
+	}
+
 	const checkForShift = () => {
 		if (
 			$shiftPressed &&
-			$lastCheckedCheckoutTasks !== null &&
+			$lastCheckedCheckoutTasks === id &&
 			$secondLastCheckedCheckoutTasks !== null
 		) {
 			let start = Math.min($lastCheckedCheckoutTasks, $secondLastCheckedCheckoutTasks);
 			let end = Math.max($lastCheckedCheckoutTasks, $secondLastCheckedCheckoutTasks);
 
 			for (let i = start + 1; i < end; i++) {
-				if (!$checkedCheckoutTasks.includes(i)) {
+				let taskWithThisId = $verboseTasks.find((task) => task.id === i);
+				if (taskWithThisId && !$checkedCheckoutTasks.includes(taskWithThisId.id)) {
 					checkedCheckoutTasks.update((value) => {
 						value.push(i);
 						return value;
@@ -70,18 +95,19 @@
 	};
 
 	const handleClick = (passedIndex?: number) => {
-		const currentIndex = typeof passedIndex !== 'undefined' ? passedIndex : index;
+		const currentIndex = typeof passedIndex !== 'undefined' ? passedIndex : id;
+		if (!currentIndex || typeof currentIndex === 'undefined') return;
 
 		$secondLastCheckedCheckoutTasks = $lastCheckedCheckoutTasks;
 		$lastCheckedCheckoutTasks = currentIndex;
 
-		checkedCheckoutTasks.update((value) => {
-			if (checked && currentIndex) {
-				value.splice(value.indexOf(currentIndex), 1);
-			} else if (currentIndex) {
-				value.push(currentIndex);
+		checkedCheckoutTasks.update((arrayOfTaskIndexes) => {
+			if (checked) {
+				arrayOfTaskIndexes.splice(arrayOfTaskIndexes.indexOf(currentIndex), 1);
+			} else {
+				arrayOfTaskIndexes.push(currentIndex);
 			}
-			return value;
+			return arrayOfTaskIndexes;
 		});
 
 		checkForShift();
@@ -90,30 +116,6 @@
 	const handleDispatch = (event: any) => {
 		handleClick(event.detail.index);
 	};
-
-	let size = '';
-	let taskId: number;
-	let state: State;
-	let profileName: string;
-	let profileTags = '';
-	$: {
-		let thisTask = $verboseTasks.find((task) => task['account']['username'] === row['Account']);
-
-		state = thisTask ? thisTask['state'] : 'Ready';
-		size = thisTask ? thisTask['product']['size'] : '';
-		taskId = thisTask ? thisTask['id'] : 0;
-		profileName = thisTask ? thisTask['account']['profile']['name'] : '';
-		profileTags = thisTask
-			? thisTask['account']['profile']['tags'].map((item) => item.name).join(', ')
-			: '';
-	}
-
-	let checked = false;
-	$: {
-		if (index !== null) {
-			checked = $checkedCheckoutTasks.includes(index);
-		}
-	}
 
 	const handleEdit = (event: MouseEvent) => {
 		event.stopPropagation();
@@ -153,7 +155,7 @@
 		<div class="count-content">
 			<div style="width: 10px; text-align: right; font-size:12px;">{index}</div>
 			<div class="checkbox">
-				<Checkbox {index} bind:checked on:change={handleDispatch} />
+				<Checkbox {id} bind:checked on:change={handleDispatch} />
 			</div>
 		</div>
 	</td>

@@ -26,9 +26,10 @@
 	$: {
 		let filtered = $verboseTasks.filter((task) => {
 			// Keyword Search
-			let keywordMatch = Object.values(task)
-				.filter((value) => typeof value === 'string')
-				.some((value) => (value as string).toLowerCase().includes($searchValue.toLowerCase()));
+			let keywordMatch = true;
+			if ($searchValue !== '') {
+				keywordMatch = JSON.stringify(task).toLowerCase().includes($searchValue.toLowerCase());
+			}
 
 			// Tag Filtering
 			let tagMatch;
@@ -49,16 +50,6 @@
 
 		filteredTasks.set(filtered);
 	}
-
-	// const recursiveSearch = (obj, searchValue) => {
-	// 	// Base case: if the obj is not an object or array, perform the string search
-	// 	if (typeof obj !== 'object' || obj === null) {
-	// 		return obj ? obj.toString().toLowerCase().includes(searchValue) : false;
-	// 	}
-
-	// 	// Recursive case: if it is an object or array, search its properties/elements
-	// 	return Object.values(obj).some((value) => recursiveSearch(value, searchValue));
-	// };
 </script>
 
 <link

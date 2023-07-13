@@ -1,6 +1,6 @@
 <script lang="ts">
-	import Nav from '../../lib/Nav.svelte';
-	import Table from '../../lib/Table.svelte';
+	import Nav from '$lib/Nav.svelte';
+	import Table from '$lib/Table.svelte';
 	import StatusBar from './StatusBar.svelte';
 	import { onMount, onDestroy } from 'svelte';
 	import {
@@ -9,10 +9,12 @@
 		selectedState,
 		searchValue,
 		settings,
-		selectedTags
+		selectedTags,
+		showTags
 	} from '../../datastore';
 	import { makeRequest } from '../../helpers';
-	import type { Task, EventData } from '../../types';
+	import type { Task, EventData, HeaderConfigType } from '../../types';
+	import Tags from '$lib/Tags.svelte';
 
 	let eventSource: EventSource;
 
@@ -97,7 +99,7 @@
 		verboseTasks.set(cleanedData);
 	});
 
-	let headerConfig = {
+	let headerConfig: HeaderConfigType<Task> = {
 		SKU: (task: Task) => task?.product?.product_id ?? '',
 		Account: (task: Task) => task?.account?.username ?? '',
 		Proxy: (task: Task) => task?.account?.proxy ?? '',
@@ -122,6 +124,7 @@
 
 <StatusBar />
 <Nav />
+{#if $showTags} <Tags /> {/if}
 <div class="container">
 	<Table tableData={filterOn ? $filteredTasks : $verboseTasks} {headerConfig} />
 </div>

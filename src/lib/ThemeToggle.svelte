@@ -4,8 +4,6 @@
 	import { page } from '$app/stores';
 	import Fa from 'svelte-fa';
 	let icon = faCircleHalfStroke;
-
-	export const ssr = true;
 </script>
 
 <form

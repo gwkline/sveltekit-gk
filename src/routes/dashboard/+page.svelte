@@ -1,6 +1,6 @@
 <script lang="ts">
-	import Button from '../../lib/Button.svelte';
-	import Input from '../../lib/Input.svelte';
+	import Button from '$lib/Button.svelte';
+	import Input from '$lib/Input.svelte';
 	import { faPencil, faCheck, faX, faRefresh } from '@fortawesome/free-solid-svg-icons';
 	import type { WhopMembershipType, WhopResponseBodyType } from '../../types';
 

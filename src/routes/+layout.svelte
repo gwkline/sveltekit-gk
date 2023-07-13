@@ -1,10 +1,10 @@
 <script lang="ts">
-	import Sidebar from '../lib/Sidebar.svelte';
-	import ThemeToggle from '../lib/ThemeToggle.svelte';
+	import Sidebar from '$lib/Sidebar.svelte';
+	import ThemeToggle from '$lib/ThemeToggle.svelte';
 	import { shiftPressed, sidebarCollapsed } from '../datastore';
 
 	export const ssr = false;
-	export const prerender = false;
+	export const prerender = true;
 
 	const handleKeydown = (event: KeyboardEvent) => {
 		if (event.key === 'Shift') {
@@ -19,8 +19,7 @@
 </script>
 
 <head>
-	<link rel="stylesheet" href="/global.css" />
-	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto" />
+	<link rel="stylesheet" href="" />
 </head>
 
 <svelte:window on:keydown={handleKeydown} on:keyup={handleKeyup} />
@@ -34,7 +33,9 @@
 </div>
 
 <style lang="css" global>
+	@import 'https://fonts.googleapis.com/css?family=Roboto';
 	@import '/global.css';
+
 	* {
 		font-family: Roboto;
 	}

@@ -1,10 +1,9 @@
 <script lang="ts">
-	import Search from './Search.svelte';
-	import Button from './Button.svelte';
-	import Input from '../lib/Input.svelte';
-	import Toggle from './Toggle.svelte';
-	import Tags from './Tags.svelte';
-	import CreateTasksModal from './CreateTasksModal.svelte';
+	import Search from '$lib/Search.svelte';
+	import Button from '$lib/Button.svelte';
+	import Input from '$lib/Input.svelte';
+	import Toggle from '$lib/Toggle.svelte';
+	import CreateTasksModal from '$lib/CreateTasksModal.svelte';
 	import {
 		checkedCheckoutTasks,
 		verboseTasks,
@@ -19,11 +18,10 @@
 		faTrash,
 		faPen,
 		faCopy,
-		faPlus,
-		faSave
+		faPlus
 	} from '@fortawesome/free-solid-svg-icons';
 	import { makeRequest } from '../helpers';
-	import type { Task } from '../types';
+	import type { Settings, Task } from '../types';
 
 	let showModal = false;
 	let modalTitle: string;
@@ -38,9 +36,7 @@
 	};
 
 	const getTaskIds = (all: boolean) => {
-		return all
-			? $verboseTasks.map((task) => task.id)
-			: $checkedCheckoutTasks.map((index) => $verboseTasks[index - 1]?.id);
+		return all ? $verboseTasks.map((task) => task.id) : $checkedCheckoutTasks;
 	};
 
 	const changeTasksState = (state: states, all = false) => {
@@ -129,11 +125,13 @@
 		});
 	};
 
-	// Changes in saveSettings method
-	const saveSettings = (settingKey: string, value: string) => {
-		settings.update((curSettings) => {
-			curSettings[settingKey] = value ? parseInt(value) : curSettings[settingKey];
-			return curSettings;
+	type settings = 'max_active_tasks' | 'max_starting_tasks';
+	const saveSettings = (settingKey: settings, value: string) => {
+		settings.update((currentSettings) => {
+			let newSettings = currentSettings as Settings;
+
+			newSettings[settingKey] = value ? parseInt(value) : newSettings[settingKey];
+			return newSettings;
 		});
 
 		const url = 'http://127.0.0.1:23432/settings';
@@ -257,7 +255,6 @@
 		</div>
 	</div>
 </div>
-{#if $showTags} <Tags /> {/if}
 {#if showModal}
 	<CreateTasksModal {showModal} {closeModal} {modalTitle} />
 {/if}

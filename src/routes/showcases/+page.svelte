@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Button from '../../lib/Button.svelte';
+	import Button from '$lib/Button.svelte';
 
 	import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 
