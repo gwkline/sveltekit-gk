@@ -141,7 +141,6 @@
 		let items = $checkedCheckoutTasks;
 		//remove -1 from items
 		items = items.filter((item) => item != -1);
-		console.log('yo', items.length);
 		if ($shiftPressed || items.length == 0) {
 			buttonTextCount = 'All';
 		} else if (items.length == $verboseTasks.length) {

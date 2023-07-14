@@ -155,7 +155,7 @@
 		<div class="count-content">
 			<div style="width: 10px; text-align: right; font-size:12px;">{index}</div>
 			<div class="checkbox">
-				<Checkbox {id} bind:checked on:change={handleDispatch} />
+				<Checkbox bind:checked on:change={handleDispatch} />
 			</div>
 		</div>
 	</td>

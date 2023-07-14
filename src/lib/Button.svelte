@@ -24,9 +24,6 @@
 	type Shape = 'rectangle' | 'square' | 'circle';
 	type OutlineType = 'outline' | 'noOutline';
 
-	let innerWidth = 0;
-	let x: MediaQueryList;
-
 	function handleClick(event: MouseEvent) {
 		if (isLoading || disabled) {
 			return;
@@ -34,38 +31,33 @@
 		onclick(event);
 	}
 
-	if (browser) {
-		onMount(() => {
-			innerWidth = window.innerWidth;
-			x = window.matchMedia('(max-width: 980px)');
-		});
-	}
-</script>
+	const generateClassString = () => {
+		let classes: string[] = [variant, size];
+		if (isLoading || (icon && !$$slots.default)) classes.push('iconOnly');
+		if (outline === 'outline') classes.push('outline');
+		classes.push(shape);
+		if (alternate) classes.push('alternate');
+		if (resizable) classes.push('resizable');
 
-<svelte:window bind:innerWidth />
+		return classes.join(' ');
+	};
+</script>
 
 <div class="container">
 	<button
 		{type}
-		class="
-		{variant} 
-		{size} 
-		{isLoading || (icon && !$$slots.default) ? 'iconOnly' : ''}
-		{outline === 'outline' ? 'outline' : 'noOutline'} 
-		{shape} 
-		{alternate ? 'alternate' : ''} {resizable ? 'resizable' : ''}
-		"
 		{style}
 		{disabled}
+		class={generateClassString()}
 		on:click|preventDefault={handleClick}
 	>
 		{#if isLoading}
 			<Fa icon={faCog} spin />
 		{:else}
-			{#if icon && !(size === 'xs' && x && x.matches && resizable)}
+			{#if icon && !(size === 'xs' && resizable)}
 				<Fa {icon} {size} class={$$slots.default ? 'icon-with-text' : 'icon-only'} />
 			{/if}
-			{#if $$slots.default && !(resizable && x && x.matches)}
+			{#if $$slots.default && !resizable}
 				<slot />
 			{/if}
 		{/if}
@@ -296,6 +288,30 @@
 		}
 
 		button.lg.resizable {
+			padding: 15px 15px;
+			justify-content: center;
+			align-items: center;
+			text-align: center;
+		}
+	}
+
+	/* Add your styles for smaller screen sizes here */
+	@media (max-width: 980px) {
+		button.iconOnly.xs.resizable {
+			padding: 7px 7px;
+			justify-content: center;
+			align-items: center;
+			text-align: center;
+		}
+
+		button.iconOnly.md.resizable {
+			padding: 10px 10px;
+			justify-content: center;
+			align-items: center;
+			text-align: center;
+		}
+
+		button.iconOnly.lg.resizable {
 			padding: 15px 15px;
 			justify-content: center;
 			align-items: center;

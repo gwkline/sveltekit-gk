@@ -2,21 +2,25 @@
 	import { createEventDispatcher } from 'svelte';
 	export let option: string = '';
 	export let style: string = '';
-	export let id: number | null = null;
 	export let checked: boolean = false;
 	export let disabled = false;
+	export let mini = false;
 
 	const dispatch = createEventDispatcher<{
 		click: { id: number | null };
 		change: { checked: boolean };
 	}>();
 
-	const handleClick = () => {
-		dispatch('click', { id: id });
-	};
-
 	const handleChange = () => {
 		dispatch('change', { checked: checked });
+	};
+
+	const generateClassString = () => {
+		let classString = '';
+		if (mini) {
+			classString += 'mini';
+		}
+		return classString;
 	};
 </script>
 
@@ -27,9 +31,9 @@
 			id={option}
 			type="checkbox"
 			bind:checked
-			on:click|stopPropagation={handleClick}
+			on:click|stopPropagation
 			on:change={handleChange}
-			class={option}
+			class={generateClassString()}
 			{disabled}
 		/>
 	</li>

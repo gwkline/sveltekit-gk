@@ -86,7 +86,7 @@
 						if (e.key === 'Enter') toggleOption(option);
 					}}
 				>
-					<Checkbox checked={selectedOptions[option]} option="mini" />
+					<Checkbox checked={selectedOptions[option]} mini={true} />
 					{option}
 				</div>
 			{/each}

@@ -22,7 +22,7 @@
 <thead>
 	<tr>
 		<th class="checkbox">
-			<Checkbox id={-1} {checked} on:change={updateCheckedAll} />
+			<Checkbox {checked} on:change={updateCheckedAll} />
 		</th>
 		{#each headers as columnHeading}
 			<th class="column-heading">{columnHeading}</th>
