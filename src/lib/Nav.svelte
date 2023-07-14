@@ -3,7 +3,7 @@
 	import Button from '$lib/Button.svelte';
 	import Input from '$lib/Input.svelte';
 	import Toggle from '$lib/Toggle.svelte';
-	import CreateTasksModal from '$lib/CreateTasksModal.svelte';
+	import CreateTasksModalHelper from '../routes/checkout/CreateTaskModalHelper.svelte';
 	import {
 		checkedCheckoutTasks,
 		verboseTasks,
@@ -24,16 +24,12 @@
 	import type { Settings, Task } from '../types';
 
 	let showModal = false;
-	let modalTitle: string;
 	let maxActiveTaskCount: string;
 	let maxStartingTaskCount: string;
 	let buttonTextCount: string;
+	let isEditing = false;
 
 	type states = 'start' | 'stop' | 'delete' | 'duplicate';
-
-	const closeModal = () => {
-		showModal = false;
-	};
 
 	const getTaskIds = (all: boolean) => {
 		return all ? $verboseTasks.map((task) => task.id) : $checkedCheckoutTasks;
@@ -138,14 +134,14 @@
 		const method = 'put';
 		maxActiveTaskCount = '';
 		maxStartingTaskCount = '';
-		return makeRequest(method, url, $settings, () => {});
+		return makeRequest(method, url, $settings);
 	};
 
 	$: {
 		let items = $checkedCheckoutTasks;
 		//remove -1 from items
 		items = items.filter((item) => item != -1);
-
+		console.log('yo', items.length);
 		if ($shiftPressed || items.length == 0) {
 			buttonTextCount = 'All';
 		} else if (items.length == $verboseTasks.length) {
@@ -162,7 +158,7 @@
 			<Button
 				variant="success"
 				onclick={() => {
-					modalTitle = 'Create Tasks';
+					isEditing = false;
 					showModal = true;
 				}}
 				size="md"
@@ -210,7 +206,7 @@
 				size="md"
 				icon={faPen}
 				onclick={() => {
-					modalTitle = `Edit ${buttonTextCount} Tasks`;
+					isEditing = true;
 					showModal = true;
 				}}
 				resizable={false}
@@ -239,7 +235,7 @@
 			<div class="input-group">
 				<Input
 					placeholder="Max Starting Tasks: {$settings.max_starting_tasks}"
-					size="xs"
+					style="width: 175px;"
 					bind:value={maxStartingTaskCount}
 					on:blur={() => saveSettings('max_starting_tasks', maxStartingTaskCount)}
 				/>
@@ -247,7 +243,7 @@
 			<div class="input-group">
 				<Input
 					placeholder="Max Active Tasks: {$settings.max_active_tasks}"
-					size="xs"
+					style="width: 175px;"
 					bind:value={maxActiveTaskCount}
 					on:blur={() => saveSettings('max_active_tasks', maxActiveTaskCount)}
 				/>
@@ -255,8 +251,9 @@
 		</div>
 	</div>
 </div>
+
 {#if showModal}
-	<CreateTasksModal {showModal} {closeModal} {modalTitle} />
+	<CreateTasksModalHelper bind:showModal bind:isEditing />
 {/if}
 
 <style>

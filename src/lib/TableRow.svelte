@@ -138,14 +138,14 @@
 	const handleStop = (event: MouseEvent) => {
 		event.stopPropagation();
 		if (taskId) {
-			makeRequest('post', `http://127.0.0.1:23432/tasks/stop?type=undefined`, [taskId], () => {});
+			makeRequest('post', `http://127.0.0.1:23432/tasks/stop?type=undefined`, [taskId]);
 		}
 	};
 
 	const handleStart = (event: MouseEvent) => {
 		event.stopPropagation();
 		if (taskId) {
-			makeRequest('post', `http://127.0.0.1:23432/tasks/start?type=undefined`, [taskId], () => {});
+			makeRequest('post', `http://127.0.0.1:23432/tasks/start?type=undefined`, [taskId]);
 		}
 	};
 </script>

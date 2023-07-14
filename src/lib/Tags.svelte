@@ -80,7 +80,7 @@
 		});
 
 		if (tasksToUpdate.length > 0) {
-			makeRequest('put', 'http://127.0.0.1:23432/tasks?type=checkout', tasksToUpdate, () => {});
+			makeRequest('put', 'http://127.0.0.1:23432/tasks?type=checkout', tasksToUpdate);
 		}
 	};
 	const removeTaskWithTag = (tag: string) => {
@@ -153,7 +153,7 @@
 		});
 
 		if (updatedTasks.length > 0) {
-			makeRequest('put', 'http://127.0.0.1:23432/tasks?type=checkout', updatedTasks, () => {});
+			makeRequest('put', 'http://127.0.0.1:23432/tasks?type=checkout', updatedTasks);
 		}
 
 		editedText = '';
@@ -208,7 +208,7 @@
 		});
 
 		if (updatedTasks.length > 0) {
-			makeRequest('put', 'http://127.0.0.1:23432/tasks?type=checkout', updatedTasks, () => {});
+			makeRequest('put', 'http://127.0.0.1:23432/tasks?type=checkout', updatedTasks);
 		}
 
 		newTagText = '';
@@ -246,7 +246,7 @@
 			});
 		});
 		if (updatedTasks.length > 0) {
-			makeRequest('put', 'http://127.0.0.1:23432/tasks?type=checkout', updatedTasks, () => {});
+			makeRequest('put', 'http://127.0.0.1:23432/tasks?type=checkout', updatedTasks);
 		}
 		newTagText = '';
 		isAddingTag = false;

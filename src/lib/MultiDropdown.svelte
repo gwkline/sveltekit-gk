@@ -12,7 +12,7 @@
 
 	export let title = '';
 	export let style = '';
-	export let status = 'active';
+	export let disabled = false;
 	export let open = false;
 	export let options: string[];
 
@@ -46,7 +46,7 @@
 	$: buttonText = `${title} ${Object.keys(selectedOptions)
 		.filter((option) => selectedOptions[option])
 		.join(', ')}`;
-	$: if (status === 'disabled') {
+	$: if (disabled) {
 		open = false;
 	}
 </script>
@@ -55,8 +55,10 @@
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <div class="dropdown" bind:this={dropdownEl} on:click|stopPropagation role="button" tabindex="-1">
-	<Button style="width:200px; height: 40px;" onclick={() => (open = !open)} {status}
-		>{buttonText}</Button
+	<Button
+		style="width:200px; height: 40px; margin-right: 0px;"
+		onclick={() => (open = !open)}
+		{disabled}>{buttonText}</Button
 	>
 	<div class="dropdown-caret">
 		<Fa icon={chevronIcon} size="xs" />
@@ -126,7 +128,7 @@
 		cursor: pointer;
 		padding-left: 10px;
 		transition: background 0.3s;
-		width: 200px;
+		width: 190px;
 		height: 30px;
 		font-size: 13px;
 	}

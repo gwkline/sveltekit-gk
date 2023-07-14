@@ -1,27 +1,33 @@
 <script lang="ts">
+	export let options: Array<{ label: string; value: any }> = [];
+	export let selectedValue: any;
+	export let orientation: 'horizontal' | 'vertical' = 'horizontal';
 </script>
 
-<form>
-	<label style="margin-bottom: 10px;">
-		<input type="radio" name="radio" checked />
-		<span>Chrome</span>
-	</label>
-	<label style="margin-bottom: 10px;">
-		<input type="radio" name="radio" />
-		<span>Brave</span>
-	</label>
-	<label style="margin-right: 10px;">
-		<input type="radio" name="radio" />
-		<span>Edge</span>
-	</label>
+<form class={orientation}>
+	{#each options as option (option.label)}
+		<label style="margin-bottom: 10px;">
+			<input type="radio" bind:group={selectedValue} value={option.value} />
+			<span>{option.label}</span>
+		</label>
+	{/each}
 </form>
 
 <style>
-	form {
+	form.horizontal,
+	form.vertical {
 		display: flex;
 		flex-wrap: wrap;
+	}
+
+	.horizontal {
+		flex-direction: row;
+	}
+
+	.vertical {
 		flex-direction: column;
 	}
+
 	span {
 		font-family: inherit;
 	}

@@ -2,8 +2,12 @@ import axios, { type AxiosResponse } from 'axios';
 export const makeRequest = (
 	method: string,
 	url: string,
-	data: object | null,
-	callback: (response: AxiosResponse) => unknown,
+	data: object | null = null,
+	callback: (response: AxiosResponse) => void = (response) => {
+		if (response.status > 399) {
+			console.log('Request Error:', response.status, response.data);
+		}
+	},
 	headers = {}
 ) => {
 	const defaultHeaders = {

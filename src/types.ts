@@ -297,3 +297,31 @@ export type WhopApiLoad = {
 	clientId: string;
 	secretId: string;
 };
+
+export type LaunchType = {
+	product_id: string;
+	name: string;
+	uri: string;
+	image_url: string;
+	style_code: string;
+	release_time: string;
+	allowed_sizes: string[];
+};
+
+export type SizePresets = {
+	mens: {
+		[key: string]: string[];
+	};
+	womens: {
+		[key: string]: string[];
+	};
+	youth: {
+		[key: string]: string[];
+	};
+	toddler: {
+		[key: string]: string[];
+	};
+	preschool: {
+		[key: string]: string[];
+	};
+};

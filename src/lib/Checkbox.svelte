@@ -4,6 +4,7 @@
 	export let style: string = '';
 	export let id: number | null = null;
 	export let checked: boolean = false;
+	export let disabled = false;
 
 	const dispatch = createEventDispatcher<{
 		click: { id: number | null };
@@ -29,6 +30,7 @@
 			on:click|stopPropagation={handleClick}
 			on:change={handleChange}
 			class={option}
+			{disabled}
 		/>
 	</li>
 </ul>
@@ -41,7 +43,7 @@
 			--border: var(--light-gray-3);
 			--border-hover: var(--gray);
 			--background: var(--background);
-			--disabled: var(--gray);
+			--disabled: var(--light-gray-3);
 			--disabled-inner: var(--gray);
 			-webkit-appearance: none;
 			-moz-appearance: none;

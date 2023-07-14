@@ -8,7 +8,6 @@ import type { Actions, PageServerLoad } from './$types';
 
 export const actions: Actions = {
 	setNickname: async ({ url }) => {
-		console.log('setting nickname');
 		const nickname = url.searchParams.get('nickname');
 		const memId = url.searchParams.get('memId');
 
@@ -26,7 +25,6 @@ export const actions: Actions = {
 		});
 
 		if (response.status !== 201) {
-			console.log('error setting nickname');
 			console.log(await response.json());
 		}
 	}
@@ -42,7 +40,6 @@ export const load: PageServerLoad = async ({ url }) => {
 			};
 		}
 		if (url.searchParams.has('token')) {
-			console.log('refreshing token');
 			return {
 				...(await refreshAccessToken(url.searchParams.get('token') as string)),
 				clientId: WHOP_CLIENT_ID,
@@ -54,8 +51,6 @@ export const load: PageServerLoad = async ({ url }) => {
 			redirectUri: WHOP_REDIRECT_URI
 		};
 	} catch (e) {
-		console.log(e);
-		console.log('error');
 		return {
 			clientId: WHOP_CLIENT_ID,
 			redirectUri: WHOP_REDIRECT_URI

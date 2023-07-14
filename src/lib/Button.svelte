@@ -1,37 +1,37 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import Fa from 'svelte-fa';
-	import type { IconDefinition } from '@fortawesome/free-solid-svg-icons';
+	import { onMount } from 'svelte';
 	import { faCog } from '@fortawesome/free-solid-svg-icons';
 	import { browser } from '$app/environment';
+	import type { IconDefinition } from '@fortawesome/free-solid-svg-icons';
 
-	export let variant = 'default';
-	export let status = 'active';
-	export let size = 'md';
+	export let variant: ButtonVariants = 'default';
+	export let size: ButtonSizes = 'md';
 	export let icon: IconDefinition | null = null;
-	export let outline = 'outline';
-	export let shape = '';
+	export let type: ButtonTypes = 'button';
+	export let shape: Shape = 'rectangle';
+	export let outline: OutlineType = 'outline';
 	export let onclick: (event: MouseEvent) => void = () => {};
-	export let alternate = '';
+	export let alternate = false;
 	export let style = '';
 	export let isLoading = false;
 	export let resizable = false;
-	export let type: ButtonTypes = 'button';
+	export let disabled = false;
 
+	type ButtonVariants = 'default' | 'primary' | 'secondary' | 'danger' | 'warning' | 'success';
 	type ButtonTypes = 'button' | 'submit' | 'reset';
+	type ButtonSizes = 'xs' | 'sm' | 'md' | 'lg';
+	type Shape = 'rectangle' | 'square' | 'circle';
+	type OutlineType = 'outline' | 'noOutline';
 
-	let open = false;
 	let innerWidth = 0;
 	let x: MediaQueryList;
 
 	function handleClick(event: MouseEvent) {
-		if (isLoading || status === 'disabled') {
-			open = false;
+		if (isLoading || disabled) {
 			return;
 		}
-		if (typeof onclick === 'function') {
-			onclick(event);
-		}
+		onclick(event);
 	}
 
 	if (browser) {
@@ -47,23 +47,27 @@
 <div class="container">
 	<button
 		{type}
-		class="{variant} {size} {status} {isLoading || (icon && !$$slots.default) ? 'iconOnly' : ''} 
-            {outline} {shape} {alternate} {resizable ? 'resizable' : ''}"
+		class="
+		{variant} 
+		{size} 
+		{isLoading || (icon && !$$slots.default) ? 'iconOnly' : ''}
+		{outline === 'outline' ? 'outline' : 'noOutline'} 
+		{shape} 
+		{alternate ? 'alternate' : ''} {resizable ? 'resizable' : ''}
+		"
 		{style}
+		{disabled}
 		on:click|preventDefault={handleClick}
-		disabled={isLoading}
 	>
 		{#if isLoading}
 			<Fa icon={faCog} spin />
 		{:else}
-			<div class="button-content">
-				{#if icon && !(size === 'xs' && x && x.matches && resizable)}
-					<Fa {icon} class={$$slots.default ? 'icon-with-text' : 'icon-only'} />
-				{/if}
-				{#if $$slots.default && !(resizable && x && x.matches)}
-					<slot />
-				{/if}
-			</div>
+			{#if icon && !(size === 'xs' && x && x.matches && resizable)}
+				<Fa {icon} {size} class={$$slots.default ? 'icon-with-text' : 'icon-only'} />
+			{/if}
+			{#if $$slots.default && !(resizable && x && x.matches)}
+				<slot />
+			{/if}
 		{/if}
 	</button>
 </div>
@@ -90,7 +94,7 @@
 		margin-right: 10px;
 	}
 
-	.square-button {
+	.square {
 		width: 30px;
 		height: 30px;
 		padding: 0 !important;
@@ -102,7 +106,7 @@
 		height: 100%;
 	}
 
-	button.danger.active:active {
+	button.danger:active {
 		background: #79071a;
 	}
 
@@ -154,11 +158,19 @@
 		padding: 10px 25px;
 	}
 
+	button.noOutline {
+		border: none;
+		outline: none;
+	}
+
 	button.circle {
 		border-radius: 50%;
 	}
 
-	button.disabled {
+	button:disabled {
+		background: var(--light-gray-3) !important;
+		outline: 1px solid var(--light-gray-4) !important;
+		color: var(--gray) !important;
 		opacity: 0.3;
 		cursor: not-allowed;
 	}
@@ -215,43 +227,43 @@
 		background: var(--warning-yellow);
 	}
 
-	button.default.active:hover,
-	button.secondary.active:hover,
-	button.success.active:hover,
-	button.warning.active:hover {
+	button.default:hover,
+	button.secondary:hover,
+	button.success:hover,
+	button.warning:hover {
 		background: var(--light-gray-2);
 	}
 
-	button.primary.active:hover {
+	button.primary:hover {
 		background: var(--primary-hover);
 	}
 
-	button.danger.active:hover {
+	button.danger:hover {
 		background: var(--danger-red-hover);
 		color: var(--white);
 	}
 
-	button.default.alternate.active:hover {
+	button.default.alternate:hover {
 		background: var(--gray);
 	}
 
-	button.danger.alternate.active:hover {
+	button.danger.alternate:hover {
 		background: var(--danger-red-hover);
 	}
 
-	button.success.alternate.active:hover {
+	button.success.alternate:hover {
 		background: var(--success-green-hover);
 	}
 
-	button.warning.alternate.active:hover {
+	button.warning.alternate:hover {
 		background: var(--warning-yellow-hover);
 	}
 
 	/* Click Indication */
-	button.default.active:active,
-	button.secondary.active:active,
-	button.success.active:active,
-	button.warning.active:active {
+	button.default:active,
+	button.secondary:active,
+	button.success:active,
+	button.warning:active {
 		transition: 0s;
 		-webkit-box-shadow: inset 0px 0px 5px #b6b6b6;
 		-moz-box-shadow: inset 0px 0px 5px #b6b6b6;
@@ -259,8 +271,8 @@
 		outline: none;
 	}
 
-	button.primary.active:active,
-	button.danger.active:active {
+	button.primary:active,
+	button.danger:active {
 		transition: 0s;
 		-webkit-box-shadow: inset 0px 0px 7px #000e30;
 		-moz-box-shadow: inset 0px 0px 7px #000e30;

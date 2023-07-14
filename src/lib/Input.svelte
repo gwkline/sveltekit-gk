@@ -15,8 +15,7 @@
 	export let style: string = '';
 	export let title: string = '';
 	export let value: string = '';
-
-	let disabled = variant == 'disabled';
+	export let disabled: boolean = false;
 
 	function handleChange(event: Event) {
 		dispatch('input', (event.target as HTMLInputElement).value);
@@ -87,7 +86,7 @@
 	input,
 	textarea {
 		box-sizing: border-box;
-		background: var(--light-gray-1);
+		background-color: var(--light-gray-1);
 		color: var(--off-black);
 		font-family: inherit;
 		font-style: normal;
@@ -126,17 +125,17 @@
 	textarea:focus {
 		outline: 1px solid var(--primary);
 		box-shadow: 0px 0px 0px 2px rgba(25, 78, 238, 0.32);
-		background: var(--light-gray-2);
+		background-color: var(--light-gray-2);
 	}
 
 	input:hover,
 	textarea:hover {
-		background: var(--light-gray-2);
+		background-color: var(--light-gray-2);
 	}
 
 	input:disabled,
 	textarea:disabled {
-		background: var(--light-gray-3);
+		background-color: var(--light-gray-3);
 		outline: 1px solid var(--light-gray-4);
 		color: var(--gray);
 		opacity: 0.3;

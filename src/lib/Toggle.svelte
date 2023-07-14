@@ -1,9 +1,10 @@
 <script lang="ts">
 	export let variant = '';
 	export let checked = false;
+	export let style = '';
 </script>
 
-<div class="container">
+<div class="container" {style}>
 	<label class="switch">
 		<input type="checkbox" bind:checked {...$$props} />
 		<span class="slider round {variant}" />

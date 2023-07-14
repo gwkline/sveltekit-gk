@@ -4,6 +4,7 @@
 
 	export let variant: Variant = 'default';
 	export let status: 'disabled' | '' = '';
+	export let disabled = false;
 	export let size: Size;
 	export let options: string[];
 	export let title: string = '';
@@ -16,7 +17,13 @@
 	{#if title !== ''}
 		<label for={id} class="label">{title}</label>
 	{/if}
-	<select bind:value class="{variant} {size} {status} outline" {style} {id}>
+	<select
+		bind:value
+		class="{variant} {size} status={status === 'disabled' || disabled ? 'disabled' : ''} outline"
+		{style}
+		{id}
+		{disabled}
+	>
 		{#each options as option (option)}
 			<option value={option}>{option}</option>
 		{/each}
@@ -86,28 +93,31 @@
 		height: 40px;
 	}
 
-	select.disabled {
-		opacity: 0.4;
-		pointer-events: none;
+	select:disabled {
+		background-color: var(--light-gray-3) !important;
+		outline: 1px solid var(--light-gray-4);
+		color: var(--gray);
+		opacity: 0.3;
+		cursor: not-allowed;
 	}
 
 	select.default {
-		background: var(--background);
+		background-color: var(--background);
 		color: var(--off-black);
 	}
 
 	select.primary {
-		background: var(--primary);
+		background-color: var(--primary);
 		color: var(--white);
 	}
 
 	select.secondary {
-		background: var(--background);
+		background-color: var(--background);
 		color: var(--primary);
 	}
 
 	select.danger {
-		background: var(--background);
+		background-color: var(--background);
 		color: var(--danger-red);
 	}
 </style>

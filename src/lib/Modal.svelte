@@ -1,8 +1,10 @@
 <script lang="ts">
-	import { createEventDispatcher, onDestroy } from 'svelte';
+	import { createEventDispatcher } from 'svelte';
 
 	const dispatch = createEventDispatcher<{ close: void }>();
-	const close = () => dispatch('close');
+	const close = () => {
+		dispatch('close');
+	};
 
 	let modal: HTMLElement;
 
@@ -35,10 +37,9 @@
 
 <svelte:window on:keydown={handle_keydown} />
 
-<!-- Added `on:click` and `on:keypress` event listeners -->
 <!-- svelte-ignore a11y-no-static-element-interactions -->
-<div class="modal-background" on:click={close} on:keypress={close}>
-	<!-- Stop propagation of the click event here -->
+<!-- svelte-ignore a11y-click-events-have-key-events -->
+<div class="modal-background" on:click={close}>
 	<!-- svelte-ignore a11y-click-events-have-key-events -->
 	<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
 	<div class="modal" role="dialog" aria-modal="true" bind:this={modal} on:click={stopPropagation}>
@@ -56,7 +57,7 @@
 		width: 100%;
 		height: 100%;
 		background: rgba(65, 65, 65, 0.568);
-		z-index: 3;
+		z-index: 4;
 	}
 
 	.modal {
@@ -64,11 +65,11 @@
 		left: 50%;
 		top: 400px;
 		transform: translate(-50%, -50%);
-		z-index: 4;
+		z-index: 6;
 
 		display: flex;
 		flex-direction: column;
-		justify-content: left;
+		justify-content: center;
 		align-items: center;
 		padding: 16px;
 

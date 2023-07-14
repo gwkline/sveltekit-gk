@@ -108,7 +108,6 @@
 	.status-section {
 		flex-grow: 1;
 		text-align: center;
-		border-radius: 10px;
 	}
 
 	.state-info {
