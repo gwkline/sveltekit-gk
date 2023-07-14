@@ -3,7 +3,7 @@
 	import Button from '$lib/Button.svelte';
 	import Input from '$lib/Input.svelte';
 	import Toggle from '$lib/Toggle.svelte';
-	import CreateTasksModalHelper from '../routes/checkout/CreateTaskModalHelper.svelte';
+	import CreateTasksModalHelper from './CreateTaskModalHelper.svelte';
 	import {
 		checkedCheckoutTasks,
 		verboseTasks,
@@ -11,7 +11,7 @@
 		isLoading,
 		shiftPressed,
 		showTags
-	} from '../datastore';
+	} from '../../datastore';
 	import {
 		faPlay,
 		faStop,
@@ -20,8 +20,8 @@
 		faCopy,
 		faPlus
 	} from '@fortawesome/free-solid-svg-icons';
-	import { makeRequest } from '../helpers';
-	import type { Settings, Task } from '../types';
+	import { makeRequest } from '../../helpers';
+	import type { Settings, Task } from '../../types';
 
 	let showModal = false;
 	let maxActiveTaskCount: string;

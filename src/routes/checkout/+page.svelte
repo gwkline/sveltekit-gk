@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Nav from '$lib/Nav.svelte';
+	import Nav from './Nav.svelte';
 	import Table from '$lib/Table.svelte';
 	import StatusBar from './StatusBar.svelte';
 	import { onMount, onDestroy } from 'svelte';

@@ -9,7 +9,7 @@
 
 	export let size = 'lg';
 
-	let thisHandleClick2 = () => {
+	let clearSearchValue = () => {
 		searchValue.set('');
 	};
 
@@ -60,7 +60,7 @@
 	<input type="text" placeholder="Search" on:input={handleInput} class={size} id="input1" />
 	<i class="fa fa-magnifying-glass fa-sm left {size}" />
 	{#if $searchValue}
-		<button on:click={thisHandleClick2} class="right {size}" id="cleartext">
+		<button on:click={clearSearchValue} class="right {size}" id="cleartext">
 			<i class="fa fa-circle-xmark fa-md right" />
 		</button>
 	{/if}

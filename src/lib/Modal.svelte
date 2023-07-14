@@ -29,20 +29,13 @@
 			e.preventDefault();
 		}
 	};
-
-	const stopPropagation = (e: MouseEvent | KeyboardEvent) => {
-		e.stopPropagation();
-	};
 </script>
 
 <svelte:window on:keydown={handle_keydown} />
 
-<!-- svelte-ignore a11y-no-static-element-interactions -->
-<!-- svelte-ignore a11y-click-events-have-key-events -->
-<div class="modal-background" on:click={close}>
-	<!-- svelte-ignore a11y-click-events-have-key-events -->
-	<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
-	<div class="modal" role="dialog" aria-modal="true" bind:this={modal} on:click={stopPropagation}>
+<div class="modal-background">
+	<button class="background-button" aria-label="Close modal" on:click={close} />
+	<div class="modal" role="dialog" aria-modal="true" bind:this={modal}>
 		<div class="frame">
 			<slot name="modal" />
 		</div>
@@ -58,6 +51,17 @@
 		height: 100%;
 		background: rgba(65, 65, 65, 0.568);
 		z-index: 4;
+	}
+
+	.background-button {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		border: none;
+		background: transparent;
+		z-index: 5;
 	}
 
 	.modal {

@@ -3,7 +3,6 @@
 	import { enhance } from '$app/forms';
 	import { page } from '$app/stores';
 	import Fa from 'svelte-fa';
-	let icon = faCircleHalfStroke;
 </script>
 
 <form
@@ -20,7 +19,7 @@
 >
 	<div class="container">
 		<button formaction="/?/setTheme&redirectTo={$page.url.pathname}">
-			<Fa {icon} />
+			<Fa icon={faCircleHalfStroke} />
 		</button>
 	</div>
 </form>

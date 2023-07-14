@@ -16,11 +16,18 @@
 		faArrowRight
 	} from '@fortawesome/free-solid-svg-icons';
 	import SidebarElement from './SidebarElement.svelte';
+	import { sidebarCollapsed } from '../datastore';
 	import { onMount } from 'svelte';
+
+	export let toggle = () => {
+		sidebarCollapsed.set(!$sidebarCollapsed);
+	};
 
 	let url = ``;
 
-	onMount(() => (url = window.location.href));
+	onMount(() => {
+		url = window.location.href;
+	});
 
 	let sidebar = [
 		{
@@ -90,37 +97,14 @@
 			disabled: false
 		}
 	];
-
-	let collapsed: boolean;
-
-	import { sidebarCollapsed } from '../datastore';
-	$: collapsed = $sidebarCollapsed;
-
-	export let toggle = () => {
-		if ($sidebarCollapsed) {
-			// collapsed theme has been selected
-			sidebarCollapsed.set(false);
-			// save theme selection
-		} else {
-			sidebarCollapsed.set(true);
-			// reset theme selection
-		}
-	};
-
-	const initTheme = () => {
-		var collapsedSidebarSelected = sidebarCollapsed;
-
-		collapsedSidebarSelected ? sidebarCollapsed.set(true) : sidebarCollapsed.set(false);
-	};
-	initTheme(); // on page load, if user has already selected a specific theme -> apply it
 </script>
 
-<div class={collapsed ? 'collapsed' : 'sidebar'}>
+<div class={$sidebarCollapsed ? 'collapsed' : 'sidebar'}>
 	<ul>
 		<li style="margin-top: 20px; margin-bottom: 20px;">
 			<SidebarElement
 				icon={null}
-				{collapsed}
+				collapsed={$sidebarCollapsed}
 				image_src="https://i.imgur.com/Njn1r3b.png"
 				disabled={false}
 			/>
@@ -128,30 +112,35 @@
 		{#each sidebar as item}
 			<li>
 				<a href={item.page} class="{url.includes(item.page) ? 'active' : ''} normal">
-					<SidebarElement text={item.text} icon={item.icon} {collapsed} disabled={item.disabled} />
+					<SidebarElement
+						text={item.text}
+						icon={item.icon}
+						collapsed={$sidebarCollapsed}
+						disabled={item.disabled}
+					/>
 				</a>
 			</li>
 		{/each}
 	</ul>
 </div>
-<div class={collapsed ? 'collapse-collapsed' : 'collapse'}>
+<div class={$sidebarCollapsed ? 'collapse-collapsed' : 'collapse'}>
 	<SidebarElement
 		text={'Collapse'}
-		icon={collapsed ? faArrowRight : faArrowLeft}
+		icon={$sidebarCollapsed ? faArrowRight : faArrowLeft}
 		style={'settings'}
-		{collapsed}
+		collapsed={$sidebarCollapsed}
 		onclick={toggle}
 		disabled={false}
 	/>
 </div>
 
-<div class={collapsed ? 'settings-collapsed' : 'settings'}>
+<div class={$sidebarCollapsed ? 'settings-collapsed' : 'settings'}>
 	<a href="settings" class={url.includes('settings') ? 'active' : ''}>
 		<SidebarElement
 			text={'Settings'}
 			icon={faGear}
 			style={'settings'}
-			{collapsed}
+			collapsed={$sidebarCollapsed}
 			disabled={false}
 		/>
 	</a>

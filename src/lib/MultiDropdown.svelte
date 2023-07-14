@@ -53,8 +53,7 @@
 
 <svelte:window on:click={handleClickOutside} />
 
-<!-- svelte-ignore a11y-click-events-have-key-events -->
-<div class="dropdown" bind:this={dropdownEl} on:click|stopPropagation role="button" tabindex="-1">
+<button class="dropdown" bind:this={dropdownEl} on:click|stopPropagation>
 	<Button
 		style="width:200px; height: 40px; margin-right: 0px;"
 		onclick={() => (open = !open)}
@@ -76,9 +75,7 @@
 			</div>
 
 			{#each filteredOptions as option}
-				<!-- svelte-ignore a11y-no-noninteractive-tabindex -->
-				<div
-					role="button"
+				<button
 					class="dropdown-item {style}"
 					tabindex="0"
 					on:click={() => toggleOption(option)}
@@ -88,17 +85,19 @@
 				>
 					<Checkbox checked={selectedOptions[option]} mini={true} />
 					{option}
-				</div>
+				</button>
 			{/each}
 		</div>
 	{/if}
-</div>
+</button>
 
 <style>
 	.dropdown {
 		display: inline-block;
 		position: relative;
-		background-color: var(--background);
+		background-color: inherit;
+		color: inherit;
+		border: none;
 	}
 	.dropdown-caret {
 		width: 0;
@@ -128,9 +127,12 @@
 		cursor: pointer;
 		padding-left: 10px;
 		transition: background 0.3s;
-		width: 190px;
+		width: 100%;
 		height: 30px;
 		font-size: 13px;
+		background-color: inherit;
+		color: inherit;
+		border: none;
 	}
 
 	.dropdown-item:hover {

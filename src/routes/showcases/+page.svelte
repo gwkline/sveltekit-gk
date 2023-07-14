@@ -33,7 +33,6 @@
 		{#if visibleButton}
 			<Button
 				variant="default"
-				status="active"
 				size="sm"
 				outline="noOutline"
 				icon={faEyeSlash}
@@ -42,7 +41,6 @@
 		{:else}
 			<Button
 				variant="default"
-				status="active"
 				size="sm"
 				outline="noOutline"
 				icon={faEye}
@@ -53,7 +51,6 @@
 		{#if visibleDropdown}
 			<Button
 				variant="default"
-				status="active"
 				size="sm"
 				outline="noOutline"
 				icon={faEyeSlash}
@@ -62,7 +59,6 @@
 		{:else}
 			<Button
 				variant="default"
-				status="active"
 				size="sm"
 				outline="noOutline"
 				icon={faEye}
@@ -72,7 +68,6 @@
 		{#if visibleControls}
 			<Button
 				variant="default"
-				status="active"
 				size="sm"
 				outline="noOutline"
 				icon={faEyeSlash}
@@ -81,7 +76,6 @@
 		{:else}
 			<Button
 				variant="default"
-				status="active"
 				size="sm"
 				outline="noOutline"
 				icon={faEye}
@@ -92,7 +86,6 @@
 		{#if visibleInputs}
 			<Button
 				variant="default"
-				status="active"
 				size="sm"
 				outline="noOutline"
 				icon={faEyeSlash}
@@ -101,7 +94,6 @@
 		{:else}
 			<Button
 				variant="default"
-				status="active"
 				size="sm"
 				outline="noOutline"
 				icon={faEye}

@@ -1,8 +1,6 @@
 <script lang="ts">
 	import Fa from 'svelte-fa';
-	import { onMount } from 'svelte';
 	import { faCog } from '@fortawesome/free-solid-svg-icons';
-	import { browser } from '$app/environment';
 	import type { IconDefinition } from '@fortawesome/free-solid-svg-icons';
 
 	export let variant: ButtonVariants = 'default';

@@ -1,29 +1,32 @@
 <script lang="ts">
 	type Size = 'sm' | 'md' | 'lg';
 	type Variant = 'default' | 'primary' | 'secondary' | 'danger';
+	type Outline = 'outline' | 'noOutline';
 
 	export let variant: Variant = 'default';
-	export let status: 'disabled' | '' = '';
-	export let disabled = false;
+	export let outline: Outline = 'outline';
 	export let size: Size;
+	export let disabled = false;
 	export let options: string[];
 	export let title: string = '';
 	export let id: string = '';
 	export let value: string = '';
 	export let style: string = '';
+
+	const generateClassString = () => {
+		let classes: string[] = [variant, size];
+		if (disabled) classes.push('disabled');
+		classes.push(outline);
+
+		return classes.join(' ');
+	};
 </script>
 
 <div class="container">
 	{#if title !== ''}
 		<label for={id} class="label">{title}</label>
 	{/if}
-	<select
-		bind:value
-		class="{variant} {size} status={status === 'disabled' || disabled ? 'disabled' : ''} outline"
-		{style}
-		{id}
-		{disabled}
-	>
+	<select bind:value class={generateClassString()} {style} {id} {disabled}>
 		{#each options as option (option)}
 			<option value={option}>{option}</option>
 		{/each}
@@ -73,6 +76,11 @@
 		border-color: var(--light-gray-4);
 		border-width: 1px;
 		border-style: solid;
+	}
+
+	select.noOutline {
+		border: none;
+		outline: none;
 	}
 
 	select.sm {
