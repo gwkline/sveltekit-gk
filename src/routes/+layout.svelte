@@ -1,8 +1,7 @@
 <script lang="ts">
-	import { browser } from '$app/environment';
-	import { goto } from '$app/navigation';
 	import Sidebar from '$lib/Sidebar.svelte';
 	import ThemeToggle from '$lib/ThemeToggle.svelte';
+	import { browser } from '$app/environment';
 	import { onMount } from 'svelte';
 	import {
 		accessDenied,
@@ -34,21 +33,15 @@
 	};
 
 	onMount(() => {
-		if (browser) {
-			if ($validAccessToken && $accessTokenExpiration > Date.now()) {
-				console.log('User has a valid access token (from store)');
-			} else {
-				findMemberships().then((memberships) => {
-					if (!memberships.some((membership) => membership.valid)) {
-						console.log("User doesn't have a valid membership");
-						return Promise.resolve();
-					} else {
-						console.log('User has a valid access token');
-						validAccessToken.set(true);
-						accessTokenExpiration.set(Date.now() + 60 * 60 * 1000);
-					}
-				});
-			}
+		if (browser && (!$validAccessToken || $accessTokenExpiration < Date.now())) {
+			findMemberships().then((memberships) => {
+				if (!memberships.some((membership) => membership.valid)) {
+					return Promise.resolve();
+				} else {
+					validAccessToken.set(true);
+					accessTokenExpiration.set(Date.now() + 60 * 60 * 1000);
+				}
+			});
 		}
 	});
 

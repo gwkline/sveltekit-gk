@@ -1,38 +1,27 @@
-# create-svelte
+# Experimental UI for Automated Retail Software
 
-Everything you need to build a Svelte project, powered by [`create-svelte`](https://github.com/sveltejs/kit/tree/master/packages/create-svelte).
+This project showcases an experimental UI design for automated retail software. It's designed to provide a user-friendly interface for managing and interacting with a retail bot.
 
-## Creating a project
+## Technology
 
-If you're seeing this, you've probably already done this step. Congrats!
+The UI is built using SvelteKit and TypeScript, which makes for a highly responsive and dynamic user experience.
 
-```bash
-# create a new project in the current directory
-npm create svelte@latest
+## Usage
 
-# create a new project in my-app
-npm create svelte@latest my-app
-```
+To use this UI, follow these steps:
 
-## Developing
+1. Clone this repository: `git clone https://github.com/gwkline/sveltekit-gk.git`
+2. Install the dependencies: `npm install`
+3. Start the development server: `npm run dev`
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+The UI will then be accessible at `localhost:5173`.
 
-```bash
-npm run dev
+Please note that this UI is designed to be connected to a bot's backend. However, some seed data has been provided to showcase the components.
 
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
-```
+## Feedback
 
-## Building
+This project was built without a designer and with almost no prior knowledge of Svelte/Sveltekit, so any and all feedback is welcome. Whether you're a user, a developer, or just someone interested in the project, please feel free to open an issue or a pull request.
 
-To create a production version of your app:
+## Contact
 
-```bash
-npm run build
-```
-
-You can preview the production build with `npm run preview`.
-
-> To deploy your app, you may need to install an [adapter](https://kit.svelte.dev/docs/adapters) for your target environment.
+If you have any questions or comments, you can reach out to me on Discord at `gkline`.
