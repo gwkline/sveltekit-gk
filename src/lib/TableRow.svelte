@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Fa from 'svelte-fa';
 	import Checkbox from './Checkbox.svelte';
-	import CreateTasksModalHelper from '../routes/checkout/CreateTaskModalHelper.svelte';
+	import CreateTasksModalHelper from '../routes/checkout/TaskModalHelper.svelte';
 	import Button from './Button.svelte';
 	import { makeRequest } from '../helpers';
 	import {

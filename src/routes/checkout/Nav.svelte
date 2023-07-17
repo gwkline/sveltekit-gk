@@ -3,7 +3,7 @@
 	import Button from '$lib/Button.svelte';
 	import Input from '$lib/Input.svelte';
 	import Toggle from '$lib/Toggle.svelte';
-	import CreateTasksModalHelper from './CreateTaskModalHelper.svelte';
+	import CreateTasksModalHelper from './TaskModalHelper.svelte';
 	import {
 		checkedCheckoutTasks,
 		verboseTasks,
@@ -22,8 +22,10 @@
 	} from '@fortawesome/free-solid-svg-icons';
 	import { makeRequest } from '../../helpers';
 	import type { Settings, Task } from '../../types';
+	import ConfirmationModal from '$lib/ConfirmationModal.svelte';
 
 	let showModal = false;
+	let showConfirmationModal = false;
 	let maxActiveTaskCount: string;
 	let maxStartingTaskCount: string;
 	let buttonTextCount: string;
@@ -98,6 +100,14 @@
 		});
 	};
 
+	const triggerModal = () => {
+		showConfirmationModal = true;
+	};
+
+	const cancelAction = () => {
+		showConfirmationModal = false;
+	};
+
 	type settings = 'max_active_tasks' | 'max_starting_tasks';
 	const saveSettings = (settingKey: settings, value: string) => {
 		settings.update((currentSettings) => {
@@ -168,7 +178,7 @@
 
 			<Button
 				variant="danger"
-				onclick={() => handleTaskAction('delete')}
+				onclick={triggerModal}
 				isLoading={$isLoading.delete}
 				size="md"
 				icon={faTrash}
@@ -231,6 +241,19 @@
 		</div>
 	</div>
 </div>
+
+{#if showConfirmationModal}
+	<ConfirmationModal
+		message={`You're about to delete ${buttonTextCount} of your tasks. This cannot be undone. Are you sure you want to continue?`}
+		on:confirm={() => {
+			showConfirmationModal = false;
+			handleTaskAction('delete');
+		}}
+		on:cancel={() => {
+			cancelAction();
+		}}
+	/>
+{/if}
 
 {#if showModal}
 	<CreateTasksModalHelper bind:showModal bind:isEditing bind:isDuplicating />
