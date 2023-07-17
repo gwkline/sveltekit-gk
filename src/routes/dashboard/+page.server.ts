@@ -11,7 +11,7 @@ export const actions: Actions = {
 		const nickname = url.searchParams.get('nickname');
 		const memId = url.searchParams.get('memId');
 
-		const response = await fetch(`https://api.whop.com/api/v2/memberships/${memId}`, {
+		await fetch(`https://api.whop.com/api/v2/memberships/${memId}`, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
@@ -23,10 +23,6 @@ export const actions: Actions = {
 				}
 			})
 		});
-
-		if (response.status !== 201) {
-			console.log(await response.json());
-		}
 	}
 };
 

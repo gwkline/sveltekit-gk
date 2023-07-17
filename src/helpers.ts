@@ -2,7 +2,7 @@ import axios, { AxiosError, type AxiosResponse } from 'axios';
 import type { WhopMembershipType } from './types';
 import { goto } from '$app/navigation';
 import { browser } from '$app/environment';
-import { validAccessToken, accessTokenExpiration } from './datastore';
+import { validAccessToken, accessTokenExpiration, accessDenied } from './datastore';
 import { get } from 'svelte/store';
 
 export const makeRequest = (
@@ -23,11 +23,8 @@ export const makeRequest = (
 	};
 
 	if (browser) {
-		if (get(validAccessToken) == false || get(accessTokenExpiration) < Date.now() / 1000) {
-			console.log('Access token missing or expired, skipping request: ', url);
+		if (get(validAccessToken) == false || get(accessTokenExpiration) < Date.now()) {
 			return Promise.resolve();
-		} else {
-			console.log('Access token valid, making request: ', url);
 		}
 	}
 
@@ -39,12 +36,16 @@ export const makeRequest = (
 			data: data
 		})
 		.then((response) => {
+			accessDenied.set(false);
 			if (callback) {
 				callback(response);
 			}
 			return response;
 		})
 		.catch((error: AxiosError) => {
+			if (error.message === 'Request failed with status code 403') {
+				accessDenied.set(true);
+			}
 			console.log('Request Error:', error.message, error.name, error.code);
 			return error;
 		});

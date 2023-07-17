@@ -1,7 +1,8 @@
 <script lang="ts">
+	export let color = 'var(--primary)';
 </script>
 
-<div class="bar">
+<div class="bar" style={`background-color: ${color}`}>
 	<slot />
 </div>
 

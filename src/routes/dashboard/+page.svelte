@@ -54,7 +54,7 @@
 			memberships = mems;
 			if (memberships.some((membership) => membership.valid)) {
 				validAccessToken.set(true);
-				accessTokenExpiration.set(Date.now() + (60 * 60) / 1000);
+				accessTokenExpiration.set(Date.now() + 60 * 60 * 1000);
 			}
 		});
 		goto('/dashboard');

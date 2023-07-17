@@ -41,6 +41,7 @@ export const sidebarCollapsed = persistentStore('sidebarCollapsed', true);
 
 export const shiftPressed = persistentStore('shiftPressed', false);
 export const showTags = persistentStore('showTags', false);
+export const accessDenied = persistentStore('accessDenied', false);
 
 export const searchValue = persistentStore('searchValue', '');
 export const selectedTags = persistentStore<string[]>('selectedTags', []);
@@ -304,5 +305,5 @@ export const sizePresets = persistentStore<SizePresets>('sizePresets', {
 	toddler: { 'Max Cop (10)': ['1C', '2C', '3C', '4C', '5C', '6C', '7C', '8C', '9C', '10C'] }
 });
 
-export const validAccessToken = writable(false);
-export const accessTokenExpiration = writable(-1);
+export const validAccessToken = persistentStore('validAccessToken', false);
+export const accessTokenExpiration = persistentStore('accessTokenExpiration', -1);

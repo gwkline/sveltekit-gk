@@ -3,7 +3,9 @@
 	import { goto } from '$app/navigation';
 	import Sidebar from '$lib/Sidebar.svelte';
 	import ThemeToggle from '$lib/ThemeToggle.svelte';
+	import { onMount } from 'svelte';
 	import {
+		accessDenied,
 		accessTokenExpiration,
 		filteredTasks,
 		searchValue,
@@ -31,22 +33,24 @@
 		}
 	};
 
-	if (browser) {
-		if ($validAccessToken && $accessTokenExpiration > Date.now() / 1000) {
-			console.log('User has a valid access token (from store)');
-		} else {
-			findMemberships().then((memberships) => {
-				if (!memberships.some((membership) => membership.valid)) {
-					console.log("User doesn't have a valid membership");
-					return Promise.resolve();
-				} else {
-					console.log('User has a valid access token');
-					validAccessToken.set(true);
-					accessTokenExpiration.set(Date.now() + (60 * 60) / 1000);
-				}
-			});
+	onMount(() => {
+		if (browser) {
+			if ($validAccessToken && $accessTokenExpiration > Date.now()) {
+				console.log('User has a valid access token (from store)');
+			} else {
+				findMemberships().then((memberships) => {
+					if (!memberships.some((membership) => membership.valid)) {
+						console.log("User doesn't have a valid membership");
+						return Promise.resolve();
+					} else {
+						console.log('User has a valid access token');
+						validAccessToken.set(true);
+						accessTokenExpiration.set(Date.now() + 60 * 60 * 1000);
+					}
+				});
+			}
 		}
-	}
+	});
 
 	const clearFilters = () => {
 		selectedTags.set([]);
@@ -92,6 +96,11 @@
 				class="nav-button">click here.</button
 			>
 		</UpdateBar>
+	{/if}
+	{#if $accessDenied}
+		<UpdateBar color="var(--danger-red)"
+			>Please go to your Project Enigma dashboard and click "use this key" to continue using the bot</UpdateBar
+		>
 	{/if}
 	<div class="border-card">
 		<slot />
