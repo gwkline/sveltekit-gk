@@ -105,7 +105,7 @@
 			<SidebarElement
 				icon={null}
 				collapsed={$sidebarCollapsed}
-				image_src="https://i.imgur.com/Njn1r3b.png"
+				image_src="../bluelogo.png"
 				disabled={false}
 			/>
 		</li>

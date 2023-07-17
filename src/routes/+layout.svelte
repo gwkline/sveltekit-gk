@@ -1,7 +1,21 @@
 <script lang="ts">
+	import { browser } from '$app/environment';
+	import { goto } from '$app/navigation';
 	import Sidebar from '$lib/Sidebar.svelte';
 	import ThemeToggle from '$lib/ThemeToggle.svelte';
-	import { shiftPressed, sidebarCollapsed } from '../datastore';
+	import {
+		accessTokenExpiration,
+		filteredTasks,
+		searchValue,
+		selectedState,
+		selectedTags,
+		shiftPressed,
+		sidebarCollapsed,
+		validAccessToken,
+		verboseTasks
+	} from '../datastore';
+	import { findMemberships } from '../helpers';
+	import UpdateBar from '../lib/UpdateBar.svelte';
 
 	export const ssr = false;
 	export const prerender = true;
@@ -16,6 +30,42 @@
 			shiftPressed.set(false);
 		}
 	};
+
+	if (browser) {
+		if ($validAccessToken && $accessTokenExpiration > Date.now() / 1000) {
+			console.log('User has a valid access token (from store)');
+		} else {
+			findMemberships().then((memberships) => {
+				if (!memberships.some((membership) => membership.valid)) {
+					console.log("User doesn't have a valid membership");
+					return Promise.resolve();
+				} else {
+					console.log('User has a valid access token');
+					validAccessToken.set(true);
+					accessTokenExpiration.set(Date.now() + (60 * 60) / 1000);
+				}
+			});
+		}
+	}
+
+	const clearFilters = () => {
+		selectedTags.set([]);
+		selectedState.set('');
+		searchValue.set('');
+		filteredTasks.set([]);
+	};
+
+	let filterOn: boolean;
+	$: if (
+		($filteredTasks.length > 0 && $filteredTasks.length < $verboseTasks.length) ||
+		$selectedTags.length > 0 ||
+		$selectedState != '' ||
+		$searchValue != ''
+	) {
+		filterOn = true;
+	} else {
+		filterOn = false;
+	}
 </script>
 
 <head>
@@ -27,6 +77,22 @@
 <ThemeToggle />
 
 <div class="{$sidebarCollapsed ? 'collapsed' : ''} master-container">
+	{#if !$validAccessToken || $accessTokenExpiration < Date.now() / 1000}
+		<UpdateBar>
+			<p>
+				You are in sandbox mode. If you are a Project Enigma user and would like to use the full
+				functionality, please sign in on the <a href="/dashboard">dashboard.</a>
+			</p>
+		</UpdateBar>
+	{/if}
+	{#if filterOn}
+		<UpdateBar>
+			You're viewing a filtered set of tasks. To clear all filters, <button
+				on:click={clearFilters}
+				class="nav-button">click here.</button
+			>
+		</UpdateBar>
+	{/if}
 	<div class="border-card">
 		<slot />
 	</div>
@@ -35,6 +101,17 @@
 <style lang="css" global>
 	@import 'https://fonts.googleapis.com/css?family=Roboto';
 	@import '/global.css';
+
+	.nav-button {
+		background: none;
+		outline: none;
+		border: none;
+		color: var(--off-black);
+	}
+
+	.nav-button:hover {
+		color: var(--light-gray-3);
+	}
 
 	* {
 		font-family: Roboto;

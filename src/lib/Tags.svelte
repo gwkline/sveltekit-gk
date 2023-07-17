@@ -538,7 +538,7 @@
 		justify-content: start;
 
 		align-items: center;
-		padding: 10px 0px;
+		padding: 0px 0px;
 	}
 
 	.tag.selected {

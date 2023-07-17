@@ -2,6 +2,7 @@ import { browser } from '$app/environment';
 import { writable } from 'svelte/store';
 import type { Writable } from 'svelte/store';
 import type { Settings, Task, Account, Schedule, SizePresets } from './types';
+import { seedAccounts, seedSettings, seedTasks } from './seedData';
 
 // Create a store that syncs with localStorage
 const persistentStore = <T>(key: string, startValue: T): Writable<T> => {
@@ -36,7 +37,6 @@ export const editRetryDeclines = writable(false);
 export const editExperimentalMode = writable(false);
 
 export const isLoading = writable<Record<string, boolean>>({});
-export const settings = persistentStore<Settings | Record<string, never>>('settings', {});
 export const sidebarCollapsed = persistentStore('sidebarCollapsed', true);
 
 export const shiftPressed = persistentStore('shiftPressed', false);
@@ -46,8 +46,9 @@ export const searchValue = persistentStore('searchValue', '');
 export const selectedTags = persistentStore<string[]>('selectedTags', []);
 export const selectedState = persistentStore('selectedState', '');
 
-export const accounts = persistentStore<Account[]>('accounts', []);
-export const verboseTasks = persistentStore<Task[]>('verboseTasks', []);
+export const settings = persistentStore<Settings>('settings', seedSettings);
+export const accounts = persistentStore<Account[]>('accounts', seedAccounts);
+export const verboseTasks = persistentStore<Task[]>('verboseTasks', seedTasks);
 export const filteredTasks = persistentStore<Task[]>('filteredTasks', []);
 
 export const schedules = persistentStore<Schedule[]>('schedules', []);
@@ -302,3 +303,6 @@ export const sizePresets = persistentStore<SizePresets>('sizePresets', {
 	},
 	toddler: { 'Max Cop (10)': ['1C', '2C', '3C', '4C', '5C', '6C', '7C', '8C', '9C', '10C'] }
 });
+
+export const validAccessToken = writable(false);
+export const accessTokenExpiration = writable(-1);

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import Fa from 'svelte-fa';
 	import Checkbox from './Checkbox.svelte';
+	import CreateTasksModalHelper from '../routes/checkout/CreateTaskModalHelper.svelte';
 	import Button from './Button.svelte';
 	import { makeRequest } from '../helpers';
 	import {
@@ -30,6 +31,14 @@
 	export let row: TableRowType;
 	export let id: number;
 
+	let showModal = false;
+	let isEditing = false;
+	let size = '';
+	let taskId: number;
+	let state: State;
+	let profileName: string;
+	let profileTags = '';
+
 	const stateIconMapping = {
 		Ready: faPause,
 		Queued: faClock,
@@ -52,11 +61,6 @@
 		Edge: 'https://upload.wikimedia.org/wikipedia/commons/7/7e/Microsoft_Edge_logo_%282019%29.png'
 	};
 
-	let size = '';
-	let taskId: number;
-	let state: State;
-	let profileName: string;
-	let profileTags = '';
 	$: {
 		let thisTask = $verboseTasks.find((task) => task['id'] === id);
 		if (thisTask) {
@@ -119,6 +123,9 @@
 
 	const handleEdit = (event: MouseEvent) => {
 		event.stopPropagation();
+		checkedCheckoutTasks.set([taskId]);
+		isEditing = true;
+		showModal = true;
 	};
 
 	const handleDelete = (event: MouseEvent) => {
@@ -219,6 +226,10 @@
 		</div>
 	</td>
 </tr>
+
+{#if showModal}
+	<CreateTasksModalHelper bind:showModal bind:isEditing />
+{/if}
 
 <style>
 	tr {

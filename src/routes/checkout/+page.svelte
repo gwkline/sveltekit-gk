@@ -10,11 +10,14 @@
 		searchValue,
 		settings,
 		selectedTags,
-		showTags
+		showTags,
+		validAccessToken,
+		accessTokenExpiration
 	} from '../../datastore';
 	import { makeRequest } from '../../helpers';
 	import type { Task, EventData, HeaderConfigType } from '../../types';
 	import Tags from '$lib/Tags.svelte';
+	import { browser } from '$app/environment';
 
 	let eventSource: EventSource;
 
@@ -43,20 +46,22 @@
 
 	// On component mount
 	onMount(() => {
-		// Connect to the event stream
-		eventSource = new EventSource('http://localhost:23432/tasks/status?stream=messages');
+		if (browser && $validAccessToken && $accessTokenExpiration > Date.now() / 1000) {
+			// Connect to the event stream
+			eventSource = new EventSource('http://localhost:23432/tasks/status?stream=messages');
 
-		// Listen for messages
-		eventSource.onmessage = (event) => {
-			const data = JSON.parse(event.data);
-			updateTasks(data);
-		};
+			// Listen for messages
+			eventSource.onmessage = (event) => {
+				const data = JSON.parse(event.data);
+				updateTasks(data);
+			};
 
-		// Handle any error that may occur
-		eventSource.onerror = (error) => {
-			console.error('EventSource failed:', error);
-			eventSource.close();
-		};
+			// Handle any error that may occur
+			eventSource.onerror = (error) => {
+				console.error('EventSource failed:', error);
+				eventSource.close();
+			};
+		}
 	});
 
 	// On component destroy
@@ -111,7 +116,7 @@
 
 	let filterOn: boolean;
 	$: if (
-		$filteredTasks.length > 0 ||
+		($filteredTasks.length > 0 && $filteredTasks.length < $verboseTasks.length) ||
 		$selectedTags.length > 0 ||
 		$selectedState != '' ||
 		$searchValue != ''

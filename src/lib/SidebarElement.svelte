@@ -8,25 +8,14 @@
 	export let onclick = () => {};
 	export let disabled = true;
 	export let image_src = '';
-
-	const generateClassString = () => {
-		let classString = 'default fill ';
-		if (image_src == '') {
-			classString += 'active ';
-		}
-		classString += 'noOutline ';
-		classString += style + ' ';
-		if (collapsed) {
-			classString += 'iconOnly ';
-		}
-		if (disabled) {
-			classString += 'disabled ';
-		}
-		return classString;
-	};
 </script>
 
-<button class={generateClassString()} on:click={onclick}>
+<button
+	class="default fill {image_src == '' ? 'active' : ''} noOutline {style} {collapsed
+		? 'iconOnly'
+		: ''} {disabled == true ? 'disabled' : ''}"
+	on:click={onclick}
+>
 	{#if image_src == ''}
 		<div class="tooltip">
 			<row>
@@ -83,17 +72,13 @@
 		text-align: center;
 		padding: 5px 0;
 		border-radius: 6px;
-
-		/* Position the tooltip text - see examples below! */
 		position: absolute;
 		z-index: 1;
 	}
 
-	/* Show the tooltip text when you mouse over the tooltip container */
 	button:hover .tooltip-text {
 		visibility: visible;
 	}
-	/* Color Settings */
 
 	button.default {
 		background: var(--sidebar-background);
@@ -104,7 +89,6 @@
 		background: var(--light-gray-1);
 	}
 
-	/* Click Indication */
 	button.default.active:active {
 		-webkit-box-shadow: inset 0px 0px 5px #b6b6b6;
 		-moz-box-shadow: inset 0px 0px 5px #b6b6b6;

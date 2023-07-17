@@ -34,6 +34,8 @@
 	"dependencies": {
 		"@fortawesome/free-solid-svg-icons": "^6.4.0",
 		"axios": "^1.4.0",
+		"crypto-js": "^4.1.1",
+		"js-cookie": "^3.0.5",
 		"svelte-fa": "^3.0.4"
 	}
 }

@@ -10,6 +10,7 @@
 		showModal = false;
 	};
 	export let isEditing = false;
+	export let isDuplicating = false;
 
 	enum ModalType {
 		None = 'None',
@@ -57,6 +58,7 @@
 				{randomSizeInput}
 				bind:currentModal
 				bind:isEditing
+				bind:isDuplicating
 			/>
 		{/if}
 	</div>

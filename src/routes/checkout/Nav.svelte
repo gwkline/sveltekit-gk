@@ -28,6 +28,7 @@
 	let maxStartingTaskCount: string;
 	let buttonTextCount: string;
 	let isEditing = false;
+	let isDuplicating = false;
 
 	type states = 'start' | 'stop' | 'delete' | 'duplicate';
 
@@ -76,48 +77,24 @@
 	};
 
 	const handleTaskAction = (state: states) => {
-		const all = $shiftPressed || $checkedCheckoutTasks.filter((item) => item != -1).length === 0;
+		const all: boolean =
+			$shiftPressed || $checkedCheckoutTasks.filter((item) => item != -1).length === 0;
 		isLoading.set({ [state]: true });
 
-		if (state === 'duplicate') {
-			duplicateTasks(all).then(() => {
-				isLoading.set({ [state]: false });
+		// If the action is "stop", filter out tasks in the "Ready" state.
+		if (state === 'stop') {
+			const ids = getTaskIds(all).filter((id) => {
+				const task = $verboseTasks.find((task: Task) => task.id === id);
+				return task && task.state !== 'Ready';
 			});
-		} else {
-			// If the action is "stop", filter out tasks in the "Ready" state.
-			if (state === 'stop') {
-				const ids = getTaskIds(all).filter((id) => {
-					const task = $verboseTasks.find((task: Task) => task.id === id);
-					return task && task.state !== 'Ready';
-				});
-				if (ids.length === 0) {
-					// If there are no valid tasks to stop, don't proceed.
-					isLoading.set({ [state]: false });
-					return;
-				}
+			if (ids.length === 0) {
+				// If there are no valid tasks to stop, don't proceed.
+				isLoading.set({ [state]: false });
+				return;
 			}
-			changeTasksState(state, all).then(() => {
-				isLoading.set({ [state]: false });
-			});
 		}
-	};
-
-	const duplicateTasks = (all: boolean = false) => {
-		const tasks: any[] = getTaskIds(all).reduce((result, id) => {
-			const task: Task | undefined = $verboseTasks.find((task) => task.id === id);
-			if (task) {
-				result.push({ ...task, account: null, id: 0 });
-			}
-			return result;
-		}, [] as any[]);
-
-		const url = 'http://127.0.0.1:23432/tasks?type=checkout';
-		const method = 'post';
-
-		return makeRequest(method, url, tasks, (response: any) => {
-			verboseTasks.update((curTasks: Task[]) => {
-				return curTasks.concat(response.data['created']);
-			});
+		changeTasksState(state, all).then(() => {
+			isLoading.set({ [state]: false });
 		});
 	};
 
@@ -216,7 +193,11 @@
 				variant="default"
 				size="md"
 				icon={faCopy}
-				onclick={() => handleTaskAction('duplicate')}
+				onclick={() => {
+					isEditing = true;
+					isDuplicating = true;
+					showModal = true;
+				}}
 				resizable={false}
 				style="button">Duplicate {buttonTextCount} Tasks</Button
 			>
@@ -252,7 +233,7 @@
 </div>
 
 {#if showModal}
-	<CreateTasksModalHelper bind:showModal bind:isEditing />
+	<CreateTasksModalHelper bind:showModal bind:isEditing bind:isDuplicating />
 {/if}
 
 <style>

@@ -24,7 +24,7 @@
 		editRetryDeclines,
 		editExperimentalMode
 	} from '../../datastore';
-	import type { Account, Tag } from '../../types';
+	import type { Account, OutboundTask, Tag } from '../../types';
 
 	enum ModalType {
 		None = 'None',
@@ -39,11 +39,12 @@
 	export let preferredSizeInput = '';
 	export let randomSizeInput = '';
 	export let isEditing = false;
+	export let isDuplicating = false;
 
 	let allAccountTags: string[];
 	let allProfileTags: string[];
-	let selectedAccountTags: string[];
-	let selectedProfileTags: string[];
+	let selectedAccountTags: string[] = [];
+	let selectedProfileTags: string[] = [];
 	let scheduleNames = ['None', ...$schedules.map((schedule) => schedule.name)];
 	let scheduleDropdown = 'None';
 
@@ -117,7 +118,6 @@
 
 		return makeRequest('post', 'http://127.0.0.1:23432/tasks?type=checkout', tasks);
 	};
-
 	const editTasks = () => {
 		let updatedTasks: any[] = [];
 		verboseTasks.update((tasks) => {
@@ -164,26 +164,84 @@
 			});
 		});
 
+		return makeRequest('put', 'http://127.0.0.1:23432/tasks?type=checkout', updatedTasks, () => {});
+	};
+
+	const duplicateTasks = () => {
+		let updatedTasks: any[] = [];
+		let iter = 0;
+		$verboseTasks.forEach((task: OutboundTask) => {
+			if ($checkedCheckoutTasks.length === 0 || $checkedCheckoutTasks.includes(task.id)) {
+				task.account = null;
+				task.id = 0;
+
+				if ($editSku) {
+					task.product.product_id = sku;
+				}
+				if ($editPreferredSizeInput) {
+					let preferredSanitizedSizes = preferredSizeInput.split(',').map((item) => item.trim());
+					task.product.size = preferredSanitizedSizes[iter % preferredSanitizedSizes.length];
+				}
+				if ($editRandomSizeInput) {
+					let randomSanitizedSizes = randomSizeInput.split(',').map((item) => item.trim());
+					task.product.allowed_random_sizes = randomSanitizedSizes;
+					task.product.enable_random_sizing = randomSanitizedSizes.length > 0;
+				}
+				if ($editScheduleDropdown) {
+					let scheduleId =
+						scheduleDropdown !== 'None'
+							? $schedules.find((schedule) => schedule.name === scheduleDropdown)?.id || 0
+							: 0;
+					task.schedule_id = scheduleId;
+				}
+				if ($editBrowserType) {
+					task.browser_type = $checkoutSettings.browserType;
+				}
+				if ($editRetryMode) {
+					task.retry_mode = $checkoutSettings.retryMode;
+				}
+				if ($editRetryNonWinner) {
+					task.retry_non_winner = $checkoutSettings.retryNonWinner;
+				}
+				if ($editRetryDeclines) {
+					task.retry_on_decline = $checkoutSettings.retryDeclines;
+				}
+				if ($editExperimentalMode) {
+					task.experimental_mode = $checkoutSettings.experimentalMode;
+				}
+				updatedTasks.push(task);
+			}
+		});
+
 		return makeRequest(
 			'post',
 			'http://127.0.0.1:23432/tasks?type=checkout',
 			updatedTasks,
-			() => {}
+			(response) => {
+				if (response.status === 200) {
+					// Add the newly created tasks to the verboseTasks list
+					verboseTasks.update((tasks) => [...tasks, ...response.data.created]);
+				}
+			}
 		);
 	};
 
 	const handleSaveClicked = () => {
 		isLoading.set({ saveTasks: true });
 
+		if (isEditing && isDuplicating) {
+			duplicateTasks();
+		}
 		if (isEditing) {
 			editTasks();
-			isEditing = false;
 		} else {
 			saveTasks();
 		}
 
 		isLoading.set({ saveTasks: false });
 		closeModal();
+		isEditing = false;
+		isDuplicating = false;
 	};
 
 	makeRequest('get', 'http://127.0.0.1:23432/schedules', null, (response) => {

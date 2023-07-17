@@ -9,6 +9,8 @@
 	import { enhance } from '$app/forms';
 	import type { PageData } from './$types';
 	import type { WhopMembershipType } from '../../types';
+	import { findMemberships } from '../../helpers';
+	import { accessTokenExpiration, validAccessToken } from '../../datastore';
 
 	export let data: PageData;
 
@@ -35,39 +37,26 @@
 		if (form) form.submit();
 	}
 
-	const findMemberships = async (): Promise<void> => {
-		const response = await fetch('https://api.whop.com/api/v2/me/memberships', {
-			method: 'GET',
-			headers: {
-				'Content-Type': 'application/json',
-				Authorization: `Bearer ${localStorage.getItem('whopAccessToken')}`
-			}
-		});
-
-		if (response.status !== 200) {
-			localStorage.removeItem('whopAccessToken');
-
-			const refreshToken = localStorage.getItem('whopRefreshToken');
-			if (!refreshToken) return;
-			localStorage.removeItem('whopRefreshToken');
-			goto(`/dashboard?token=${refreshToken}`);
-		}
-
-		const parsed_response = await response.json();
-		memberships = parsed_response.data;
-	};
-
 	// if we have an existing token, we can get memberships
 	if (browser && localStorage.getItem('whopAccessToken')) {
-		findMemberships();
+		findMemberships().then((mems) => {
+			memberships = mems;
+		});
 	}
 
 	// if they've just logged in, we can get memberships
 	if (data.access_token && browser) {
+		//TODO: clear accounts, tasks, etc
 		localStorage.setItem('whopAccessToken', data.access_token);
 		localStorage.setItem('whopRefreshToken', data.refresh_token);
 
-		findMemberships();
+		findMemberships().then((mems) => {
+			memberships = mems;
+			if (memberships.some((membership) => membership.valid)) {
+				validAccessToken.set(true);
+				accessTokenExpiration.set(Date.now() + (60 * 60) / 1000);
+			}
+		});
 		goto('/dashboard');
 	}
 

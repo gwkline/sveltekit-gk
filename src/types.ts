@@ -15,8 +15,35 @@ export type Task = {
 	browser_type: string;
 	nike_module_type: string;
 	account: Account | ShortAccount;
-	schedule: Schedule;
-	metadata: object;
+	schedule: Schedule | ShortSchedule;
+	metadata: object | null;
+	retry_mode: string;
+	tags: Tag[];
+	experimental_mode: boolean;
+	cache_enabled: boolean;
+	retry_non_winner: boolean;
+	retry_on_decline: boolean;
+};
+
+export type OutboundTask = {
+	id: number;
+	account_id: number;
+	schedule_id: number;
+	product: Product;
+	result: string;
+	created_at: string;
+	updated_at: string;
+	state: State;
+	status: string;
+	headless: boolean;
+	enable_images: boolean;
+	release_datetime: string;
+	max_expedited_shipping_price: number;
+	browser_type: string;
+	nike_module_type: string;
+	account: Account | ShortAccount | null;
+	schedule: Schedule | ShortSchedule;
+	metadata: object | null;
 	retry_mode: string;
 	tags: Tag[];
 	experimental_mode: boolean;
@@ -31,7 +58,7 @@ export type Product = {
 	allowed_random_sizes: string[];
 	enable_random_sizing: boolean;
 	product_id: string;
-	properties: object;
+	properties: object | null;
 };
 
 export type Account = {
@@ -61,7 +88,7 @@ export type Account = {
 	use_account_name: boolean;
 	archived: boolean;
 	status: string;
-	analytics_properties: object;
+	analytics_properties: object | null;
 };
 
 export type ShortAccount = {
@@ -139,10 +166,20 @@ export type Schedule = {
 	start_time: string;
 	interval_seconds: number;
 	repeating: boolean;
+	created_at: string;
+	updated_at: string;
+};
+
+export type ShortSchedule = {
+	id: number;
+	name: string;
+	start_time: string;
+	interval_seconds: number;
+	repeating: boolean;
 };
 
 export type PreviousWins = {
-	last_win: string | undefined;
+	last_win: string | null;
 	number_of_wins: number;
 };
 
