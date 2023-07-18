@@ -63,6 +63,11 @@
 	} else {
 		filterOn = false;
 	}
+
+	import { dev } from '$app/environment';
+	import { inject } from '@vercel/analytics';
+
+	inject({ mode: dev ? 'development' : 'production' });
 </script>
 
 <head>
@@ -77,8 +82,8 @@
 	{#if !$validAccessToken || $accessTokenExpiration < Date.now() / 1000}
 		<UpdateBar>
 			<p>
-				You are in sandbox mode. If you are a Project Enigma user and would like to use the full
-				functionality, please sign in on the <a href="/dashboard">dashboard.</a>
+				You are in sandbox mode. If you are a PE user and would like to use the full functionality,
+				please sign in on the <a href="/dashboard">dashboard.</a>
 			</p>
 		</UpdateBar>
 	{/if}
