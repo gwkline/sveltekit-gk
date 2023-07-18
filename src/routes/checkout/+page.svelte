@@ -12,14 +12,30 @@
 		selectedTags,
 		showTags,
 		validAccessToken,
-		accessTokenExpiration
+		accessTokenExpiration,
+		sortState,
+		checkedAllCheckoutTasks,
+		checkedCheckoutTasks
 	} from '../../datastore';
 	import { makeRequest } from '../../helpers';
-	import type { Task, EventData, HeaderConfigType } from '../../types';
+	import type { Task, EventData, HeaderConfigType, TableRowType } from '../../types';
 	import Tags from '$lib/Tags.svelte';
 	import { browser } from '$app/environment';
 
 	let eventSource: EventSource;
+	let tableData: TableRowType[] = [];
+	let tableIds: number[] = [];
+	let filterOn: boolean;
+	let headers: string[] = [];
+	let headerConfig: HeaderConfigType<Task> = {
+		SKU: (task: Task) => task?.product?.product_id ?? '',
+		Account: (task: Task) => task?.account?.username ?? '',
+		Proxy: (task: Task) => task?.account?.proxy ?? '',
+		Profile: (task: Task) => task?.account?.profile?.name ?? '',
+		Browser: (task: Task) =>
+			task?.browser_type == 'Default' ? $settings?.browser ?? '' : task?.browser_type ?? '',
+		Status: (task: Task) => task?.status ?? ''
+	};
 
 	const updateTasks = (updatedTasks: EventData[]) => {
 		updatedTasks.forEach((newTaskData) => {
@@ -104,17 +120,36 @@
 		verboseTasks.set(cleanedData);
 	});
 
-	let headerConfig: HeaderConfigType<Task> = {
-		SKU: (task: Task) => task?.product?.product_id ?? '',
-		Account: (task: Task) => task?.account?.username ?? '',
-		Proxy: (task: Task) => task?.account?.proxy ?? '',
-		Profile: (task: Task) => task?.account?.profile?.name ?? '',
-		Browser: (task: Task) =>
-			task?.browser_type == 'Default' ? $settings?.browser ?? '' : task?.browser_type ?? '',
-		Status: (task: Task) => task?.status ?? ''
+	const updateSortState = (e: CustomEvent) => {
+		sortState.update((currentState) => {
+			let newDirection: 0 | 1 | -1 = 1;
+			let newColumn: string | null = e.detail;
+			if (currentState.column === e.detail) {
+				// Click on same column
+				if (currentState.direction === 1) {
+					// Change direction if currently ascending
+					newDirection = -1;
+				} else if (currentState.direction === -1) {
+					// Remove sorting if currently descending
+					newDirection = 0;
+					newColumn = null;
+				}
+			}
+			return { column: newColumn, direction: newDirection };
+		});
 	};
 
-	let filterOn: boolean;
+	const updateCheckedAll = (event: CustomEvent) => {
+		checkedAllCheckoutTasks.set(event.detail.checked);
+
+		if (event.detail.checked) {
+			let allIds = $verboseTasks.map((task) => task.id);
+			checkedCheckoutTasks.set(allIds);
+		} else {
+			checkedCheckoutTasks.set([]);
+		}
+	};
+
 	$: if (
 		($filteredTasks.length > 0 && $filteredTasks.length < $verboseTasks.length) ||
 		$selectedTags.length > 0 ||
@@ -152,6 +187,44 @@
 		});
 
 		filteredTasks.set(filtered);
+
+		headers = Object.keys(headerConfig);
+		tableIds = [];
+
+		let tableDataShortenedTemp = filtered.map((row) => {
+			const rowObject: TableRowType = {};
+			for (const header of headers) {
+				rowObject[header] = headerConfig[header](row);
+			}
+			tableIds.push(row.id);
+			return rowObject;
+		});
+
+		if (typeof $sortState.column === 'string') {
+			// Get the getter function for the sort column
+			const getSortValue = headerConfig[$sortState.column];
+			const indices = tableDataShortenedTemp.map((_, index) => index); // Initialize indices array
+
+			indices.sort((aIndex, bIndex) => {
+				// Use the getter function to extract the sort value
+				const aValue = getSortValue(filtered[aIndex]).toLowerCase();
+				const bValue = getSortValue(filtered[bIndex]).toLowerCase();
+
+				if (aValue < bValue) {
+					return $sortState.direction === 1 ? -1 : 1;
+				}
+				if (aValue > bValue) {
+					return $sortState.direction === 1 ? 1 : -1;
+				}
+				return 0;
+			});
+
+			// Sort the tableDataShortenedTemp array and the tableIds array according to the sorted indices
+			tableDataShortenedTemp = indices.map((index) => tableDataShortenedTemp[index]);
+			tableIds = indices.map((index) => tableIds[index]);
+		}
+
+		tableData = tableDataShortenedTemp;
 	}
 </script>
 
@@ -159,7 +232,15 @@
 <Nav />
 {#if $showTags} <Tags /> {/if}
 <div class="container">
-	<Table tableData={filterOn ? $filteredTasks : $verboseTasks} {headerConfig} />
+	<Table
+		{tableData}
+		{headers}
+		{tableIds}
+		sortState={$sortState}
+		checkedAll={$checkedAllCheckoutTasks}
+		on:sort={updateSortState}
+		on:checkedAll={updateCheckedAll}
+	/>
 </div>
 
 <style>

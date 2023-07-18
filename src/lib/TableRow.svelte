@@ -22,8 +22,7 @@
 		shiftPressed,
 		checkedCheckoutTasks,
 		lastCheckedCheckoutTasks,
-		secondLastCheckedCheckoutTasks,
-		selectedTags
+		secondLastCheckedCheckoutTasks
 	} from '../datastore';
 	import type { State, TableRowType } from '../types';
 

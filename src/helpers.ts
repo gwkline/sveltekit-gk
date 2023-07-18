@@ -2,7 +2,7 @@ import axios, { AxiosError, type AxiosResponse } from 'axios';
 import type { WhopMembershipType } from './types';
 import { goto } from '$app/navigation';
 import { browser } from '$app/environment';
-import { validAccessToken, accessTokenExpiration, accessDenied } from './datastore';
+import { validAccessToken, accessTokenExpiration, accessDenied, networkError } from './datastore';
 import { get } from 'svelte/store';
 
 export const makeRequest = (
@@ -37,6 +37,7 @@ export const makeRequest = (
 		})
 		.then((response) => {
 			accessDenied.set(false);
+			networkError.set(false);
 			if (callback) {
 				callback(response);
 			}
@@ -45,6 +46,8 @@ export const makeRequest = (
 		.catch((error: AxiosError) => {
 			if (error.message === 'Request failed with status code 403') {
 				accessDenied.set(true);
+			} else if (error.message === 'Network Error') {
+				networkError.set(true);
 			}
 			console.log('Request Error:', error.message, error.name, error.code);
 			return error;

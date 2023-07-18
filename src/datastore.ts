@@ -42,6 +42,7 @@ export const sidebarCollapsed = persistentStore('sidebarCollapsed', true);
 export const shiftPressed = persistentStore('shiftPressed', false);
 export const showTags = persistentStore('showTags', false);
 export const accessDenied = persistentStore('accessDenied', false);
+export const networkError = persistentStore('networkError', false);
 
 export const searchValue = persistentStore('searchValue', '');
 export const selectedTags = persistentStore<string[]>('selectedTags', []);

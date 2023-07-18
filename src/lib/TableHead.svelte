@@ -1,64 +1,40 @@
 <script lang="ts">
-	import Checkbox from './Checkbox.svelte';
-	import {
-		checkedAllCheckoutTasks,
-		checkedCheckoutTasks,
-		verboseTasks,
-		sortState
-	} from '../datastore';
-	import { faSort, faSortDown, faSortUp, faUnsorted } from '@fortawesome/free-solid-svg-icons';
 	import Fa from 'svelte-fa';
-	export let headers: string[];
-	export let store = verboseTasks;
+	import Checkbox from './Checkbox.svelte';
+	import { createEventDispatcher } from 'svelte';
+	import { faSort, faSortDown, faSortUp } from '@fortawesome/free-solid-svg-icons';
+	import type { SortState } from '../types';
 
-	let checked = $checkedAllCheckoutTasks;
+	export let headers: string[];
+	export let checkedAll: boolean;
+	export let sortState: SortState;
+
+	const dispatch = createEventDispatcher();
 
 	const updateCheckedAll = (event: CustomEvent) => {
-		checkedAllCheckoutTasks.set(event.detail.checked);
-
-		if (event.detail.checked) {
-			let allIds = $store.map((task) => task.id);
-			checkedCheckoutTasks.set(allIds);
-		} else {
-			checkedCheckoutTasks.set([]);
-		}
+		dispatch('checkedAll', event.detail);
 	};
 
 	const updateSortState = (column: string) => {
-		sortState.update((currentState) => {
-			let newDirection: 0 | 1 | -1 = 1;
-			let newColumn: string | null = column;
-			if (currentState.column === column) {
-				// Click on same column
-				if (currentState.direction === 1) {
-					// Change direction if currently ascending
-					newDirection = -1;
-				} else if (currentState.direction === -1) {
-					// Remove sorting if currently descending
-					newDirection = 0;
-					newColumn = null;
-				}
-			}
-			return { column: newColumn, direction: newDirection };
-		});
+		dispatch('sort', column);
 	};
 </script>
 
 <thead>
 	<tr>
 		<th class="checkbox">
-			<Checkbox {checked} on:change={updateCheckedAll} />
+			<Checkbox checked={checkedAll} on:change={updateCheckedAll} />
 		</th>
 		{#each headers as columnHeading}
 			<th class="column-heading" on:click={() => updateSortState(columnHeading)}>
 				{columnHeading}
 				<span class="icon-container">
-					{#if $sortState.column === columnHeading && $sortState.direction === 1}
+					{#if sortState.column === columnHeading && sortState.direction === 1}
 						<Fa icon={faSortDown} />
-					{:else if $sortState.column === columnHeading && $sortState.direction === -1}
+					{:else if sortState.column === columnHeading && sortState.direction === -1}
 						<Fa icon={faSortUp} />
 					{:else}
-						<Fa icon={faUnsorted} />
+						<Fa icon={faSort} />
 					{/if}
 				</span>
 			</th>

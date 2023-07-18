@@ -26,5 +26,12 @@ module.exports = {
 				parser: '@typescript-eslint/parser'
 			}
 		}
-	]
+	],
+	rules: {
+		"no-await-in-loop": true,
+		"no-constant-binary-expression": true,
+		"no-duplicate-imports": true,
+		"no-self-compare": true,
+		"no-unreachable-loop": true,
+	}
 };

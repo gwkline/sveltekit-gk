@@ -7,6 +7,7 @@
 		accessDenied,
 		accessTokenExpiration,
 		filteredTasks,
+		networkError,
 		searchValue,
 		selectedState,
 		selectedTags,
@@ -101,6 +102,11 @@
 	{#if $accessDenied}
 		<UpdateBar color="var(--danger-red)"
 			>Please go to your Project Enigma dashboard and click "use this key" to continue using the bot</UpdateBar
+		>
+	{/if}
+	{#if $networkError}
+		<UpdateBar color="var(--danger-red)"
+			>Please make sure your Project Enigma is running and that you are connected to the internet.</UpdateBar
 		>
 	{/if}
 	<div class="border-card">
