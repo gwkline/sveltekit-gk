@@ -1,20 +1,28 @@
 <script lang="ts">
-	import type { IconDefinition } from '@fortawesome/free-solid-svg-icons';
 	import Fa from 'svelte-fa';
+	import { goto } from '$app/navigation';
+	import type { IconDefinition } from '@fortawesome/free-solid-svg-icons';
 	export let icon: IconDefinition | null;
 	export let text = '';
 	export let style = '';
 	export let collapsed = false;
-	export let onclick = () => {};
 	export let disabled = true;
 	export let image_src = '';
+	export let page: string | null;
+	export let onclick = () => {};
+
+	const redirect = () => {
+		if (!disabled && page !== null) {
+			goto(`/${page}`);
+		}
+	};
 </script>
 
 <button
 	class="default fill {image_src == '' ? 'active' : ''} noOutline {style} {collapsed
 		? 'iconOnly'
 		: ''} {disabled == true ? 'disabled' : ''}"
-	on:click={onclick}
+	on:click={page ? redirect : onclick}
 >
 	{#if image_src == ''}
 		<div class="tooltip">

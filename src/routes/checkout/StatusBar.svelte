@@ -145,7 +145,7 @@
 
 	.state-name,
 	.state-count {
-		margin-left: 10px; /* consistent 10px space after the icon */
+		margin-left: 10px;
 		font-size: small;
 	}
 

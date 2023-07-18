@@ -70,20 +70,14 @@
 		top: 400px;
 		transform: translate(-50%, -50%);
 		z-index: 6;
-
 		display: flex;
 		flex-direction: column;
 		justify-content: center;
 		align-items: center;
 		padding: 16px;
-
-		/* background */
-
 		background: var(--background);
 		border: 2px solid rgba(0, 0, 0, 0.1);
 		border-radius: 8px;
-
-		/* Inside auto layout */
 
 		flex: none;
 		order: 0;
@@ -91,15 +85,11 @@
 	}
 
 	.frame {
-		/* Auto layout */
-
 		display: flex;
 		flex-direction: column;
 		align-items: flex-start;
 		padding: 10px;
 		gap: 16px;
-
-		/* Inside auto layout */
 		width: 100%;
 		flex: none;
 		order: 1;

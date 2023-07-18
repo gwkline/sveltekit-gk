@@ -128,26 +128,24 @@
 	}
 
 	.master-container {
-		position: relative; /* Or absolute, or fixed, depending on your needs */
+		position: relative;
 		right: 0;
 		margin-left: 225px;
 		height: 100%;
-		width: calc(
-			100% - 230px
-		); /* This will ensure the width of master-container is always the full width minus the left margin */
+		width: calc(100% - 230px);
 		display: flex;
 		flex-direction: column;
 	}
 
 	.master-container.collapsed {
 		margin-left: 50px;
-		width: calc(100% - 60px); /* Update this too, to take into account the changed left margin */
+		width: calc(100% - 60px);
 	}
 
 	.border-card {
 		background-color: var(--background);
 		border: 1px solid var(--light-gray-3);
-		margin: 10px 10px 10px 10px; /* Change the bottom margin value here */
+		margin: 10px 10px 10px 10px;
 		padding: 20px 50px;
 		position: relative;
 		top: 5px;

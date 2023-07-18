@@ -243,7 +243,7 @@
 		display: flex;
 		align-items: center;
 		justify-content: start;
-		gap: 5px; /* creates a gap between the icon and the text */
+		gap: 5px;
 	}
 
 	.profile-content {
@@ -263,7 +263,7 @@
 
 	.button-group {
 		display: flex;
-		flex-wrap: wrap; /* allows the buttons to wrap to next line */
+		flex-wrap: wrap;
 		justify-content: flex-end;
 		margin-right: 10px;
 	}

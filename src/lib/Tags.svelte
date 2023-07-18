@@ -14,6 +14,9 @@
 	import Button from './Button.svelte';
 	import type { Task } from '../types';
 
+	type AddOrEdit = 'add' | 'edit';
+	type AddOrEditState = AddOrEdit | null;
+	let addOrEdit: AddOrEditState = null;
 	let allTags: string[];
 	let tagsCount: { tag: string; count: number }[];
 	let isEditing = false;
@@ -215,10 +218,6 @@
 		isAddingTag = false;
 		selectedTags.set([]);
 	};
-
-	type AddOrEdit = 'add' | 'edit';
-	type AddOrEditState = AddOrEdit | null;
-	let addOrEdit: AddOrEditState = null;
 	const startAddingTag = (setState: AddOrEdit) => {
 		if (isAddingTag && setState) {
 			addOrEdit = null;
@@ -250,6 +249,16 @@
 		}
 		newTagText = '';
 		isAddingTag = false;
+	};
+	const selectInput = (event: { target: any }) => {
+		const input = event.target;
+		if ('select' in input) {
+			input.select();
+		}
+	};
+	const saveInput = (event: { target: any }) => {
+		const input = event.target;
+		newTagText = input.value;
 	};
 	$: {
 		allTags = $verboseTasks
@@ -293,18 +302,6 @@
 		}
 		totalSelectedTasks = selectedTasks.size;
 	}
-
-	const selectInput = (event: { target: any }) => {
-		const input = event.target;
-		if ('select' in input) {
-			input.select();
-		}
-	};
-
-	const saveInput = (event: { target: any }) => {
-		const input = event.target;
-		newTagText = input.value;
-	};
 </script>
 
 <div class="container-wrapper">
@@ -483,9 +480,9 @@
 	.clear-all {
 		cursor: pointer;
 		border: none;
-		margin-right: 1rem; /* Adds a bit of margin on the left to separate it from the selection info */
-		font-size: 11px; /* adjust as needed */
-		display: inline; /* Ensure it is displayed inline */
+		margin-right: 1rem;
+		font-size: 11px;
+		display: inline;
 		background-color: inherit;
 		color: var(--off-black);
 	}
@@ -503,7 +500,7 @@
 		width: 100%;
 		outline: none;
 	}
-	/* Create generic style for all new action links */
+
 	.selection-info > button {
 		cursor: pointer;
 		font-size: 11px;
@@ -511,7 +508,6 @@
 		display: inline;
 	}
 
-	/* Styling for hover state */
 	.selection-info > button:hover {
 		color: var(--primary);
 		text-decoration: underline;
@@ -522,14 +518,14 @@
 		flex-wrap: wrap;
 	}
 	.container-wrapper {
-		position: relative; /* set the container wrapper as the reference point for absolute positioning */
+		position: relative;
 		padding-bottom: 10px;
 		display: flex;
 		flex-direction: column;
 	}
 
 	.selection-info {
-		position: relative; /* position the selection-info absolutely within the container wrapper */
+		position: relative;
 		font-size: 12px;
 		color: var(--off-black);
 		display: flex;
@@ -555,7 +551,7 @@
 		outline: 1px solid var(--light-gray-4);
 		color: var(--off-black);
 		font-size: 12px;
-		transition: transform 0.1s ease; /* transition the transform property */
+		transition: transform 0.1s ease;
 	}
 
 	.tag-text {
@@ -571,7 +567,6 @@
 	}
 
 	.tag:hover {
-		/* enlarge the tag when it's hovered over */
 		transform: scale(1.05);
 	}
 </style>

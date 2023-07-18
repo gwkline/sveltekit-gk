@@ -184,8 +184,8 @@
 	.new-preset {
 		display: flex;
 		flex-direction: column;
-		align-items: center; /* Vertically center items */
-		justify-content: space-between; /* Horizontally center items */
+		align-items: center;
+		justify-content: space-between;
 		margin: 10px 0;
 	}
 
@@ -200,8 +200,8 @@
 	.new-preset > div {
 		width: 100%;
 		display: flex;
-		align-items: center; /* Vertically center items */
-		justify-content: space-between; /* Horizontally center items */
+		align-items: center;
+		justify-content: space-between;
 	}
 
 	.new-preset-row {

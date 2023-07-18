@@ -17,17 +17,16 @@
 	} from '@fortawesome/free-solid-svg-icons';
 	import SidebarElement from './SidebarElement.svelte';
 	import { sidebarCollapsed } from '../datastore';
-	import { onMount } from 'svelte';
+	import { page } from '$app/stores';
 
 	export let toggle = () => {
 		sidebarCollapsed.set(!$sidebarCollapsed);
 	};
 
 	let url = ``;
-
-	onMount(() => {
-		url = window.location.href;
-	});
+	$: {
+		url = $page.url.pathname;
+	}
 
 	let sidebar = [
 		{
@@ -105,20 +104,22 @@
 			<SidebarElement
 				icon={null}
 				collapsed={$sidebarCollapsed}
+				page={''}
 				image_src="../bluelogo.png"
 				disabled={false}
 			/>
 		</li>
 		{#each sidebar as item}
 			<li>
-				<a href={item.page} class="{url.includes(item.page) ? 'active' : ''} normal">
+				<div class={url.includes(item.page) ? 'active' : ''}>
 					<SidebarElement
 						text={item.text}
+						page={item.page}
 						icon={item.icon}
 						collapsed={$sidebarCollapsed}
 						disabled={item.disabled}
 					/>
-				</a>
+				</div>
 			</li>
 		{/each}
 	</ul>
@@ -129,21 +130,23 @@
 		icon={$sidebarCollapsed ? faArrowRight : faArrowLeft}
 		style={'settings'}
 		collapsed={$sidebarCollapsed}
+		page={null}
 		onclick={toggle}
 		disabled={false}
 	/>
 </div>
 
 <div class={$sidebarCollapsed ? 'settings-collapsed' : 'settings'}>
-	<a href="settings" class={url.includes('settings') ? 'active' : ''}>
+	<div class={url.includes('settings') ? 'active' : ''}>
 		<SidebarElement
 			text={'Settings'}
+			page={'settings'}
 			icon={faGear}
 			style={'settings'}
 			collapsed={$sidebarCollapsed}
-			disabled={false}
+			disabled={true}
 		/>
-	</a>
+	</div>
 </div>
 
 <style>
@@ -196,7 +199,7 @@
 		background-color: var(--primary);
 	}
 
-	ul li a {
+	ul li div {
 		display: block;
 		position: relative;
 	}

@@ -88,17 +88,17 @@
 	.product-info {
 		display: flex;
 		flex-direction: column;
-		justify-content: center; /* Aligns text vertically in the middle */
+		justify-content: center;
 		margin-left: 20px;
-		width: calc(100% - 100px); /* Subtract the width of the image */
+		width: calc(100% - 100px);
 	}
 
 	.products-container {
 		display: flex;
 		flex-wrap: wrap;
 		justify-content: space-between;
-		overflow-y: auto; /* Allows vertical scrolling */
-		height: 500px; /* Set a max height */
+		overflow-y: auto;
+		height: 500px;
 		margin: 0 10px;
 		padding: 10px;
 	}
