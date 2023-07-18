@@ -3,12 +3,12 @@
 	import Modal from '$lib/Modal.svelte';
 	import Button from './Button.svelte';
 
+	export let message = '';
 	export let showModal: boolean = false;
 	export let closeModal: () => void = () => {
 		showModal = false;
 	};
 
-	export let message = '';
 	const dispatch = createEventDispatcher();
 
 	function confirmAction() {

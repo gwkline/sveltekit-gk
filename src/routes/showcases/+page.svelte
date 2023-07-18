@@ -22,9 +22,14 @@
 	};
 
 	import InputShowcase from './InputShowcase.svelte';
+	import TextShowcase from './TextShowcase.svelte';
 	let visibleInputs = false;
+	let visibleText = false;
 	export let toggleInputShowcase = () => {
 		visibleInputs = !visibleInputs;
+	};
+	export let toggleTextShowcase = () => {
+		visibleText = !visibleText;
 	};
 </script>
 
@@ -100,6 +105,24 @@
 				onclick={toggleInputShowcase}>Show Input Showcase</Button
 			>
 		{/if}
+
+		{#if visibleText}
+			<Button
+				variant="default"
+				size="sm"
+				outline="noOutline"
+				icon={faEyeSlash}
+				onclick={toggleTextShowcase}>Hide Text Showcase</Button
+			>
+		{:else}
+			<Button
+				variant="default"
+				size="sm"
+				outline="noOutline"
+				icon={faEye}
+				onclick={toggleTextShowcase}>Show Text Showcase</Button
+			>
+		{/if}
 	</row>
 
 	{#if visibleControls}
@@ -116,6 +139,10 @@
 
 	{#if visibleDropdown}
 		<DropdownShowcase />
+	{/if}
+
+	{#if visibleText}
+		<TextShowcase />
 	{/if}
 </div>
 <div style="margin-top: 20px;" />

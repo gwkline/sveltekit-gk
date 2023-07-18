@@ -1,22 +1,14 @@
 <script lang="ts">
-	import {
-		verboseTasks,
-		filteredTasks,
-		selectedTags,
-		selectedState,
-		searchValue,
-		sortState
-	} from '../datastore';
-	import type { HeaderConfigType, Task } from '../types';
+	import { searchValue } from '../datastore';
 
 	export let size = 'lg';
-	export let headerConfig: HeaderConfigType<Task>;
 
 	let clearSearchValue = () => {
 		searchValue.set('');
 	};
 
 	let timeout: number;
+
 	function handleInput(e: Event): void {
 		const target = e.target as HTMLInputElement;
 		const value = target.value;
@@ -25,34 +17,6 @@
 			searchValue.set(value);
 		}, 300);
 	}
-
-	$: {
-		let filtered = $verboseTasks.filter((task) => {
-			// Keyword Search
-			let keywordMatch = true;
-			if ($searchValue !== '') {
-				keywordMatch = JSON.stringify(task).toLowerCase().includes($searchValue.toLowerCase());
-			}
-
-			// Tag Filtering
-			let tagMatch;
-			if ($selectedTags.includes('No Tags')) {
-				tagMatch =
-					task.tags.length === 0 ||
-					$selectedTags.some((tag) => task.tags.map((tagObj) => tagObj.name).includes(tag));
-			} else {
-				tagMatch =
-					$selectedTags.length === 0 ||
-					$selectedTags.some((tag) => task.tags.map((tagObj) => tagObj.name).includes(tag));
-			}
-
-			// State Filtering
-			let stateMatch = !$selectedState || task.state === $selectedState;
-			return keywordMatch && tagMatch && stateMatch;
-		});
-
-		filteredTasks.set(filtered);
-	}
 </script>
 
 <link
@@ -60,7 +24,14 @@
 	href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css"
 />
 <div class="container">
-	<input type="text" placeholder="Search" on:input={handleInput} class={size} id="input1" />
+	<input
+		type="text"
+		bind:value={$searchValue}
+		placeholder="Search"
+		on:input={handleInput}
+		class={size}
+		id="input1"
+	/>
 	<i class="fa fa-magnifying-glass fa-sm left {size}" />
 	{#if $searchValue}
 		<button on:click={clearSearchValue} class="right {size}" id="cleartext">

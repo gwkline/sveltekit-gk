@@ -1,9 +1,9 @@
 <script lang="ts">
+	import Fa from 'svelte-fa';
 	import Button from '$lib/Button.svelte';
 	import Checkbox from '$lib/Checkbox.svelte';
 	import Input from '$lib/Input.svelte';
 	import { createEventDispatcher } from 'svelte';
-	import Fa from 'svelte-fa';
 	import {
 		faChevronDown,
 		faChevronUp,

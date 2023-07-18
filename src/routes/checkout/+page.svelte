@@ -125,10 +125,38 @@
 	} else {
 		filterOn = false;
 	}
+
+	$: {
+		let filtered = $verboseTasks.filter((task) => {
+			// Keyword Search
+			let keywordMatch = true;
+			if ($searchValue !== '') {
+				keywordMatch = JSON.stringify(task).toLowerCase().includes($searchValue.toLowerCase());
+			}
+
+			// Tag Filtering
+			let tagMatch;
+			if ($selectedTags.includes('No Tags')) {
+				tagMatch =
+					task.tags.length === 0 ||
+					$selectedTags.some((tag) => task.tags.map((tagObj) => tagObj.name).includes(tag));
+			} else {
+				tagMatch =
+					$selectedTags.length === 0 ||
+					$selectedTags.some((tag) => task.tags.map((tagObj) => tagObj.name).includes(tag));
+			}
+
+			// State Filtering
+			let stateMatch = !$selectedState || task.state === $selectedState;
+			return keywordMatch && tagMatch && stateMatch;
+		});
+
+		filteredTasks.set(filtered);
+	}
 </script>
 
 <StatusBar />
-<Nav {headerConfig} />
+<Nav />
 {#if $showTags} <Tags /> {/if}
 <div class="container">
 	<Table tableData={filterOn ? $filteredTasks : $verboseTasks} {headerConfig} />

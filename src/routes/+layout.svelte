@@ -17,7 +17,7 @@
 		verboseTasks
 	} from '../datastore';
 	import { findMemberships } from '../helpers';
-	import UpdateBar from '../lib/UpdateBar.svelte';
+	import UpdateBar from '$lib/UpdateBar.svelte';
 
 	export const ssr = false;
 	export const prerender = true;
@@ -51,6 +51,7 @@
 		selectedState.set('');
 		searchValue.set('');
 		filteredTasks.set([]);
+		sortState.set({ column: null, direction: 0 });
 	};
 
 	let filterOn: boolean;

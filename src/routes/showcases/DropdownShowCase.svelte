@@ -1,9 +1,15 @@
 <script lang="ts">
 	import Dropdown from '$lib/Dropdown.svelte';
-	let variants = ['default', 'primary', 'secondary', 'danger'];
-	let sizes = ['sm', 'md', 'lg'];
-	let statuses = ['active', 'disabled'];
+	import MultiDropdown from '$lib/MultiDropdown.svelte';
+	let variants: Variant[] = ['default', 'primary', 'secondary', 'danger'];
+	let outlines: Outline[] = ['noOutline', 'outline'];
+	let sizes: Size[] = ['sm', 'md', 'lg'];
+	let disabled = [true, false];
 	let options = ['Option 1', 'Option 2', 'Option 3'];
+
+	type Size = 'sm' | 'md' | 'lg';
+	type Variant = 'default' | 'primary' | 'secondary' | 'danger';
+	type Outline = 'outline' | 'noOutline';
 </script>
 
 <main>
@@ -11,18 +17,21 @@
 	{#each variants as variant}
 		<column>
 			<div style="margin-bottom: 20px">
-				{#each statuses as status}
+				{#each disabled as disable}
 					<row>
 						{#each sizes as size}
-							<div style="margin-right: 20px; margin-top: 10px">
-								<Dropdown {variant} {status} {size} {options} />
-							</div>
+							{#each outlines as outline}
+								<div style="margin-right: 20px; margin-top: 10px">
+									<Dropdown {variant} disabled={disable} {size} {options} {outline} />
+								</div>
+							{/each}
 						{/each}
 					</row>
 				{/each}
 			</div>
 		</column>
 	{/each}
+	<MultiDropdown options={['1', '2', '3', '4', '5', '6', '7', '8', '9', '10']} />
 </main>
 
 <style>

@@ -2,6 +2,14 @@
 	import Toggle from '$lib/Toggle.svelte';
 	import Radio from '$lib/Radio.svelte';
 	import Checkbox from '$lib/Checkbox.svelte';
+
+	let radioObject = [
+		{ label: 'Option 1', value: 'option1' },
+		{ label: 'Option 2', value: 'option2' },
+		{ label: 'Option 3', value: 'option3' }
+	];
+
+	let selectedRadio = '';
 </script>
 
 <main>
@@ -15,7 +23,7 @@
 			</div>
 		</column>
 
-		<Radio />
+		<Radio bind:selectedValue={selectedRadio} bind:options={radioObject} />
 		<Checkbox />
 	</row>
 </main>

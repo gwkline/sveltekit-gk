@@ -26,7 +26,8 @@
 
 	const updateSortState = (column: string) => {
 		sortState.update((currentState) => {
-			let newDirection = 1;
+			let newDirection: 0 | 1 | -1 = 1;
+			let newColumn: string | null = column;
 			if (currentState.column === column) {
 				// Click on same column
 				if (currentState.direction === 1) {
@@ -35,10 +36,10 @@
 				} else if (currentState.direction === -1) {
 					// Remove sorting if currently descending
 					newDirection = 0;
-					column = null;
+					newColumn = null;
 				}
 			}
-			return { column: column, direction: newDirection };
+			return { column: newColumn, direction: newDirection };
 		});
 	};
 </script>
@@ -53,9 +54,9 @@
 				{columnHeading}
 				<span class="icon-container">
 					{#if $sortState.column === columnHeading && $sortState.direction === 1}
-						<Fa icon={faSortUp} />
-					{:else if $sortState.column === columnHeading && $sortState.direction === -1}
 						<Fa icon={faSortDown} />
+					{:else if $sortState.column === columnHeading && $sortState.direction === -1}
+						<Fa icon={faSortUp} />
 					{:else}
 						<Fa icon={faUnsorted} />
 					{/if}

@@ -18,7 +18,7 @@
 
 	type ButtonVariants = 'default' | 'primary' | 'secondary' | 'danger' | 'warning' | 'success';
 	type ButtonTypes = 'button' | 'submit' | 'reset';
-	type ButtonSizes = 'xs' | 'sm' | 'md' | 'lg';
+	type ButtonSizes = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 	type Shape = 'rectangle' | 'square' | 'circle';
 	type OutlineType = 'outline' | 'noOutline';
 
@@ -36,6 +36,9 @@
 		classes.push(shape);
 		if (alternate) classes.push('alternate');
 		if (resizable) classes.push('resizable');
+		if (shape === 'circle' || shape === 'square') {
+			classes.push('center-icon');
+		}
 
 		return classes.join(' ');
 	};
@@ -55,7 +58,7 @@
 			{#if icon && !(size === 'xs' && resizable)}
 				<Fa {icon} {size} class={$$slots.default ? 'icon-with-text' : 'icon-only'} />
 			{/if}
-			{#if $$slots.default && !resizable}
+			{#if $$slots.default && !resizable && !(shape == 'circle' || shape == 'square')}
 				<slot />
 			{/if}
 		{/if}
@@ -74,9 +77,13 @@
 		overflow: auto;
 		white-space: nowrap;
 	}
+	.center-icon {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+	}
 
 	button {
-		/* Auto layout */
 		width: auto;
 		font-family: inherit;
 		border: 1px solid transparent;
@@ -102,22 +109,7 @@
 
 	/* Icon-only sizing */
 
-	button.iconOnly.sm {
-		padding: 7px 7px;
-		justify-content: center;
-		align-items: center;
-		text-align: center;
-	}
-
-	button.iconOnly.md {
-		padding: 10px 10px;
-		justify-content: center;
-		align-items: center;
-		text-align: center;
-	}
-
-	button.iconOnly.lg {
-		padding: 15px 15px;
+	button.iconOnly {
 		justify-content: center;
 		align-items: center;
 		text-align: center;
@@ -128,24 +120,6 @@
 		border-width: 1px;
 		border-style: solid;
 		box-shadow: 0px 1px 0px 0px rgba(27, 31, 35, 0.04);
-	}
-
-	button.sm {
-		font-weight: 500;
-		font-size: 13px;
-		padding: 3px 15px;
-	}
-
-	button.md {
-		font-weight: 500;
-		font-size: 14px;
-		padding: 6px 20px;
-	}
-
-	button.lg {
-		font-size: 15px;
-		font-weight: 700;
-		padding: 10px 25px;
 	}
 
 	button.noOutline {
@@ -315,5 +289,62 @@
 			align-items: center;
 			text-align: center;
 		}
+	}
+
+	/* SIZING CLASSES */
+
+	button.sm {
+		font-weight: 500;
+		font-size: 13px;
+		padding: 3px 15px;
+	}
+
+	button.md {
+		font-weight: 500;
+		font-size: 14px;
+		padding: 6px 20px;
+	}
+
+	button.lg {
+		font-size: 15px;
+		font-weight: 700;
+		padding: 10px 25px;
+	}
+
+	button.circle.xs {
+		width: 20px;
+		height: 20px;
+	}
+
+	button.circle.sm {
+		width: 30px;
+		height: 30px;
+	}
+
+	button.circle.md {
+		width: 40px;
+		height: 40px;
+	}
+
+	button.circle.lg {
+		width: 50px;
+		height: 50px;
+	}
+
+	button.circle.xl {
+		width: 60px;
+		height: 60px;
+	}
+
+	button.iconOnly.sm {
+		padding: 7px 7px;
+	}
+
+	button.iconOnly.md {
+		padding: 10px 10px;
+	}
+
+	button.iconOnly.lg {
+		padding: 15px 15px;
 	}
 </style>

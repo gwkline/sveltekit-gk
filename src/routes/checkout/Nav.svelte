@@ -24,8 +24,6 @@
 	import ConfirmationModal from '$lib/ConfirmationModal.svelte';
 	import TaskModalHelper from './TaskModalHelper.svelte';
 
-	export let headerConfig: HeaderConfigType<Task>;
-
 	let showModal = false;
 	let showConfirmationModal = false;
 	let maxActiveTaskCount: string;
@@ -217,7 +215,7 @@
 	</div>
 	<div class="button-row">
 		<div class="button-group left-button-group">
-			<Search size="md" {headerConfig} />
+			<Search size="md" />
 			<div class="toggle-container">
 				<Toggle bind:checked={$showTags} />
 				<span class="toggle-label">Show tags</span>

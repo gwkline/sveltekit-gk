@@ -24,7 +24,7 @@
 			return rowObject;
 		});
 
-		if ($sortState.column !== null) {
+		if (typeof $sortState.column === 'string') {
 			// Get the getter function for the sort column
 			const getSortValue = headerConfig[$sortState.column];
 			const indices = tableDataShortenedTemp.map((_, index) => index); // Initialize indices array
@@ -49,7 +49,6 @@
 		}
 
 		tableDataShortened = tableDataShortenedTemp;
-		console.log(tableDataShortened);
 	}
 </script>
 
