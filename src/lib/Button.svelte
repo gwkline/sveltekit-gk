@@ -3,6 +3,12 @@
 	import { faCog } from '@fortawesome/free-solid-svg-icons';
 	import type { IconDefinition } from '@fortawesome/free-solid-svg-icons';
 
+	type ButtonVariants = 'default' | 'primary' | 'secondary' | 'danger' | 'warning' | 'success';
+	type ButtonTypes = 'button' | 'submit' | 'reset';
+	type ButtonSizes = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
+	type Shape = 'rectangle' | 'square' | 'circle';
+	type OutlineType = 'outline' | 'noOutline';
+
 	export let variant: ButtonVariants = 'default';
 	export let size: ButtonSizes = 'md';
 	export let icon: IconDefinition | null = null;
@@ -15,12 +21,6 @@
 	export let isLoading = false;
 	export let resizable = false;
 	export let disabled = false;
-
-	type ButtonVariants = 'default' | 'primary' | 'secondary' | 'danger' | 'warning' | 'success';
-	type ButtonTypes = 'button' | 'submit' | 'reset';
-	type ButtonSizes = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
-	type Shape = 'rectangle' | 'square' | 'circle';
-	type OutlineType = 'outline' | 'noOutline';
 
 	function handleClick(event: MouseEvent) {
 		if (isLoading || disabled) {

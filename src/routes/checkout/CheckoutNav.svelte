@@ -27,6 +27,8 @@
 	type states = 'start' | 'stop' | 'delete' | 'duplicate';
 	type settings = 'max_active_tasks' | 'max_starting_tasks';
 
+	export let searchValue: string = '';
+
 	let showModal = false;
 	let showConfirmationModal = false;
 	let maxActiveTaskCount: string;
@@ -213,7 +215,7 @@
 	</div>
 	<div class="button-row">
 		<div class="button-group left-button-group">
-			<Search size="md" />
+			<Search size="md" on:searchValue value={searchValue} />
 			<div class="toggle-container">
 				<Toggle bind:checked={$showTags} />
 				<span class="toggle-label">Show tags</span>

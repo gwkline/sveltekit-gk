@@ -1,20 +1,22 @@
 <script lang="ts">
-	import { searchValue } from '../datastore';
+	import { createEventDispatcher } from 'svelte';
 
+	export let value: string = '';
 	export let size = 'lg';
 
-	let clearSearchValue = () => {
-		searchValue.set('');
+	const dispatch = createEventDispatcher();
+
+	const clearSearchValue = () => {
+		dispatch('searchValue', '');
 	};
 
 	let timeout: number;
 
 	function handleInput(e: Event): void {
 		const target = e.target as HTMLInputElement;
-		const value = target.value;
 		clearTimeout(timeout);
 		timeout = setTimeout(() => {
-			searchValue.set(value);
+			dispatch('searchValue', target.value);
 		}, 300);
 	}
 </script>
@@ -26,14 +28,14 @@
 <div class="container">
 	<input
 		type="text"
-		bind:value={$searchValue}
 		placeholder="Search"
+		bind:value
 		on:input={handleInput}
 		class={size}
 		id="input1"
 	/>
 	<i class="fa fa-magnifying-glass fa-sm left {size}" />
-	{#if $searchValue}
+	{#if value}
 		<button on:click={clearSearchValue} class="right {size}" id="cleartext">
 			<i class="fa fa-circle-xmark fa-md right" />
 		</button>

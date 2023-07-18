@@ -37,29 +37,6 @@
 		Status: (task: Task) => task?.status ?? ''
 	};
 
-	const updateTasks = (updatedTasks: EventData[]) => {
-		updatedTasks.forEach((newTaskData) => {
-			let id = newTaskData['data']['id'];
-			let status = newTaskData['data']['status'];
-			let state = newTaskData['data']['state'];
-
-			// Update the status of the task with the given id
-			verboseTasks.update((tasks) => {
-				const taskIndex = tasks.findIndex((task) => task['id'] == id);
-				if (
-					taskIndex !== -1 &&
-					(tasks[taskIndex]['status'] !== status || tasks[taskIndex]['state'] !== state)
-				) {
-					const updatedTasks = [...tasks];
-					updatedTasks[taskIndex]['status'] = status;
-					updatedTasks[taskIndex]['state'] = state;
-					return updatedTasks;
-				}
-				return tasks;
-			});
-		});
-	};
-
 	// On component mount
 	onMount(() => {
 		if (browser && $validAccessToken && $accessTokenExpiration > Date.now() / 1000) {
@@ -115,6 +92,29 @@
 		verboseTasks.set(cleanedData);
 	});
 
+	const updateTasks = (updatedTasks: EventData[]) => {
+		updatedTasks.forEach((newTaskData) => {
+			let id = newTaskData['data']['id'];
+			let status = newTaskData['data']['status'];
+			let state = newTaskData['data']['state'];
+
+			// Update the status of the task with the given id
+			verboseTasks.update((tasks) => {
+				const taskIndex = tasks.findIndex((task) => task['id'] == id);
+				if (
+					taskIndex !== -1 &&
+					(tasks[taskIndex]['status'] !== status || tasks[taskIndex]['state'] !== state)
+				) {
+					const updatedTasks = [...tasks];
+					updatedTasks[taskIndex]['status'] = status;
+					updatedTasks[taskIndex]['state'] = state;
+					return updatedTasks;
+				}
+				return tasks;
+			});
+		});
+	};
+
 	const updateSortState = (e: CustomEvent) => {
 		sortState.update((currentState) => {
 			let newDirection: 0 | 1 | -1 = 1;
@@ -151,6 +151,10 @@
 		} else {
 			selectedState.set(e.detail);
 		}
+	};
+
+	const updateSearchValue = (e: CustomEvent) => {
+		searchValue.set(e.detail);
 	};
 
 	$: {
@@ -225,8 +229,10 @@
 	tasks={$filteredTasks}
 	selectedState={$selectedState}
 />
-<CheckoutNav />
-{#if $showTags} <Tags /> {/if}
+<CheckoutNav on:searchValue={updateSearchValue} searchValue={$searchValue} />
+{#if $showTags}
+	<Tags />
+{/if}
 <div class="container">
 	<Table
 		{tableData}
