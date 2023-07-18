@@ -4,10 +4,13 @@
 		filteredTasks,
 		selectedTags,
 		selectedState,
-		searchValue
+		searchValue,
+		sortState
 	} from '../datastore';
+	import type { HeaderConfigType, Task } from '../types';
 
 	export let size = 'lg';
+	export let headerConfig: HeaderConfigType<Task>;
 
 	let clearSearchValue = () => {
 		searchValue.set('');

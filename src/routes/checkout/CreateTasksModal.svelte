@@ -45,6 +45,7 @@
 	let allProfileTags: string[];
 	let selectedAccountTags: string[] = [];
 	let selectedProfileTags: string[] = [];
+	let predictedTaskCount: number = 0;
 	let scheduleNames = ['None', ...$schedules.map((schedule) => schedule.name)];
 	let scheduleDropdown = 'None';
 
@@ -294,6 +295,38 @@
 
 	$: dropdownStatus1 = $checkoutSettings.specifyAccountsByAccountTag ? true : false;
 	$: dropdownStatus2 = $checkoutSettings.specifyAccountsByProfileTag ? true : false;
+
+	$: {
+		let filteredAccounts = $accounts;
+		let selectedAccountTagsSet = new Set(selectedAccountTags);
+		let selectedProfileTagsSet = new Set(selectedProfileTags);
+
+		if (selectedAccountTagsSet.size > 0 && dropdownStatus1) {
+			filteredAccounts = filteredAccounts.filter((account) => {
+				let tags = account.tags.map((tag) => tag.name);
+
+				// Check if some tag is in selectedAccountTagsSet
+				return tags.some((tag) => selectedAccountTagsSet.has(tag));
+			});
+		}
+
+		if (selectedProfileTagsSet.size > 0 && dropdownStatus2) {
+			filteredAccounts = filteredAccounts.filter((account) => {
+				let profileTags = account.profile.tags.map((tag) => tag.name);
+
+				// Check if some tag is in selectedProfileTagsSet
+				return profileTags.some((tag) => selectedProfileTagsSet.has(tag));
+			});
+		}
+
+		predictedTaskCount = filteredAccounts.length;
+	}
+
+	const saveButtonText = () => {
+		if (isDuplicating) return 'Duplicate';
+		if (isEditing) return 'Edit';
+		return 'Save';
+	};
 </script>
 
 <h5 style="margin-bottom: 20px;">{isEditing ? 'Edit Tasks' : 'Create Tasks'}</h5>
@@ -530,7 +563,7 @@
 		size="lg"
 		icon={faSave}
 		onclick={handleSaveClicked}
-		isLoading={$isLoading['saveTasks']}>Save</Button
+		isLoading={$isLoading['saveTasks']}>{saveButtonText()} {predictedTaskCount} tasks</Button
 	>
 </div>
 

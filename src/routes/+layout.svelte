@@ -12,6 +12,7 @@
 		selectedTags,
 		shiftPressed,
 		sidebarCollapsed,
+		sortState,
 		validAccessToken,
 		verboseTasks
 	} from '../datastore';
@@ -57,7 +58,8 @@
 		($filteredTasks.length > 0 && $filteredTasks.length < $verboseTasks.length) ||
 		$selectedTags.length > 0 ||
 		$selectedState != '' ||
-		$searchValue != ''
+		$searchValue != '' ||
+		$sortState.column != null
 	) {
 		filterOn = true;
 	} else {

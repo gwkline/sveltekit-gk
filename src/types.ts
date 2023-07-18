@@ -362,3 +362,8 @@ export type SizePresets = {
 		[key: string]: string[];
 	};
 };
+
+export type SortState = {
+	column: string | null;
+	direction: -1 | 0 | 1;
+};

@@ -3,7 +3,6 @@
 	import Button from '$lib/Button.svelte';
 	import Input from '$lib/Input.svelte';
 	import Toggle from '$lib/Toggle.svelte';
-	import CreateTasksModalHelper from './TaskModalHelper.svelte';
 	import {
 		checkedCheckoutTasks,
 		verboseTasks,
@@ -21,8 +20,11 @@
 		faPlus
 	} from '@fortawesome/free-solid-svg-icons';
 	import { makeRequest } from '../../helpers';
-	import type { Settings, Task } from '../../types';
+	import type { HeaderConfigType, Settings, Task } from '../../types';
 	import ConfirmationModal from '$lib/ConfirmationModal.svelte';
+	import TaskModalHelper from './TaskModalHelper.svelte';
+
+	export let headerConfig: HeaderConfigType<Task>;
 
 	let showModal = false;
 	let showConfirmationModal = false;
@@ -215,7 +217,7 @@
 	</div>
 	<div class="button-row">
 		<div class="button-group left-button-group">
-			<Search size="md" />
+			<Search size="md" {headerConfig} />
 			<div class="toggle-container">
 				<Toggle bind:checked={$showTags} />
 				<span class="toggle-label">Show tags</span>
@@ -256,7 +258,7 @@
 {/if}
 
 {#if showModal}
-	<CreateTasksModalHelper bind:showModal bind:isEditing bind:isDuplicating />
+	<TaskModalHelper bind:showModal bind:isEditing bind:isDuplicating />
 {/if}
 
 <style>

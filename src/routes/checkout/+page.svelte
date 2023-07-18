@@ -128,7 +128,7 @@
 </script>
 
 <StatusBar />
-<Nav />
+<Nav {headerConfig} />
 {#if $showTags} <Tags /> {/if}
 <div class="container">
 	<Table tableData={filterOn ? $filteredTasks : $verboseTasks} {headerConfig} />

@@ -1,9 +1,17 @@
 <script lang="ts">
 	import Checkbox from './Checkbox.svelte';
-	import { checkedAllCheckoutTasks, checkedCheckoutTasks, verboseTasks } from '../datastore';
+	import {
+		checkedAllCheckoutTasks,
+		checkedCheckoutTasks,
+		verboseTasks,
+		sortState
+	} from '../datastore';
+	import { faSort, faSortDown, faSortUp, faUnsorted } from '@fortawesome/free-solid-svg-icons';
+	import Fa from 'svelte-fa';
 	export let headers: string[];
-
 	export let store = verboseTasks;
+
+	let checked = $checkedAllCheckoutTasks;
 
 	const updateCheckedAll = (event: CustomEvent) => {
 		checkedAllCheckoutTasks.set(event.detail.checked);
@@ -16,7 +24,23 @@
 		}
 	};
 
-	let checked = $checkedAllCheckoutTasks;
+	const updateSortState = (column: string) => {
+		sortState.update((currentState) => {
+			let newDirection = 1;
+			if (currentState.column === column) {
+				// Click on same column
+				if (currentState.direction === 1) {
+					// Change direction if currently ascending
+					newDirection = -1;
+				} else if (currentState.direction === -1) {
+					// Remove sorting if currently descending
+					newDirection = 0;
+					column = null;
+				}
+			}
+			return { column: column, direction: newDirection };
+		});
+	};
 </script>
 
 <thead>
@@ -25,7 +49,18 @@
 			<Checkbox {checked} on:change={updateCheckedAll} />
 		</th>
 		{#each headers as columnHeading}
-			<th class="column-heading">{columnHeading}</th>
+			<th class="column-heading" on:click={() => updateSortState(columnHeading)}>
+				{columnHeading}
+				<span class="icon-container">
+					{#if $sortState.column === columnHeading && $sortState.direction === 1}
+						<Fa icon={faSortUp} />
+					{:else if $sortState.column === columnHeading && $sortState.direction === -1}
+						<Fa icon={faSortDown} />
+					{:else}
+						<Fa icon={faUnsorted} />
+					{/if}
+				</span>
+			</th>
 		{/each}
 	</tr>
 </thead>
@@ -66,5 +101,9 @@
 	.column-heading {
 		text-align: start;
 		padding-left: 10px;
+	}
+
+	.icon-container {
+		margin-left: 5px;
 	}
 </style>

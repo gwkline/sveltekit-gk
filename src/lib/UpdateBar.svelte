@@ -16,5 +16,8 @@
 		justify-content: center;
 		color: var(--off-black);
 		font-size: 12px;
+		position: absolute;
+		top: 0;
+		z-index: 20;
 	}
 </style>

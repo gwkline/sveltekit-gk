@@ -8,6 +8,8 @@
 	export let showModal: boolean = false;
 	export let closeModal: () => void = () => {
 		showModal = false;
+		isDuplicating = false;
+		isEditing = false;
 	};
 	export let isEditing = false;
 	export let isDuplicating = false;
