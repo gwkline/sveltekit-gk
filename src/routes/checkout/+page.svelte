@@ -1,7 +1,11 @@
 <script lang="ts">
 	import Nav from './Nav.svelte';
+	import Tags from '$lib/Tags.svelte';
 	import Table from '$lib/Table.svelte';
+	import TableRow from '../../lib/TableRow.svelte';
 	import StatusBar from './StatusBar.svelte';
+	import { makeRequest } from '../../helpers';
+	import { browser } from '$app/environment';
 	import { onMount, onDestroy } from 'svelte';
 	import {
 		verboseTasks,
@@ -17,15 +21,11 @@
 		checkedAllCheckoutTasks,
 		checkedCheckoutTasks
 	} from '../../datastore';
-	import { makeRequest } from '../../helpers';
 	import type { Task, EventData, HeaderConfigType, TableRowType } from '../../types';
-	import Tags from '$lib/Tags.svelte';
-	import { browser } from '$app/environment';
 
 	let eventSource: EventSource;
 	let tableData: TableRowType[] = [];
 	let tableIds: number[] = [];
-	let filterOn: boolean;
 	let headers: string[] = [];
 	let headerConfig: HeaderConfigType<Task> = {
 		SKU: (task: Task) => task?.product?.product_id ?? '',
@@ -88,14 +88,9 @@
 		}
 	});
 
-	if (Object.keys($settings).length === 0) {
-		let method = 'get';
-		let url = 'http://127.0.0.1:23432/settings';
-
-		makeRequest(method, url, null, (response) => {
-			settings.set(response.data);
-		});
-	}
+	makeRequest('get', 'http://127.0.0.1:23432/settings', null, (response) => {
+		settings.set(response.data);
+	});
 
 	makeRequest('get', 'http://127.0.0.1:23432/tasks?type=checkout', null, (response) => {
 		let data = response.data;
@@ -149,17 +144,6 @@
 			checkedCheckoutTasks.set([]);
 		}
 	};
-
-	$: if (
-		($filteredTasks.length > 0 && $filteredTasks.length < $verboseTasks.length) ||
-		$selectedTags.length > 0 ||
-		$selectedState != '' ||
-		$searchValue != ''
-	) {
-		filterOn = true;
-	} else {
-		filterOn = false;
-	}
 
 	$: {
 		let filtered = $verboseTasks.filter((task) => {
@@ -240,7 +224,12 @@
 		checkedAll={$checkedAllCheckoutTasks}
 		on:sort={updateSortState}
 		on:checkedAll={updateCheckedAll}
-	/>
+		let:row
+		let:index
+		let:itemId
+	>
+		<TableRow {row} {index} {itemId} />
+	</Table>
 </div>
 
 <style>

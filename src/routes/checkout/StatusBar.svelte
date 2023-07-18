@@ -1,4 +1,5 @@
 <script lang="ts">
+	import Fa from 'svelte-fa';
 	import {
 		faFlag,
 		faHourglassHalf,
@@ -10,7 +11,6 @@
 		faListOl
 	} from '@fortawesome/free-solid-svg-icons';
 	import { stateColors, verboseTasks, selectedState } from '../../datastore';
-	import Fa from 'svelte-fa';
 	import type { State, Task } from '../../types';
 
 	// Array of states in the desired order

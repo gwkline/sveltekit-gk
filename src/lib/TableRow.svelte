@@ -28,7 +28,7 @@
 
 	export let index: number | null;
 	export let row: TableRowType;
-	export let id: number;
+	export let itemId: number;
 
 	let showModal = false;
 	let isEditing = false;
@@ -61,7 +61,7 @@
 	};
 
 	$: {
-		let thisTask = $verboseTasks.find((task) => task['id'] === id);
+		let thisTask = $verboseTasks.find((task) => task['id'] === itemId);
 		if (thisTask) {
 			state = thisTask['state'];
 			size = thisTask['product']['size'];
@@ -73,13 +73,13 @@
 
 	let checked = false;
 	$: {
-		checked = $checkedCheckoutTasks.includes(id);
+		checked = $checkedCheckoutTasks.includes(itemId);
 	}
 
 	const checkForShift = () => {
 		if (
 			$shiftPressed &&
-			$lastCheckedCheckoutTasks === id &&
+			$lastCheckedCheckoutTasks === itemId &&
 			$secondLastCheckedCheckoutTasks !== null
 		) {
 			let start = Math.min($lastCheckedCheckoutTasks, $secondLastCheckedCheckoutTasks);
@@ -98,7 +98,7 @@
 	};
 
 	const handleClick = (passedIndex?: number) => {
-		const currentIndex = typeof passedIndex !== 'undefined' ? passedIndex : id;
+		const currentIndex = typeof passedIndex !== 'undefined' ? passedIndex : itemId;
 		if (!currentIndex || typeof currentIndex === 'undefined') return;
 
 		$secondLastCheckedCheckoutTasks = $lastCheckedCheckoutTasks;
