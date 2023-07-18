@@ -1,7 +1,7 @@
 import { browser } from '$app/environment';
 import { writable } from 'svelte/store';
 import type { Writable } from 'svelte/store';
-import type { Settings, Task, Account, Schedule, SizePresets, SortState } from './types';
+import type { Settings, Task, Account, Schedule, SizePresets, SortState, State } from './types';
 import { seedAccounts, seedSettings, seedTasks } from './seedData';
 
 // Create a store that syncs with localStorage
@@ -46,7 +46,7 @@ export const networkError = persistentStore('networkError', false);
 
 export const searchValue = persistentStore('searchValue', '');
 export const selectedTags = persistentStore<string[]>('selectedTags', []);
-export const selectedState = persistentStore('selectedState', '');
+export const selectedState = persistentStore<State | ''>('selectedState', '');
 export const sortState = persistentStore<SortState>('sortState', {
 	column: null,
 	direction: 0 // 0 = not sorted, 1 = ascending, -1 = descending
@@ -56,43 +56,7 @@ export const settings = persistentStore<Settings>('settings', seedSettings);
 export const accounts = persistentStore<Account[]>('accounts', seedAccounts);
 export const verboseTasks = persistentStore<Task[]>('verboseTasks', seedTasks);
 export const filteredTasks = persistentStore<Task[]>('filteredTasks', []);
-
 export const schedules = persistentStore<Schedule[]>('schedules', []);
-
-export const checkedCheckoutTasks = persistentStore<number[]>('checkedCheckoutTasks', []);
-export const checkedAllCheckoutTasks = persistentStore('checkedAllCheckoutTasks', false);
-export const lastCheckedCheckoutTasks = persistentStore<number | null>(
-	'lastCheckedCheckoutTasks',
-	null
-);
-export const secondLastCheckedCheckoutTasks = persistentStore<number | null>(
-	'secondLastCheckedCheckoutTasks',
-	null
-);
-
-export const checkoutSettings = persistentStore('checkoutSettings', {
-	browserType: 'Default',
-	retryMode: 'Requeue',
-	retryNonWinner: false,
-	retryDeclines: false,
-	experimentalMode: false,
-	useAccountTags: false,
-	specifyAccountsByAccountTag: false,
-	specifyAccountsByProfileTag: false
-});
-
-// Define color mapping
-export const stateColors = {
-	Ready: 'var(--light-gray-2)',
-	Queued: 'var(--warning-yellow)',
-	Starting: 'var(--primary-hover)',
-	Running: 'var(--primary)',
-	Waiting: 'purple',
-	Error: 'var(--danger-red)',
-	Entered: 'var(--success-green)',
-	Winning: '#00801a'
-};
-
 export const sizePresets = persistentStore<SizePresets>('sizePresets', {
 	mens: {
 		"Weighted w/ 6's (20)": [
@@ -309,6 +273,40 @@ export const sizePresets = persistentStore<SizePresets>('sizePresets', {
 	},
 	toddler: { 'Max Cop (10)': ['1C', '2C', '3C', '4C', '5C', '6C', '7C', '8C', '9C', '10C'] }
 });
+
+export const checkedCheckoutTasks = persistentStore<number[]>('checkedCheckoutTasks', []);
+export const checkedAllCheckoutTasks = persistentStore('checkedAllCheckoutTasks', false);
+export const lastCheckedCheckoutTasks = persistentStore<number | null>(
+	'lastCheckedCheckoutTasks',
+	null
+);
+export const secondLastCheckedCheckoutTasks = persistentStore<number | null>(
+	'secondLastCheckedCheckoutTasks',
+	null
+);
+
+export const checkoutSettings = persistentStore('checkoutSettings', {
+	browserType: 'Default',
+	retryMode: 'Requeue',
+	retryNonWinner: false,
+	retryDeclines: false,
+	experimentalMode: false,
+	useAccountTags: false,
+	specifyAccountsByAccountTag: false,
+	specifyAccountsByProfileTag: false
+});
+
+// Define color mapping
+export const stateColors = {
+	Ready: 'var(--light-gray-2)',
+	Queued: 'var(--warning-yellow)',
+	Starting: 'var(--primary-hover)',
+	Running: 'var(--primary)',
+	Waiting: 'purple',
+	Error: 'var(--danger-red)',
+	Entered: 'var(--success-green)',
+	Winning: '#00801a'
+};
 
 export const validAccessToken = persistentStore('validAccessToken', false);
 export const accessTokenExpiration = persistentStore('accessTokenExpiration', -1);

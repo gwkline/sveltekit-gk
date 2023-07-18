@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Nav from './Nav.svelte';
+	import CheckoutNav from './CheckoutNav.svelte';
 	import Tags from '$lib/Tags.svelte';
 	import Table from '$lib/Table.svelte';
 	import TableRow from '../../lib/TableRow.svelte';
@@ -134,14 +134,22 @@
 		});
 	};
 
-	const updateCheckedAll = (event: CustomEvent) => {
-		checkedAllCheckoutTasks.set(event.detail.checked);
+	const updateCheckedAll = (e: CustomEvent) => {
+		checkedAllCheckoutTasks.set(e.detail.checked);
 
-		if (event.detail.checked) {
+		if (e.detail.checked) {
 			let allIds = $verboseTasks.map((task) => task.id);
 			checkedCheckoutTasks.set(allIds);
 		} else {
 			checkedCheckoutTasks.set([]);
+		}
+	};
+
+	const updateSelectedState = (e: CustomEvent) => {
+		if ($selectedState === e.detail) {
+			selectedState.set('');
+		} else {
+			selectedState.set(e.detail);
 		}
 	};
 
@@ -212,8 +220,12 @@
 	}
 </script>
 
-<StatusBar />
-<Nav />
+<StatusBar
+	on:selectedState={updateSelectedState}
+	tasks={$filteredTasks}
+	selectedState={$selectedState}
+/>
+<CheckoutNav />
 {#if $showTags} <Tags /> {/if}
 <div class="container">
 	<Table

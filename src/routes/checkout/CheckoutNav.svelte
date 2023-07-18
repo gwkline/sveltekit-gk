@@ -3,6 +3,10 @@
 	import Button from '$lib/Button.svelte';
 	import Input from '$lib/Input.svelte';
 	import Toggle from '$lib/Toggle.svelte';
+	import ConfirmationModal from '$lib/ConfirmationModal.svelte';
+	import TaskModalHelper from './TaskModalHelper.svelte';
+	import { makeRequest } from '../../helpers';
+	import type { Settings, Task } from '../../types';
 	import {
 		checkedCheckoutTasks,
 		verboseTasks,
@@ -19,10 +23,9 @@
 		faCopy,
 		faPlus
 	} from '@fortawesome/free-solid-svg-icons';
-	import { makeRequest } from '../../helpers';
-	import type { HeaderConfigType, Settings, Task } from '../../types';
-	import ConfirmationModal from '$lib/ConfirmationModal.svelte';
-	import TaskModalHelper from './TaskModalHelper.svelte';
+
+	type states = 'start' | 'stop' | 'delete' | 'duplicate';
+	type settings = 'max_active_tasks' | 'max_starting_tasks';
 
 	let showModal = false;
 	let showConfirmationModal = false;
@@ -31,8 +34,6 @@
 	let buttonTextCount: string;
 	let isEditing = false;
 	let isDuplicating = false;
-
-	type states = 'start' | 'stop' | 'delete' | 'duplicate';
 
 	const getTaskIds = (all: boolean) => {
 		return all ? $verboseTasks.map((task) => task.id) : $checkedCheckoutTasks;
@@ -108,7 +109,6 @@
 		showConfirmationModal = false;
 	};
 
-	type settings = 'max_active_tasks' | 'max_starting_tasks';
 	const saveSettings = (settingKey: settings, value: string) => {
 		settings.update((currentSettings) => {
 			let newSettings = currentSettings as Settings;
@@ -126,8 +126,6 @@
 
 	$: {
 		let items = $checkedCheckoutTasks;
-		//remove -1 from items
-		items = items.filter((item) => item != -1);
 		if ($shiftPressed || items.length == 0) {
 			buttonTextCount = 'All';
 		} else if (items.length == $verboseTasks.length) {
