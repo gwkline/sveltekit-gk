@@ -61,6 +61,11 @@
 	const clearAll = () => {
 		selectedTags.set([]); // Clears all selected tags
 	};
+	/* ------------------------------ */
+	const deleteSelectedTags = () => {
+		$selectedTags.forEach((tag) => removeTag(tag));
+		selectedTags.set([]); // Clear selection after deleting
+	};
 	const removeTag = (tag: string) => {
 		let tasksToUpdate: Task[] = [];
 
@@ -85,6 +90,11 @@
 		if (tasksToUpdate.length > 0) {
 			makeRequest('put', 'http://127.0.0.1:23432/tasks?type=checkout', tasksToUpdate);
 		}
+	};
+
+	const deleteSelectedTasks = () => {
+		$selectedTags.forEach((tag) => removeTaskWithTag(tag));
+		selectedTags.set([]); // Clear selection after deleting
 	};
 	const removeTaskWithTag = (tag: string) => {
 		let taskIdsToRemove: number[] = [];
@@ -115,14 +125,8 @@
 			);
 		}
 	};
-	const deleteSelectedTags = () => {
-		$selectedTags.forEach((tag) => removeTag(tag));
-		selectedTags.set([]); // Clear selection after deleting
-	};
-	const deleteSelectedTasks = () => {
-		$selectedTags.forEach((tag) => removeTaskWithTag(tag));
-		selectedTags.set([]); // Clear selection after deleting
-	};
+
+	/* ------------------------------ */
 	const saveEditedTags = () => {
 		// Do not proceed with the function if the editedText is empty
 		if (editedText.trim() === '') return;
@@ -167,6 +171,7 @@
 		editedText = '';
 		isEditing = true;
 	};
+
 	const handleKeydown = (event: KeyboardEvent) => {
 		if (isEditing) {
 			if (event.key === 'Enter') {
@@ -250,16 +255,13 @@
 		newTagText = '';
 		isAddingTag = false;
 	};
-	const selectInput = (event: { target: any }) => {
-		const input = event.target;
-		if ('select' in input) {
-			input.select();
-		}
-	};
+
+	/* ------------------------------ */
 	const saveInput = (event: { target: any }) => {
 		const input = event.target;
 		newTagText = input.value;
 	};
+
 	$: {
 		allTags = $verboseTasks
 			.map((task) => task.tags)
@@ -326,7 +328,6 @@
 							on:input={saveInput}
 							on:keydown={(e) => e.key === 'Enter' && addTagToTasks()}
 							on:blur={addTagToTasks}
-							on:focus|stopPropagation={selectInput}
 						/>
 						<Button
 							icon={faSave}
@@ -386,7 +387,6 @@
 							on:input={saveInput}
 							on:keydown={(e) => e.key === 'Enter' && addAdditionalTag()}
 							on:blur={addAdditionalTag}
-							on:focus|stopPropagation={selectInput}
 						/>
 						<Button
 							icon={faSave}
@@ -436,7 +436,6 @@
 							e.key === 'Enter' && saveEditedTags();
 						}}
 						on:blur={saveEditedTags}
-						on:focus|stopPropagation={selectInput}
 					/>
 				{:else}
 					<div class="tag-text">
