@@ -1,16 +1,7 @@
 import { browser } from '$app/environment';
 import { writable } from 'svelte/store';
 import type { Writable } from 'svelte/store';
-import type {
-	Settings,
-	Task,
-	Account,
-	Schedule,
-	SizePresets,
-	SortState,
-	State,
-	ActivityTask
-} from './types';
+import type { Settings, Task, Account, Schedule, SizePresets, SortState, State } from './types';
 import { seedAccounts, seedSettings, seedTasks } from './seedData';
 
 // Create a store that syncs with localStorage
@@ -35,29 +26,17 @@ const persistentStore = <T>(key: string, startValue: T): Writable<T> => {
 	return store;
 };
 
-export const editSku = writable(false);
-export const editPreferredSizeInput = writable(false);
-export const editRandomSizeInput = writable(false);
-export const editScheduleDropdown = writable(false);
-export const editBrowserType = writable(false);
-export const editRetryMode = writable(false);
-export const editRetryNonWinner = writable(false);
-export const editRetryDeclines = writable(false);
-export const editExperimentalMode = writable(false);
+export const sidebarCollapsed = persistentStore('sidebarCollapsed', true);
+export const showTags = persistentStore('showTags', false);
 
 export const isLoading = writable<Record<string, boolean>>({});
-export const sidebarCollapsed = persistentStore('sidebarCollapsed', true);
-
-export const shiftPressed = persistentStore('shiftPressed', false);
-export const showTags = persistentStore('showTags', false);
-export const accessDenied = persistentStore('accessDenied', false);
-export const networkError = persistentStore('networkError', false);
+export const shiftPressed = writable(false);
+export const accessDenied = writable(false);
+export const networkError = writable(false);
 
 export const searchValue = persistentStore('searchValue', '');
 export const selectedTags = persistentStore<string[]>('selectedTags', []);
 export const selectedState = persistentStore<State | ''>('selectedState', '');
-export const selectedActivityTags = persistentStore<string[]>('selectedActivityTags', []);
-export const selectedActivityState = persistentStore<State | ''>('selectedActivityState', '');
 export const sortState = persistentStore<SortState>('sortState', {
 	column: null,
 	direction: 0 // 0 = not sorted, 1 = ascending, -1 = descending
@@ -66,9 +45,8 @@ export const sortState = persistentStore<SortState>('sortState', {
 export const settings = persistentStore<Settings>('settings', seedSettings);
 export const accounts = persistentStore<Account[]>('accounts', seedAccounts);
 export const verboseTasks = persistentStore<Task[]>('verboseTasks', seedTasks);
+export const verboseActivityTasks = persistentStore<Task[]>('verboseActivityTasks', seedTasks);
 export const filteredTasks = persistentStore<Task[]>('filteredTasks', []);
-export const verboseActivityTasks = persistentStore<ActivityTask[]>('verboseActivityTasks', []);
-export const filteredActivityTasks = persistentStore<ActivityTask[]>('filteredActivityTasks', []);
 export const schedules = persistentStore<Schedule[]>('schedules', []);
 export const sizePresets = persistentStore<SizePresets>('sizePresets', {
 	mens: {
@@ -297,7 +275,6 @@ export const secondLastCheckedCheckoutTasks = persistentStore<number | null>(
 	'secondLastCheckedCheckoutTasks',
 	null
 );
-
 export const checkoutSettings = persistentStore('checkoutSettings', {
 	browserType: 'Default',
 	retryMode: 'Requeue',

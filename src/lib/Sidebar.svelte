@@ -39,7 +39,7 @@
 			page: 'accountActivity',
 			text: 'Account Activity',
 			icon: faPersonRunning,
-			disabled: true
+			disabled: false
 		},
 		{
 			page: 'accountCreation',

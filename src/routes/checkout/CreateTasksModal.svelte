@@ -13,16 +13,7 @@
 		isLoading,
 		checkoutSettings,
 		verboseTasks,
-		checkedCheckoutTasks,
-		editSku,
-		editPreferredSizeInput,
-		editRandomSizeInput,
-		editScheduleDropdown,
-		editBrowserType,
-		editRetryMode,
-		editRetryNonWinner,
-		editRetryDeclines,
-		editExperimentalMode
+		checkedCheckoutTasks
 	} from '../../datastore';
 	import type { Account, OutboundTask, Tag } from '../../types';
 
@@ -41,6 +32,16 @@
 	export let isEditing = false;
 	export let isDuplicating = false;
 
+	let editSku: boolean = false;
+	let editPreferredSizeInput: boolean = false;
+	let editRandomSizeInput: boolean = false;
+	let editScheduleDropdown: boolean = false;
+	let editBrowserType: boolean = false;
+	let editRetryMode: boolean = false;
+	let editRetryNonWinner: boolean = false;
+	let editRetryDeclines: boolean = false;
+	let editExperimentalMode: boolean = false;
+
 	let allAccountTags: string[];
 	let allProfileTags: string[];
 	let selectedAccountTags: string[] = [];
@@ -48,14 +49,6 @@
 	let predictedTaskCount: number | string = 0;
 	let scheduleNames = ['None', ...$schedules.map((schedule) => schedule.name)];
 	let scheduleDropdown = 'None';
-
-	const startEditing = () => {
-		isEditing = true;
-	};
-
-	const endEditing = () => {
-		isEditing = false;
-	};
 
 	const saveTasks = () => {
 		let preferredSanitizedSizes = preferredSizeInput.split(',').map((item) => item.trim());
@@ -125,38 +118,38 @@
 			let iter = 0;
 			return tasks.map((task) => {
 				if ($checkedCheckoutTasks.length === 0 || $checkedCheckoutTasks.includes(task.id)) {
-					if ($editSku) {
+					if (editSku) {
 						task.product.product_id = sku;
 					}
-					if ($editPreferredSizeInput) {
+					if (editPreferredSizeInput) {
 						let preferredSanitizedSizes = preferredSizeInput.split(',').map((item) => item.trim());
 						task.product.size = preferredSanitizedSizes[iter % preferredSanitizedSizes.length];
 					}
-					if ($editRandomSizeInput) {
+					if (editRandomSizeInput) {
 						let randomSanitizedSizes = randomSizeInput.split(',').map((item) => item.trim());
 						task.product.allowed_random_sizes = randomSanitizedSizes;
 						task.product.enable_random_sizing = randomSanitizedSizes.length > 0;
 					}
-					if ($editScheduleDropdown) {
+					if (editScheduleDropdown) {
 						let scheduleId =
 							scheduleDropdown !== 'None'
 								? $schedules.find((schedule) => schedule.name === scheduleDropdown)?.id || 0
 								: 0;
 						task.schedule_id = scheduleId;
 					}
-					if ($editBrowserType) {
+					if (editBrowserType) {
 						task.browser_type = $checkoutSettings.browserType;
 					}
-					if ($editRetryMode) {
+					if (editRetryMode) {
 						task.retry_mode = $checkoutSettings.retryMode;
 					}
-					if ($editRetryNonWinner) {
+					if (editRetryNonWinner) {
 						task.retry_non_winner = $checkoutSettings.retryNonWinner;
 					}
-					if ($editRetryDeclines) {
+					if (editRetryDeclines) {
 						task.retry_on_decline = $checkoutSettings.retryDeclines;
 					}
-					if ($editExperimentalMode) {
+					if (editExperimentalMode) {
 						task.experimental_mode = $checkoutSettings.experimentalMode;
 					}
 				}
@@ -176,38 +169,38 @@
 				task.account = null;
 				task.id = 0;
 
-				if ($editSku) {
+				if (editSku) {
 					task.product.product_id = sku;
 				}
-				if ($editPreferredSizeInput) {
+				if (editPreferredSizeInput) {
 					let preferredSanitizedSizes = preferredSizeInput.split(',').map((item) => item.trim());
 					task.product.size = preferredSanitizedSizes[iter % preferredSanitizedSizes.length];
 				}
-				if ($editRandomSizeInput) {
+				if (editRandomSizeInput) {
 					let randomSanitizedSizes = randomSizeInput.split(',').map((item) => item.trim());
 					task.product.allowed_random_sizes = randomSanitizedSizes;
 					task.product.enable_random_sizing = randomSanitizedSizes.length > 0;
 				}
-				if ($editScheduleDropdown) {
+				if (editScheduleDropdown) {
 					let scheduleId =
 						scheduleDropdown !== 'None'
 							? $schedules.find((schedule) => schedule.name === scheduleDropdown)?.id || 0
 							: 0;
 					task.schedule_id = scheduleId;
 				}
-				if ($editBrowserType) {
+				if (editBrowserType) {
 					task.browser_type = $checkoutSettings.browserType;
 				}
-				if ($editRetryMode) {
+				if (editRetryMode) {
 					task.retry_mode = $checkoutSettings.retryMode;
 				}
-				if ($editRetryNonWinner) {
+				if (editRetryNonWinner) {
 					task.retry_non_winner = $checkoutSettings.retryNonWinner;
 				}
-				if ($editRetryDeclines) {
+				if (editRetryDeclines) {
 					task.retry_on_decline = $checkoutSettings.retryDeclines;
 				}
-				if ($editExperimentalMode) {
+				if (editExperimentalMode) {
 					task.experimental_mode = $checkoutSettings.experimentalMode;
 				}
 				updatedTasks.push(task);
@@ -339,7 +332,7 @@
 <div class="row">
 	<div class="component-wrapper sku">
 		{#if isEditing}
-			<Toggle bind:checked={$editSku} style="margin-right: 10px; margin-bottom: 8px;" />
+			<Toggle bind:checked={editSku} style="margin-right: 10px; margin-bottom: 8px;" />
 		{/if}
 		<Input
 			placeholder="Enter SKU"
@@ -347,7 +340,7 @@
 			title="SKU"
 			style="height: 36px;"
 			variant="transparent"
-			disabled={isEditing && !$editSku ? true : false}
+			disabled={isEditing && !editSku ? true : false}
 		/>
 		<Button
 			icon={faSearch}
@@ -355,12 +348,12 @@
 			onclick={() => {
 				currentModal = ModalType.Launches;
 			}}
-			disabled={isEditing && !$editSku ? true : false}
+			disabled={isEditing && !editSku ? true : false}
 		/>
 	</div>
 	<div class="component-wrapper browser">
 		{#if isEditing}
-			<Toggle bind:checked={$editBrowserType} style="margin-right: 10px; margin-bottom: 8px;" />
+			<Toggle bind:checked={editBrowserType} style="margin-right: 10px; margin-bottom: 8px;" />
 		{/if}
 		<Dropdown
 			title="Browser Type"
@@ -369,14 +362,14 @@
 			options={['Default', 'Chrome', 'Chrome Beta', 'Edge', 'Brave']}
 			bind:value={$checkoutSettings.browserType}
 			size="lg"
-			disabled={isEditing && !$editBrowserType ? true : false}
+			disabled={isEditing && !editBrowserType ? true : false}
 		/>
 	</div>
 </div>
 <div class="row inputs">
 	<div class="component-wrapper retryMode">
 		{#if isEditing}
-			<Toggle bind:checked={$editRetryMode} style="margin-right: 10px; margin-bottom: 8px;" />
+			<Toggle bind:checked={editRetryMode} style="margin-right: 10px; margin-bottom: 8px;" />
 		{/if}
 		<Dropdown
 			title="Retry Mode"
@@ -385,15 +378,12 @@
 			options={['Requeue', 'Restart']}
 			bind:value={$checkoutSettings.retryMode}
 			size="lg"
-			disabled={isEditing && !$editRetryMode ? true : false}
+			disabled={isEditing && !editRetryMode ? true : false}
 		/>
 	</div>
 	<div class="component-wrapper schedule">
 		{#if isEditing}
-			<Toggle
-				bind:checked={$editScheduleDropdown}
-				style="margin-right: 10px; margin-bottom: 8px;"
-			/>
+			<Toggle bind:checked={editScheduleDropdown} style="margin-right: 10px; margin-bottom: 8px;" />
 		{/if}
 		<Dropdown
 			title="Schedule"
@@ -402,7 +392,7 @@
 			options={scheduleNames}
 			bind:value={scheduleDropdown}
 			size="lg"
-			disabled={isEditing && !$editScheduleDropdown ? true : false}
+			disabled={isEditing && !editScheduleDropdown ? true : false}
 		/>
 	</div>
 </div>
@@ -410,7 +400,7 @@
 	<div class="component-wrapper sizeRow">
 		{#if isEditing}
 			<Toggle
-				bind:checked={$editPreferredSizeInput}
+				bind:checked={editPreferredSizeInput}
 				style="margin-right: 10px; margin-bottom: 8px;"
 			/>
 		{/if}
@@ -420,7 +410,7 @@
 			bind:value={preferredSizeInput}
 			style="height: 36px; width: 100%;"
 			variant="transparent"
-			disabled={isEditing && !$editPreferredSizeInput ? true : false}
+			disabled={isEditing && !editPreferredSizeInput ? true : false}
 		/>
 		<Button
 			icon={faStar}
@@ -428,7 +418,7 @@
 				currentModal = ModalType.Size;
 			}}
 			style="margin: 0 0 0 10px;"
-			disabled={isEditing && !$editPreferredSizeInput ? true : false}
+			disabled={isEditing && !editPreferredSizeInput ? true : false}
 		/>
 	</div>
 </div>
@@ -437,7 +427,7 @@
 		<div class="component-wrapper">
 			{#if isEditing}
 				<Toggle
-					bind:checked={$editRandomSizeInput}
+					bind:checked={editRandomSizeInput}
 					style="margin-right: 10px; margin-bottom: 8px;"
 				/>
 			{/if}
@@ -447,7 +437,7 @@
 				bind:value={randomSizeInput}
 				style="height: 36px; width: 100%;"
 				variant="transparent"
-				disabled={isEditing && !$editRandomSizeInput ? true : false}
+				disabled={isEditing && !editRandomSizeInput ? true : false}
 			/>
 			<Button
 				icon={faStar}
@@ -455,7 +445,7 @@
 					currentModal = ModalType.Size;
 				}}
 				style="margin: 0 0 0 10px;"
-				disabled={isEditing && !$editRandomSizeInput ? true : false}
+				disabled={isEditing && !editRandomSizeInput ? true : false}
 			/>
 		</div>
 	</div>
@@ -465,24 +455,24 @@
 	<div class="component-wrapper checkboxWrapper">
 		<div class="component-wrapper checkbox">
 			{#if isEditing}
-				<Toggle bind:checked={$editRetryNonWinner} style="margin-right: 10px;" />
+				<Toggle bind:checked={editRetryNonWinner} style="margin-right: 10px;" />
 			{/if}
 			<Checkbox
 				option="$checkoutSettings.retryNonWinner"
 				bind:checked={$checkoutSettings.retryNonWinner}
-				disabled={isEditing && !$editRetryNonWinner ? true : false}
+				disabled={isEditing && !editRetryNonWinner ? true : false}
 			/>
 			<label for="$checkoutSettings.retryNonWinner"> Retry Non-Winner </label>
 		</div>
 		<div class="component-wrapper checkbox">
 			<div class="checkbox-wrapper">
 				{#if isEditing}
-					<Toggle bind:checked={$editRetryDeclines} style="margin-right: 10px;" />
+					<Toggle bind:checked={editRetryDeclines} style="margin-right: 10px;" />
 				{/if}
 				<Checkbox
 					option="$checkoutSettings.retryDeclines"
 					bind:checked={$checkoutSettings.retryDeclines}
-					disabled={isEditing && !$editRetryDeclines ? true : false}
+					disabled={isEditing && !editRetryDeclines ? true : false}
 				/>
 				<label for="$checkoutSettings.retryDeclines"> Retry Declines </label>
 			</div>
@@ -493,13 +483,13 @@
 	<div class="component-wrapper checkboxWrapper">
 		<div class="component-wrapper checkbox">
 			{#if isEditing}
-				<Toggle bind:checked={$editExperimentalMode} style="margin-right: 10px;" />
+				<Toggle bind:checked={editExperimentalMode} style="margin-right: 10px;" />
 			{/if}
 			<div class="checkbox-wrapper">
 				<Checkbox
 					option="$checkoutSettings.experimentalMode"
 					bind:checked={$checkoutSettings.experimentalMode}
-					disabled={isEditing && !$editExperimentalMode ? true : false}
+					disabled={isEditing && !editExperimentalMode ? true : false}
 				/>
 				<label for="$checkoutSettings.experimentalMode"> Experimental Mode </label>
 			</div>
