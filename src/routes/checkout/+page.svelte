@@ -2,8 +2,8 @@
 	import CheckoutNav from './CheckoutNav.svelte';
 	import Tags from '$lib/Tags.svelte';
 	import Table from '$lib/Table.svelte';
-	import TableRow from '../../lib/TableRow.svelte';
-	import StatusBar from './StatusBar.svelte';
+	import TableRow from '$lib/TableRow.svelte';
+	import StatusBar from '../../lib/StatusBar.svelte';
 	import { makeRequest } from '../../helpers';
 	import { browser } from '$app/environment';
 	import { onMount, onDestroy } from 'svelte';
@@ -36,6 +36,10 @@
 			task?.browser_type == 'Default' ? $settings?.browser ?? '' : task?.browser_type ?? '',
 		Status: (task: Task) => task?.status ?? ''
 	};
+
+	let allTags: string[] = [];
+	let tagsCount: { tag: string; count: number }[] = [];
+	let totalSelectedTasks: number = 0;
 
 	// On component mount
 	onMount(() => {
@@ -157,6 +161,178 @@
 		searchValue.set(e.detail);
 	};
 
+	const updateSelectedTags = (e: CustomEvent) => {
+		const tag: string | string[] = e.detail;
+		if (typeof tag === 'string') {
+			// if the tag is already selected, remove it from selectedTags
+			// otherwise, add it to selectedTags
+			const index = $selectedTags.indexOf(tag);
+			if (index > -1) {
+				selectedTags.set($selectedTags.filter((t) => t !== tag));
+			} else {
+				selectedTags.set([...$selectedTags, tag]);
+			}
+		} else {
+			// user wants to select all tags or no tags
+			selectedTags.set(tag);
+		}
+	};
+
+	const deleteSelectedTags = (e: CustomEvent) => {
+		$selectedTags.forEach((tag) => removeTag(tag));
+		selectedTags.set([]); // Clear selection after deleting
+	};
+
+	const deleteSelectedTasks = (e: CustomEvent) => {
+		$selectedTags.forEach((tag) => removeTaskWithTag(tag));
+		selectedTags.set([]); // Clear selection after deleting
+	};
+
+	const removeTaskWithTag = (tag: string) => {
+		let taskIdsToRemove: number[] = [];
+
+		verboseTasks.update((tasks) => {
+			return tasks.filter((task) => {
+				let taskHasTag = task.tags.some((t) => t.name === tag);
+				let removingNoTags = $selectedTags.includes('No Tags') && task.tags.length === 0;
+
+				if (taskHasTag || removingNoTags) {
+					// add task id to array of task ids to remove
+					taskIdsToRemove.push(task.id);
+					// filter out this task
+					return false;
+				}
+
+				// keep this task in the array
+				return true;
+			});
+		});
+
+		if (taskIdsToRemove.length > 0) {
+			makeRequest(
+				'delete',
+				'http://127.0.0.1:23432/tasks?type=checkout',
+				taskIdsToRemove,
+				() => {}
+			);
+		}
+	};
+
+	const removeTag = (tag: string) => {
+		let tasksToUpdate: Task[] = [];
+
+		verboseTasks.update((tasks) => {
+			return tasks.map((task) => {
+				// check if task contains the tag
+				let taskHasTag = task.tags.some((t) => t.name === tag);
+
+				if (taskHasTag) {
+					// remove the tag from this task
+					task.tags = task.tags.filter((t) => t.name !== tag);
+
+					// add task to array of tasks to update
+					tasksToUpdate.push(task);
+				}
+
+				// return the potentially modified task
+				return task;
+			});
+		});
+
+		if (tasksToUpdate.length > 0) {
+			makeRequest('put', 'http://127.0.0.1:23432/tasks?type=checkout', tasksToUpdate);
+		}
+	};
+
+	const updateTagNames = (e: CustomEvent) => {
+		// Do not proceed with the function if the editedText is empty
+		let editedText = e.detail;
+
+		let updatedTasks: Task[] = [];
+		verboseTasks.update((tasks) => {
+			return tasks.map((task) => {
+				let taskHasSelectedTag = task.tags.some((t) => $selectedTags.includes(t.name));
+
+				// If the "No Tags" tag is being edited and the task has no tags
+				if ($selectedTags.includes('No Tags') && task.tags.length === 0) {
+					// Add the new tag
+					task.tags.push({ name: editedText });
+
+					// Add the task to the updatedTasks array
+					updatedTasks.push(task);
+				}
+				// If the task has a selected tag
+				else if (taskHasSelectedTag) {
+					// Update the name of the tag
+					task.tags = task.tags.map((t) =>
+						$selectedTags.includes(t.name) ? { ...t, name: editedText } : t
+					);
+
+					// Add the task to the updatedTasks array
+					updatedTasks.push(task);
+				}
+
+				return task;
+			});
+		});
+
+		if (updatedTasks.length > 0) {
+			makeRequest('put', 'http://127.0.0.1:23432/tasks?type=checkout', updatedTasks);
+		}
+
+		selectedTags.set([]);
+	};
+
+	const addAdditionalTag = (e: CustomEvent) => {
+		let updatedTasks: Task[] = [];
+		let newTagText = e.detail;
+
+		verboseTasks.update((tasks) => {
+			return tasks.map((task) => {
+				let taskHasSelectedTag = task.tags.some((t) => $selectedTags.includes(t.name));
+
+				// If the "No Tags" tag is selected and the task has no tags
+				if ($selectedTags.includes('No Tags') && task.tags.length === 0) {
+					task.tags.push({ name: newTagText });
+					updatedTasks.push(task);
+				}
+
+				// If the task has a selected tag
+				if (taskHasSelectedTag) {
+					// Add the new tag to the task
+					task.tags.push({ name: newTagText });
+
+					// Add the task to the updatedTasks array
+					updatedTasks.push(task);
+				}
+
+				return task;
+			});
+		});
+
+		if (updatedTasks.length > 0) {
+			makeRequest('put', 'http://127.0.0.1:23432/tasks?type=checkout', updatedTasks);
+		}
+		selectedTags.set([]);
+	};
+
+	const addTagToTasks = (e: CustomEvent) => {
+		let newTagText = e.detail;
+		let updatedTasks: Task[] = [];
+		verboseTasks.update((tasks) => {
+			return tasks.map((task) => {
+				if ($checkedCheckoutTasks.includes(task.id)) {
+					task.tags.push({ name: newTagText });
+					updatedTasks.push(task);
+				}
+				return task;
+			});
+		});
+		if (updatedTasks.length > 0) {
+			makeRequest('put', 'http://127.0.0.1:23432/tasks?type=checkout', updatedTasks);
+		}
+	};
+
 	$: {
 		let filtered = $verboseTasks.filter((task) => {
 			// Keyword Search
@@ -222,6 +398,50 @@
 
 		tableData = tableDataShortenedTemp;
 	}
+
+	$: {
+		allTags = $verboseTasks
+			.map((task) => task.tags)
+			.flat()
+			.map((tag) => tag.name)
+			.filter((tag) => tag);
+
+		let uniqueTags = [...new Set(allTags)];
+
+		tagsCount = uniqueTags.map((tag) => {
+			return {
+				tag: tag,
+				count: allTags.filter((t) => t === tag).length
+			};
+		});
+
+		// Count the number of accounts without any tags
+		let noTagsCount = $verboseTasks.filter((account) => account.tags.length === 0).length;
+
+		// Add a "No Tags" tag if there are any accounts without tags
+		if (noTagsCount > 0) {
+			tagsCount.unshift({ tag: 'No Tags', count: noTagsCount });
+		}
+	}
+
+	$: {
+		// Get all tasks with selected tags, but don't count a task more than once
+		const selectedTasks = new Set();
+		if ($selectedTags.length > 0) {
+			$verboseTasks.forEach((task) => {
+				const taskTags = task.tags.map((t) => t.name);
+				if ($selectedTags.some((tag) => taskTags.includes(tag))) {
+					selectedTasks.add(task.id);
+				}
+
+				// If the "No Tags" tag is selected, add tasks that have no tags
+				if ($selectedTags.includes('No Tags') && task.tags.length === 0) {
+					selectedTasks.add(task.id);
+				}
+			});
+		}
+		totalSelectedTasks = selectedTasks.size;
+	}
 </script>
 
 <StatusBar
@@ -231,7 +451,18 @@
 />
 <CheckoutNav on:searchValue={updateSearchValue} searchValue={$searchValue} />
 {#if $showTags}
-	<Tags />
+	<Tags
+		{tagsCount}
+		totalSelectedItems={totalSelectedTasks}
+		selectedTags={$selectedTags}
+		checkedItems={$checkedCheckoutTasks}
+		on:selectTag={updateSelectedTags}
+		on:deleteSelectedTags={deleteSelectedTags}
+		on:deleteSelectedTasks={deleteSelectedTasks}
+		on:updateTagNames={updateTagNames}
+		on:addAdditionalTag={addAdditionalTag}
+		on:addTagToTasks={addTagToTasks}
+	/>
 {/if}
 <div class="container">
 	<Table

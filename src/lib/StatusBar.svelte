@@ -10,8 +10,8 @@
 		faClock,
 		faListOl
 	} from '@fortawesome/free-solid-svg-icons';
-	import { stateColors } from '../../datastore';
-	import type { State, Task } from '../../types';
+	import { stateColors } from '../datastore';
+	import type { State, Task } from '../types';
 	import { createEventDispatcher } from 'svelte';
 
 	export let tasks: Task[] = [];

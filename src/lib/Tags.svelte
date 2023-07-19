@@ -1,5 +1,7 @@
 <script lang="ts">
 	import Fa from 'svelte-fa';
+	import Button from './Button.svelte';
+	import { browser } from '$app/environment';
 	import {
 		faTimes,
 		faTrash,
@@ -8,168 +10,97 @@
 		faPlus,
 		faSave
 	} from '@fortawesome/free-solid-svg-icons';
-	import { verboseTasks, selectedTags, checkedCheckoutTasks } from '../datastore';
-	import { makeRequest } from '../helpers';
-	import { onMount, onDestroy } from 'svelte';
-	import Button from './Button.svelte';
-	import type { Task } from '../types';
+	import { onMount, onDestroy, createEventDispatcher } from 'svelte';
+
+	export let tagsCount: { tag: string; count: number }[] = [];
+	export let selectedTags: string[] = [];
+	export let checkedItems: number[] = [];
+	export let totalSelectedItems: number = 0;
 
 	type AddOrEdit = 'add' | 'edit';
 	type AddOrEditState = AddOrEdit | null;
 	let addOrEdit: AddOrEditState = null;
-	let allTags: string[];
-	let tagsCount: { tag: string; count: number }[];
 	let isEditing = false;
-	let editedText = '';
 	let isAddingTag = false;
+	let editedText = '';
 	let newTagText = '';
-	let totalSelectedTasks = 0;
+	const dispatch = createEventDispatcher();
 
 	onMount(() => {
 		window.addEventListener('keydown', handleKeydown as EventListener);
+
+		if (browser) {
+			// Listen for mouse click events outside of the tag to stop editing
+			window.addEventListener('mousedown', (event: MouseEvent) => {
+				const target = event.target as HTMLElement;
+				if (isEditing && !target?.classList?.contains('tag-edit-input') && !isAddingTag) {
+					saveEditedTags();
+				}
+			});
+		}
 	});
 
 	onDestroy(() => {
 		window.removeEventListener('keydown', handleKeydown);
+		if (browser) {
+			// Listen for mouse click events outside of the tag to stop editing
+			window.removeEventListener('mousedown', (event: MouseEvent) => {
+				const target = event.target as HTMLElement;
+				if (isEditing && !target?.classList?.contains('tag-edit-input') && !isAddingTag) {
+					saveEditedTags();
+				}
+			});
+		}
 	});
-
-	if (typeof window !== 'undefined') {
-		// Listen for mouse click events outside of the tag to stop editing
-		window.addEventListener('mousedown', (event: MouseEvent) => {
-			const target = event.target as HTMLElement;
-			if (isEditing && !target?.classList?.contains('tag-edit-input') && !isAddingTag) {
-				saveEditedTags();
-			}
-		});
-	}
 
 	const selectTag = (tag: string) => {
 		isAddingTag = false;
-
-		// if the tag is already selected, remove it from selectedTags
-		// otherwise, add it to selectedTags
-		const index = $selectedTags.indexOf(tag);
-		if (index > -1) {
-			selectedTags.set($selectedTags.filter((t) => t !== tag));
-		} else {
-			selectedTags.set([...$selectedTags, tag]);
-		}
+		dispatch('selectTag', tag);
 	};
+
 	const selectAllTags = () => {
-		selectedTags.set(tagsCount.map((t) => t.tag)); // Selects all tags
+		dispatch(
+			'selectTag',
+			tagsCount.map((t) => t.tag)
+		);
 	};
+
 	const clearAll = () => {
-		selectedTags.set([]); // Clears all selected tags
+		dispatch('selectTag', []);
 	};
-	/* ------------------------------ */
+
 	const deleteSelectedTags = () => {
-		$selectedTags.forEach((tag) => removeTag(tag));
-		selectedTags.set([]); // Clear selection after deleting
-	};
-	const removeTag = (tag: string) => {
-		let tasksToUpdate: Task[] = [];
-
-		verboseTasks.update((tasks) => {
-			return tasks.map((task) => {
-				// check if task contains the tag
-				let taskHasTag = task.tags.some((t) => t.name === tag);
-
-				if (taskHasTag) {
-					// remove the tag from this task
-					task.tags = task.tags.filter((t) => t.name !== tag);
-
-					// add task to array of tasks to update
-					tasksToUpdate.push(task);
-				}
-
-				// return the potentially modified task
-				return task;
-			});
-		});
-
-		if (tasksToUpdate.length > 0) {
-			makeRequest('put', 'http://127.0.0.1:23432/tasks?type=checkout', tasksToUpdate);
-		}
+		dispatch('deleteSelectedTags');
 	};
 
 	const deleteSelectedTasks = () => {
-		$selectedTags.forEach((tag) => removeTaskWithTag(tag));
-		selectedTags.set([]); // Clear selection after deleting
-	};
-	const removeTaskWithTag = (tag: string) => {
-		let taskIdsToRemove: number[] = [];
-
-		verboseTasks.update((tasks) => {
-			return tasks.filter((task) => {
-				let taskHasTag = task.tags.some((t) => t.name === tag);
-				let removingNoTags = $selectedTags.includes('No Tags') && task.tags.length === 0;
-
-				if (taskHasTag || removingNoTags) {
-					// add task id to array of task ids to remove
-					taskIdsToRemove.push(task.id);
-					// filter out this task
-					return false;
-				}
-
-				// keep this task in the array
-				return true;
-			});
-		});
-
-		if (taskIdsToRemove.length > 0) {
-			makeRequest(
-				'delete',
-				'http://127.0.0.1:23432/tasks?type=checkout',
-				taskIdsToRemove,
-				() => {}
-			);
-		}
+		dispatch('deleteSelectedTasks');
 	};
 
-	/* ------------------------------ */
 	const saveEditedTags = () => {
 		// Do not proceed with the function if the editedText is empty
 		if (editedText.trim() === '') return;
 
-		let updatedTasks: Task[] = [];
-		verboseTasks.update((tasks) => {
-			return tasks.map((task) => {
-				let taskHasSelectedTag = task.tags.some((t) => $selectedTags.includes(t.name));
-
-				// If the "No Tags" tag is being edited and the task has no tags
-				if ($selectedTags.includes('No Tags') && task.tags.length === 0) {
-					// Add the new tag
-					task.tags.push({ name: editedText });
-
-					// Add the task to the updatedTasks array
-					updatedTasks.push(task);
-				}
-				// If the task has a selected tag
-				else if (taskHasSelectedTag) {
-					// Update the name of the tag
-					task.tags = task.tags.map((t) =>
-						$selectedTags.includes(t.name) ? { ...t, name: editedText } : t
-					);
-
-					// Add the task to the updatedTasks array
-					updatedTasks.push(task);
-				}
-
-				return task;
-			});
-		});
-
-		if (updatedTasks.length > 0) {
-			makeRequest('put', 'http://127.0.0.1:23432/tasks?type=checkout', updatedTasks);
-		}
+		dispatch('updateTagNames', editedText);
 
 		editedText = '';
 		isEditing = false;
-		selectedTags.set([]);
 	};
+
 	const editTags = () => {
 		editedText = '';
 		isEditing = true;
+	};
+
+	const addAdditionalTag = () => {
+		// Do not proceed with the function if the newTagText is empty
+		if (newTagText.trim() === '') {
+			return;
+		}
+
+		dispatch('addAdditionalTag', newTagText);
+		newTagText = '';
+		isAddingTag = false;
 	};
 
 	const handleKeydown = (event: KeyboardEvent) => {
@@ -185,44 +116,7 @@
 			}
 		}
 	};
-	const addAdditionalTag = () => {
-		// Do not proceed with the function if the newTagText is empty
-		if (newTagText.trim() === '') {
-			return;
-		}
 
-		let updatedTasks: Task[] = [];
-		verboseTasks.update((tasks) => {
-			return tasks.map((task) => {
-				let taskHasSelectedTag = task.tags.some((t) => $selectedTags.includes(t.name));
-
-				// If the "No Tags" tag is selected and the task has no tags
-				if ($selectedTags.includes('No Tags') && task.tags.length === 0) {
-					task.tags.push({ name: newTagText });
-					updatedTasks.push(task);
-				}
-
-				// If the task has a selected tag
-				if (taskHasSelectedTag) {
-					// Add the new tag to the task
-					task.tags.push({ name: newTagText });
-
-					// Add the task to the updatedTasks array
-					updatedTasks.push(task);
-				}
-
-				return task;
-			});
-		});
-
-		if (updatedTasks.length > 0) {
-			makeRequest('put', 'http://127.0.0.1:23432/tasks?type=checkout', updatedTasks);
-		}
-
-		newTagText = '';
-		isAddingTag = false;
-		selectedTags.set([]);
-	};
 	const startAddingTag = (setState: AddOrEdit) => {
 		if (isAddingTag && setState) {
 			addOrEdit = null;
@@ -234,90 +128,35 @@
 			isAddingTag = true;
 		}
 	};
+
 	const addTagToTasks = () => {
 		//Do not proceed with the function if the newTagText is empty
 		if (newTagText.trim() === '') {
 			return;
 		}
-		let updatedTasks: Task[] = [];
-		verboseTasks.update((tasks) => {
-			return tasks.map((task) => {
-				if ($checkedCheckoutTasks.includes(task.id)) {
-					task.tags.push({ name: newTagText });
-					updatedTasks.push(task);
-				}
-				return task;
-			});
-		});
-		if (updatedTasks.length > 0) {
-			makeRequest('put', 'http://127.0.0.1:23432/tasks?type=checkout', updatedTasks);
-		}
+		dispatch('addTagToTasks', newTagText);
 		newTagText = '';
 		isAddingTag = false;
 	};
 
-	/* ------------------------------ */
 	const saveInput = (event: { target: any }) => {
 		const input = event.target;
 		newTagText = input.value;
 	};
-
-	$: {
-		allTags = $verboseTasks
-			.map((task) => task.tags)
-			.flat()
-			.map((tag) => tag.name)
-			.filter((tag) => tag);
-
-		let uniqueTags = [...new Set(allTags)];
-
-		tagsCount = uniqueTags.map((tag) => {
-			return {
-				tag: tag,
-				count: allTags.filter((t) => t === tag).length
-			};
-		});
-
-		// Count the number of accounts without any tags
-		let noTagsCount = $verboseTasks.filter((account) => account.tags.length === 0).length;
-
-		// Add a "No Tags" tag if there are any accounts without tags
-		if (noTagsCount > 0) {
-			tagsCount.unshift({ tag: 'No Tags', count: noTagsCount });
-		}
-	}
-	$: {
-		// Get all tasks with selected tags, but don't count a task more than once
-		const selectedTasks = new Set();
-		if ($selectedTags.length > 0) {
-			$verboseTasks.forEach((task) => {
-				const taskTags = task.tags.map((t) => t.name);
-				if ($selectedTags.some((tag) => taskTags.includes(tag))) {
-					selectedTasks.add(task.id);
-				}
-
-				// If the "No Tags" tag is selected, add tasks that have no tags
-				if ($selectedTags.includes('No Tags') && task.tags.length === 0) {
-					selectedTasks.add(task.id);
-				}
-			});
-		}
-		totalSelectedTasks = selectedTasks.size;
-	}
 </script>
 
 <div class="container-wrapper">
 	<div class="selection-info">
 		<p class="count-info">
-			{$selectedTags.length}
-			{$selectedTags.length === 1 ? 'tag' : 'tags'} selected ({totalSelectedTasks}
+			{selectedTags.length}
+			{selectedTags.length === 1 ? 'tag' : 'tags'} selected ({totalSelectedItems}
 			total tasks)
 		</p>
 		<button class="clear-all" on:click={selectAllTags}>
 			<Fa icon={faCheck} size="sm" />
 			Select all tags
 		</button>
-		{#if $checkedCheckoutTasks.length > 0}
+		{#if checkedItems.length > 0}
 			<div class="input-wrapper">
 				{#if isAddingTag && addOrEdit === 'add'}
 					<div class={isAddingTag ? 'input-container' : 'input-container hidden'}>
@@ -360,7 +199,7 @@
 			</div>
 		{/if}
 
-		{#if $selectedTags.length > 0}
+		{#if selectedTags.length > 0}
 			<button class="clear-all" on:click={clearAll}>
 				<Fa icon={faTimes} size="sm" />
 				Clear selections
@@ -424,10 +263,10 @@
 		{#each tagsCount as { tag, count }}
 			<button
 				class="tag"
-				class:selected={$selectedTags.includes(tag)}
+				class:selected={selectedTags.includes(tag)}
 				on:click|stopPropagation={() => selectTag(tag)}
 			>
-				{#if $selectedTags.includes(tag) && isEditing}
+				{#if selectedTags.includes(tag) && isEditing}
 					<input
 						type="text"
 						class="tag-edit-input"
