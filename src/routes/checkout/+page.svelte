@@ -461,11 +461,13 @@
 </script>
 
 <StatusBar
-	on:selectedState={updateSelectedState}
 	tasks={$filteredTasks}
 	selectedState={$selectedState}
+	on:selectedState={updateSelectedState}
 />
-<CheckoutNav on:searchValue={updateSearchValue} searchValue={$searchValue} />
+
+<CheckoutNav searchValue={$searchValue} on:searchValue={updateSearchValue} />
+
 {#if $showTags}
 	<Tags
 		{tagsCount}
@@ -480,6 +482,7 @@
 		on:addTagToTasks={addTagToTasks}
 	/>
 {/if}
+
 <div class="container">
 	<Table
 		{tableData}
@@ -488,24 +491,24 @@
 		verboseData={$filteredTasks}
 		sortState={$sortState}
 		checkedAll={$checkedAllCheckoutTasks}
-		on:sort={updateSortState}
-		on:checkedAll={updateCheckedAll}
 		let:row
 		let:index
 		let:itemId
 		let:thisTask
+		on:sort={updateSortState}
+		on:checkedAll={updateCheckedAll}
 	>
 		<TableRow
 			{row}
 			{index}
 			{itemId}
 			{thisTask}
+			checked={$checkedCheckoutTasks.includes(itemId)}
 			on:checked={handleChecked}
 			on:delete={handleTask}
 			on:start={handleTask}
 			on:edit={handleTask}
 			on:stop={handleTask}
-			checked={$checkedCheckoutTasks.includes(itemId)}
 		/>
 	</Table>
 </div>

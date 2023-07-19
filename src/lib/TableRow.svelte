@@ -1,5 +1,4 @@
 <script lang="ts">
-	import Checkbox from './Checkbox.svelte';
 	import StatusCell from './TableCells/StatusCell.svelte';
 	import AccountCell from './TableCells/AccountCell.svelte';
 	import SkuCell from './TableCells/SkuCell.svelte';
@@ -9,6 +8,7 @@
 	import BrowserCell from './TableCells/BrowserCell.svelte';
 	import { createEventDispatcher } from 'svelte';
 	import type { TableRowType, VerboseTask } from '../types';
+	import CheckboxCell from './TableCells/CheckboxCell.svelte';
 
 	export let index: number | null;
 	export let row: TableRowType;
@@ -24,40 +24,37 @@
 
 <tr on:click|stopPropagation={handleClick} class={checked ? 'active' : ''}>
 	<td class="Count">
-		<div class="count-content">
-			<div style="width: 10px; text-align: right; font-size:12px;">{index}</div>
-			<div class="checkbox">
-				<Checkbox bind:checked on:change={handleClick} />
-			</div>
-		</div>
+		<CheckboxCell {index} {checked} on:change={handleClick} />
 	</td>
 
-	{#each Object.entries(row) as [column, value]}
-		<td class={column}>
-			{#if column === 'Browser'}
-				<BrowserCell {value} />
-			{:else if column === 'Status'}
-				<StatusCell {value} state={thisTask?.state || 'Ready'} />
-			{:else if column === 'SKU'}
-				<SkuCell {value} size={thisTask?.product?.size || ''} />
-			{:else if column === 'Account'}
-				<AccountCell {value} />
-			{:else if column === 'Proxy'}
-				<ProxyCell {value} />
-			{:else if column === 'Profile'}
-				<ProfileCell
-					profileName={thisTask?.account?.profile?.name || ''}
-					profileTags={thisTask?.account?.profile?.tags?.map((item) => item.name).join(', ') || ''}
-				/>
-			{:else}
-				{value}
-			{/if}
+	{#if thisTask}
+		{#each Object.entries(row) as [column, value]}
+			<td class={column}>
+				{#if column === 'Browser'}
+					<BrowserCell {value} />
+				{:else if column === 'Status'}
+					<StatusCell {value} state={thisTask.state || 'Ready'} />
+				{:else if column === 'SKU'}
+					<SkuCell {value} size={thisTask.product.size || ''} />
+				{:else if column === 'Account'}
+					<AccountCell {value} />
+				{:else if column === 'Proxy'}
+					<ProxyCell {value} />
+				{:else if column === 'Profile'}
+					<ProfileCell
+						profileName={thisTask.account?.profile.name || ''}
+						profileTags={thisTask.account?.profile.tags.map((item) => item.name).join(', ') || ''}
+					/>
+				{:else}
+					{value}
+				{/if}
+			</td>
+		{/each}
+
+		<td>
+			<ButtonGroup on:delete on:start on:stop on:edit {itemId} state={thisTask?.state || 'Ready'} />
 		</td>
-	{/each}
-
-	<td>
-		<ButtonGroup on:delete on:start on:stop on:edit {itemId} state={thisTask?.state || 'Ready'} />
-	</td>
+	{/if}
 </tr>
 
 <style>
