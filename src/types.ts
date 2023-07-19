@@ -410,3 +410,5 @@ export type SortState = {
 	column: string | null;
 	direction: -1 | 0 | 1;
 };
+
+export type Browser = 'Chrome' | 'Chrome Beta' | 'Edge' | 'Brave';

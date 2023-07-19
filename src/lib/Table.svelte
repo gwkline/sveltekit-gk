@@ -19,7 +19,7 @@
 
 	<tbody>
 		{#each tableData as row, index}
-			<slot {row} {index} itemId={tableIds[index]} thisTask={findTask(tableIds[index])} />
+			<slot {row} index={index + 1} itemId={tableIds[index]} thisTask={findTask(tableIds[index])} />
 		{/each}
 	</tbody>
 </table>
