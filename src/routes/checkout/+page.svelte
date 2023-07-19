@@ -5,8 +5,6 @@
 	import TableRow from '$lib/TableRow.svelte';
 	import StatusBar from '../../lib/StatusBar.svelte';
 	import { makeRequest } from '../../helpers';
-	import { browser } from '$app/environment';
-	import { onMount, onDestroy } from 'svelte';
 	import {
 		verboseTasks,
 		filteredTasks,
@@ -15,17 +13,23 @@
 		settings,
 		selectedTags,
 		showTags,
-		validAccessToken,
-		accessTokenExpiration,
 		sortState,
 		checkedAllCheckoutTasks,
-		checkedCheckoutTasks
+		checkedCheckoutTasks,
+		secondLastCheckedCheckoutTasks,
+		lastCheckedCheckoutTasks,
+		shiftPressed
 	} from '../../datastore';
-	import type { Task, EventData, HeaderConfigType, TableRowType } from '../../types';
+	import type { Task, HeaderConfigType, TableRowType } from '../../types';
+	import TaskModalHelper from './TaskModalHelper.svelte';
 
-	let eventSource: EventSource;
+	let showModal = false;
+	let isEditing = false;
 	let tableData: TableRowType[] = [];
 	let tableIds: number[] = [];
+	let allTags: string[] = [];
+	let tagsCount: { tag: string; count: number }[] = [];
+	let totalSelectedTasks: number = 0;
 	let headers: string[] = [];
 	let headerConfig: HeaderConfigType<Task> = {
 		SKU: (task: Task) => task?.product?.product_id ?? '',
@@ -36,38 +40,6 @@
 			task?.browser_type == 'Default' ? $settings?.browser ?? '' : task?.browser_type ?? '',
 		Status: (task: Task) => task?.status ?? ''
 	};
-
-	let allTags: string[] = [];
-	let tagsCount: { tag: string; count: number }[] = [];
-	let totalSelectedTasks: number = 0;
-
-	// On component mount
-	onMount(() => {
-		if (browser && $validAccessToken && $accessTokenExpiration > Date.now() / 1000) {
-			// Connect to the event stream
-			eventSource = new EventSource('http://localhost:23432/tasks/status?stream=messages');
-
-			// Listen for messages
-			eventSource.onmessage = (event) => {
-				const data = JSON.parse(event.data);
-				updateTasks(data);
-			};
-
-			// Handle any error that may occur
-			eventSource.onerror = (error) => {
-				console.error('EventSource failed:', error);
-				eventSource.close();
-			};
-		}
-	});
-
-	// On component destroy
-	onDestroy(() => {
-		// Close the connection to the event stream
-		if (eventSource) {
-			eventSource.close();
-		}
-	});
 
 	makeRequest('get', 'http://127.0.0.1:23432/settings', null, (response) => {
 		settings.set(response.data);
@@ -81,13 +53,15 @@
 				id: account['id'],
 				username: account['username'],
 				proxy: account['proxy'],
+				tags: account['tags'],
 				profile: {
 					id: account['profile']['id'],
 					name: account['profile']['name'],
 					tags: account['profile']['tags'],
 					payment: {
 						id: account['profile']['payment']['id'],
-						tags: account['profile']['payment']['tags']
+						tags: account['profile']['payment']['tags'],
+						card_name: account['profile']['payment']['card_name']
 					}
 				}
 			};
@@ -95,29 +69,6 @@
 		});
 		verboseTasks.set(cleanedData);
 	});
-
-	const updateTasks = (updatedTasks: EventData[]) => {
-		updatedTasks.forEach((newTaskData) => {
-			let id = newTaskData['data']['id'];
-			let status = newTaskData['data']['status'];
-			let state = newTaskData['data']['state'];
-
-			// Update the status of the task with the given id
-			verboseTasks.update((tasks) => {
-				const taskIndex = tasks.findIndex((task) => task['id'] == id);
-				if (
-					taskIndex !== -1 &&
-					(tasks[taskIndex]['status'] !== status || tasks[taskIndex]['state'] !== state)
-				) {
-					const updatedTasks = [...tasks];
-					updatedTasks[taskIndex]['status'] = status;
-					updatedTasks[taskIndex]['state'] = state;
-					return updatedTasks;
-				}
-				return tasks;
-			});
-		});
-	};
 
 	const updateSortState = (e: CustomEvent) => {
 		sortState.update((currentState) => {
@@ -333,6 +284,71 @@
 		}
 	};
 
+	const handleChecked = (e: CustomEvent) => {
+		let itemId: number = e.detail;
+
+		$secondLastCheckedCheckoutTasks = $lastCheckedCheckoutTasks;
+		$lastCheckedCheckoutTasks = itemId;
+
+		checkedCheckoutTasks.update((arrayOfTaskIndexes) => {
+			if ($checkedCheckoutTasks.includes(itemId)) {
+				arrayOfTaskIndexes.splice(arrayOfTaskIndexes.indexOf(itemId), 1);
+			} else {
+				arrayOfTaskIndexes.push(itemId);
+			}
+			return arrayOfTaskIndexes;
+		});
+
+		if (
+			$shiftPressed &&
+			$lastCheckedCheckoutTasks === itemId &&
+			$secondLastCheckedCheckoutTasks !== null
+		) {
+			let start = Math.min($lastCheckedCheckoutTasks, $secondLastCheckedCheckoutTasks);
+			let end = Math.max($lastCheckedCheckoutTasks, $secondLastCheckedCheckoutTasks);
+
+			for (let i = start + 1; i < end; i++) {
+				let taskWithThisId = $verboseTasks.find((task) => task.id === i);
+				if (taskWithThisId && !$checkedCheckoutTasks.includes(taskWithThisId.id)) {
+					checkedCheckoutTasks.update((value) => {
+						value.push(i);
+						return value;
+					});
+				}
+			}
+		}
+	};
+
+	const handleTask = (e: CustomEvent) => {
+		let taskId = e.detail;
+		let mode = e.type;
+
+		switch (mode) {
+			case 'start':
+				makeRequest('post', `http://127.0.0.1:23432/tasks/start?type=undefined`, [taskId]);
+				break;
+			case 'stop':
+				makeRequest('post', `http://127.0.0.1:23432/tasks/stop?type=undefined`, [taskId]);
+				break;
+			case 'delete':
+				makeRequest('delete', `http://127.0.0.1:23432/tasks?type=checkout`, [taskId], () => {
+					// Update verboseTasks by filtering out the tasks that were deleted
+					verboseTasks.update((tasks) => {
+						return tasks.filter((task) => taskId != task.id);
+					});
+
+					// Reset checkedCheckoutTasks
+					checkedCheckoutTasks.set([]);
+				});
+				break;
+			case 'edit':
+				checkedCheckoutTasks.set([taskId]);
+				isEditing = true;
+				showModal = true;
+				break;
+		}
+	};
+
 	$: {
 		let filtered = $verboseTasks.filter((task) => {
 			// Keyword Search
@@ -469,6 +485,7 @@
 		{tableData}
 		{headers}
 		{tableIds}
+		verboseData={$filteredTasks}
 		sortState={$sortState}
 		checkedAll={$checkedAllCheckoutTasks}
 		on:sort={updateSortState}
@@ -476,10 +493,26 @@
 		let:row
 		let:index
 		let:itemId
+		let:thisTask
 	>
-		<TableRow {row} {index} {itemId} />
+		<TableRow
+			{row}
+			{index}
+			{itemId}
+			{thisTask}
+			on:checked={handleChecked}
+			on:delete={handleTask}
+			on:start={handleTask}
+			on:edit={handleTask}
+			on:stop={handleTask}
+			checked={$checkedCheckoutTasks.includes(itemId)}
+		/>
 	</Table>
 </div>
+
+{#if showModal}
+	<TaskModalHelper bind:showModal bind:isEditing />
+{/if}
 
 <style>
 	.container {

@@ -2,7 +2,7 @@
 	import Sidebar from '$lib/Sidebar.svelte';
 	import ThemeToggle from '$lib/ThemeToggle.svelte';
 	import { browser } from '$app/environment';
-	import { onMount } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 	import {
 		accessDenied,
 		accessTokenExpiration,
@@ -15,6 +15,7 @@
 		sidebarCollapsed,
 		sortState,
 		validAccessToken,
+		verboseActivityTasks,
 		verboseTasks
 	} from '../datastore';
 	import { findMemberships } from '../helpers';
@@ -22,6 +23,7 @@
 
 	export const ssr = false;
 	export const prerender = true;
+	let eventSource: EventSource;
 
 	const handleKeydown = (event: KeyboardEvent) => {
 		if (event.key === 'Shift') {
@@ -34,6 +36,7 @@
 		}
 	};
 
+	// On component mount
 	onMount(() => {
 		if (browser && (!$validAccessToken || $accessTokenExpiration < Date.now())) {
 			findMemberships().then((memberships) => {
@@ -44,6 +47,63 @@
 					accessTokenExpiration.set(Date.now() + 60 * 60 * 1000);
 				}
 			});
+		}
+
+		if (browser && $validAccessToken && $accessTokenExpiration > Date.now() / 1000) {
+			// Connect to the event stream
+			eventSource = new EventSource('http://localhost:23432/tasks/status?stream=messages');
+
+			// Listen for messages
+			eventSource.onmessage = (event) => {
+				const data = JSON.parse(event.data);
+				updateTasks(data);
+			};
+
+			// Handle any error that may occur
+			eventSource.onerror = (error) => {
+				console.error('EventSource failed:', error);
+				eventSource.close();
+			};
+		}
+	});
+
+	const updateTasks = (updatedTasks: EventData[]) => {
+		updatedTasks.forEach((newTaskData) => {
+			let id = newTaskData['data']['id'];
+			let status = newTaskData['data']['status'];
+			let state = newTaskData['data']['state'];
+
+			let store: Writable<VerboseTask[]> | undefined;
+			if (newTaskData['type'] === 'Task') {
+				store = verboseTasks;
+			} else if (newTaskData['type'] === 'AccountActivity') {
+				store = verboseActivityTasks;
+			}
+
+			if (store) {
+				// Update the status of the task with the given id
+				store.update((tasks: VerboseTask[]) => {
+					const taskIndex = tasks.findIndex((task) => task['id'] == id);
+					if (
+						taskIndex !== -1 &&
+						(tasks[taskIndex]['status'] !== status || tasks[taskIndex]['state'] !== state)
+					) {
+						const updatedTasks = [...tasks];
+						updatedTasks[taskIndex]['status'] = status;
+						updatedTasks[taskIndex]['state'] = state;
+						return updatedTasks;
+					}
+					return tasks;
+				});
+			}
+		});
+	};
+
+	// On component destroy
+	onDestroy(() => {
+		// Close the connection to the event stream
+		if (eventSource) {
+			eventSource.close();
 		}
 	});
 
@@ -70,6 +130,8 @@
 
 	import { dev } from '$app/environment';
 	import { inject } from '@vercel/analytics';
+	import type { EventData, VerboseTask } from '../types';
+	import type { Writable } from 'svelte/store';
 
 	inject({ mode: dev ? 'development' : 'production' });
 </script>

@@ -1,9 +1,7 @@
 <script lang="ts">
 	import Fa from 'svelte-fa';
 	import Checkbox from './Checkbox.svelte';
-	import CreateTasksModalHelper from '../routes/checkout/TaskModalHelper.svelte';
 	import Button from './Button.svelte';
-	import { makeRequest } from '../helpers';
 	import {
 		faPlay,
 		faPen,
@@ -16,27 +14,22 @@
 		faX,
 		faClock
 	} from '@fortawesome/free-solid-svg-icons';
-	import {
-		stateColors,
-		verboseTasks,
-		shiftPressed,
-		checkedCheckoutTasks,
-		lastCheckedCheckoutTasks,
-		secondLastCheckedCheckoutTasks
-	} from '../datastore';
-	import type { State, TableRowType } from '../types';
+	import { stateColors } from '../datastore';
+	import type { State, TableRowType, Task, VerboseTask } from '../types';
+	import { createEventDispatcher } from 'svelte';
 
 	export let index: number | null;
 	export let row: TableRowType;
 	export let itemId: number;
+	export let checked = false;
+	export let thisTask: VerboseTask | undefined;
 
-	let showModal = false;
-	let isEditing = false;
 	let size = '';
-	let taskId: number;
 	let state: State;
 	let profileName: string;
 	let profileTags = '';
+
+	const dispatch = createEventDispatcher();
 
 	const stateIconMapping = {
 		Ready: faPause,
@@ -60,108 +53,44 @@
 		Edge: 'https://upload.wikimedia.org/wikipedia/commons/7/7e/Microsoft_Edge_logo_%282019%29.png'
 	};
 
-	$: {
-		let thisTask = $verboseTasks.find((task) => task['id'] === itemId);
-		if (thisTask) {
-			state = thisTask['state'];
-			size = thisTask['product']['size'];
-			taskId = thisTask['id'];
-			profileName = thisTask['account']['profile']['name'];
-			profileTags = thisTask['account']['profile']['tags'].map((item) => item.name).join(', ');
-		}
-	}
-
-	let checked = false;
-	$: {
-		checked = $checkedCheckoutTasks.includes(itemId);
-	}
-
-	const checkForShift = () => {
-		if (
-			$shiftPressed &&
-			$lastCheckedCheckoutTasks === itemId &&
-			$secondLastCheckedCheckoutTasks !== null
-		) {
-			let start = Math.min($lastCheckedCheckoutTasks, $secondLastCheckedCheckoutTasks);
-			let end = Math.max($lastCheckedCheckoutTasks, $secondLastCheckedCheckoutTasks);
-
-			for (let i = start + 1; i < end; i++) {
-				let taskWithThisId = $verboseTasks.find((task) => task.id === i);
-				if (taskWithThisId && !$checkedCheckoutTasks.includes(taskWithThisId.id)) {
-					checkedCheckoutTasks.update((value) => {
-						value.push(i);
-						return value;
-					});
-				}
-			}
-		}
-	};
-
-	const handleClick = (passedIndex?: number) => {
-		const currentIndex = typeof passedIndex !== 'undefined' ? passedIndex : itemId;
-		if (!currentIndex || typeof currentIndex === 'undefined') return;
-
-		$secondLastCheckedCheckoutTasks = $lastCheckedCheckoutTasks;
-		$lastCheckedCheckoutTasks = currentIndex;
-
-		checkedCheckoutTasks.update((arrayOfTaskIndexes) => {
-			if (checked) {
-				arrayOfTaskIndexes.splice(arrayOfTaskIndexes.indexOf(currentIndex), 1);
-			} else {
-				arrayOfTaskIndexes.push(currentIndex);
-			}
-			return arrayOfTaskIndexes;
-		});
-
-		checkForShift();
-	};
-
-	const handleDispatch = (event: any) => {
-		handleClick(event.detail.index);
+	const handleClick = () => {
+		dispatch('checked', itemId);
 	};
 
 	const handleEdit = (event: MouseEvent) => {
 		event.stopPropagation();
-		checkedCheckoutTasks.set([taskId]);
-		isEditing = true;
-		showModal = true;
+		dispatch('edit', itemId);
 	};
 
 	const handleDelete = (event: MouseEvent) => {
 		event.stopPropagation();
-		if (!taskId) return;
-		makeRequest('delete', `http://127.0.0.1:23432/tasks?type=checkout`, [taskId], () => {
-			// Update verboseTasks by filtering out the tasks that were deleted
-			verboseTasks.update((tasks) => {
-				return tasks.filter((task) => taskId != task.id);
-			});
-
-			// Reset checkedCheckoutTasks
-			checkedCheckoutTasks.set([]);
-		});
+		dispatch('delete', itemId);
 	};
 
 	const handleStop = (event: MouseEvent) => {
 		event.stopPropagation();
-		if (taskId) {
-			makeRequest('post', `http://127.0.0.1:23432/tasks/stop?type=undefined`, [taskId]);
-		}
+		dispatch('stop', itemId);
 	};
 
 	const handleStart = (event: MouseEvent) => {
 		event.stopPropagation();
-		if (taskId) {
-			makeRequest('post', `http://127.0.0.1:23432/tasks/start?type=undefined`, [taskId]);
-		}
+		dispatch('start', itemId);
 	};
+
+	$: {
+		state = thisTask?.state || 'Ready';
+		size = thisTask?.product?.size || '';
+		profileName = thisTask?.account?.profile?.name || '';
+		profileTags = thisTask?.account?.profile?.tags?.map((item) => item.name).join(', ') || '';
+	}
 </script>
 
-<tr on:click|stopPropagation={() => handleClick()} class={checked ? 'active' : ''}>
+<tr on:click|stopPropagation={handleClick} class={checked ? 'active' : ''}>
 	<td class="Count">
 		<div class="count-content">
 			<div style="width: 10px; text-align: right; font-size:12px;">{index}</div>
 			<div class="checkbox">
-				<Checkbox bind:checked on:change={handleDispatch} />
+				<Checkbox bind:checked on:change={handleClick} />
 			</div>
 		</div>
 	</td>
@@ -225,10 +154,6 @@
 		</div>
 	</td>
 </tr>
-
-{#if showModal}
-	<CreateTasksModalHelper bind:showModal bind:isEditing />
-{/if}
 
 <style>
 	tr {

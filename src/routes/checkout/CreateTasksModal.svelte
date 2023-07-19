@@ -45,7 +45,7 @@
 	let allProfileTags: string[];
 	let selectedAccountTags: string[] = [];
 	let selectedProfileTags: string[] = [];
-	let predictedTaskCount: number = 0;
+	let predictedTaskCount: number | string = 0;
 	let scheduleNames = ['None', ...$schedules.map((schedule) => schedule.name)];
 	let scheduleDropdown = 'None';
 
@@ -260,7 +260,8 @@
 				name: profile['name'],
 				payment: {
 					id: payment['id'],
-					tags: payment['tags']
+					tags: payment['tags'],
+					card_name: payment['card_name']
 				},
 				id: profile['id'],
 				tags: profile['tags']
@@ -297,29 +298,34 @@
 	$: dropdownStatus2 = $checkoutSettings.specifyAccountsByProfileTag ? true : false;
 
 	$: {
-		let filteredAccounts = $accounts;
-		let selectedAccountTagsSet = new Set(selectedAccountTags);
-		let selectedProfileTagsSet = new Set(selectedProfileTags);
+		if (!isEditing && !isDuplicating) {
+			let filteredAccounts = $accounts;
+			let selectedAccountTagsSet = new Set(selectedAccountTags);
+			let selectedProfileTagsSet = new Set(selectedProfileTags);
 
-		if (selectedAccountTagsSet.size > 0 && dropdownStatus1) {
-			filteredAccounts = filteredAccounts.filter((account) => {
-				let tags = account.tags.map((tag) => tag.name);
+			if (selectedAccountTagsSet.size > 0 && dropdownStatus1) {
+				filteredAccounts = filteredAccounts.filter((account) => {
+					let tags = account.tags.map((tag) => tag.name);
 
-				// Check if some tag is in selectedAccountTagsSet
-				return tags.some((tag) => selectedAccountTagsSet.has(tag));
-			});
+					// Check if some tag is in selectedAccountTagsSet
+					return tags.some((tag) => selectedAccountTagsSet.has(tag));
+				});
+			}
+
+			if (selectedProfileTagsSet.size > 0 && dropdownStatus2) {
+				filteredAccounts = filteredAccounts.filter((account) => {
+					let profileTags = account.profile.tags.map((tag) => tag.name);
+
+					// Check if some tag is in selectedProfileTagsSet
+					return profileTags.some((tag) => selectedProfileTagsSet.has(tag));
+				});
+			}
+
+			predictedTaskCount = filteredAccounts.length;
+		} else {
+			predictedTaskCount =
+				$checkedCheckoutTasks.length === 0 ? 'all' : $checkedCheckoutTasks.length;
 		}
-
-		if (selectedProfileTagsSet.size > 0 && dropdownStatus2) {
-			filteredAccounts = filteredAccounts.filter((account) => {
-				let profileTags = account.profile.tags.map((tag) => tag.name);
-
-				// Check if some tag is in selectedProfileTagsSet
-				return profileTags.some((tag) => selectedProfileTagsSet.has(tag));
-			});
-		}
-
-		predictedTaskCount = filteredAccounts.length;
 	}
 
 	const saveButtonText = () => {

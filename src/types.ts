@@ -25,6 +25,36 @@ export type Task = {
 	retry_on_decline: boolean;
 };
 
+export type ActivityTask = {
+	id: number;
+	account_id: number;
+	schedule_id: number;
+	created_at: string;
+	updated_at: string;
+	state: State;
+	status: string;
+	headless: boolean;
+	enable_images: boolean;
+	browser_type: string;
+	mode: ActivityMode;
+	account: Account | ShortAccount;
+	schedule: Schedule | ShortSchedule;
+	metadata: object | null;
+	retry_mode: string;
+	experimental_mode: boolean;
+	cache_enabled: boolean;
+	sms_configuration: SMSProvider;
+};
+
+export type ActivityMode =
+	| 'login'
+	| 'bp'
+	| 'stories'
+	| 'browse'
+	| 'passwordreset'
+	| 'addverifiednumber'
+	| 'manual';
+
 export type OutboundTask = {
 	id: number;
 	account_id: number;
@@ -52,6 +82,8 @@ export type OutboundTask = {
 	retry_on_decline: boolean;
 };
 
+export type VerboseTask = Task | ActivityTask | OutboundTask;
+
 export type Product = {
 	product_uri: string;
 	size: string;
@@ -67,7 +99,7 @@ export type Account = {
 	proxy_list_id: number;
 	proxy: string;
 	profile: Profile | ShortProfile;
-	proxy_list: object;
+	proxy_list: ProxyList;
 	username: string;
 	password: string;
 	creation_method: string;
@@ -96,6 +128,16 @@ export type ShortAccount = {
 	username: string;
 	proxy: string;
 	profile: ShortProfile;
+	tags: Tag[];
+};
+
+export type ProxyList = {
+	id: number;
+	name: string;
+	proxies: string[];
+	updated_at: string;
+	previous_wins: PreviousWins;
+	archived: boolean;
 };
 
 export type Profile = {
@@ -138,6 +180,7 @@ export type Payment = {
 export type ShortPayment = {
 	id: number;
 	tags: Tag[];
+	card_name: string;
 };
 
 export type Shipping = {

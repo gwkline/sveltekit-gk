@@ -11,10 +11,10 @@
 		faListOl
 	} from '@fortawesome/free-solid-svg-icons';
 	import { stateColors } from '../datastore';
-	import type { State, Task } from '../types';
+	import type { ActivityTask, State, Task } from '../types';
 	import { createEventDispatcher } from 'svelte';
 
-	export let tasks: Task[] = [];
+	export let tasks: Task[] | ActivityTask[] = [];
 	export let selectedState: State | '' = '';
 
 	const dispatch = createEventDispatcher();
@@ -30,7 +30,7 @@
 		'Winning'
 	];
 	const capitalizeFirstLetter = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
-	const countTasksByState = (tasks: Task[]): [State, number][] => {
+	const countTasksByState = (tasks: Task[] | ActivityTask[]): [State, number][] => {
 		const counts = {
 			Ready: 0,
 			Queued: 0,

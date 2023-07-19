@@ -1,12 +1,17 @@
 <script lang="ts">
 	import TableHead from './TableHead.svelte';
-	import type { SortState } from '../types';
+	import type { SortState, VerboseTask } from '../types';
 
 	export let tableData: any[];
 	export let headers: string[] = [];
 	export let tableIds: number[] = [];
 	export let sortState: SortState;
 	export let checkedAll: boolean;
+	export let verboseData: VerboseTask[] = [];
+
+	const findTask = (itemId: number): VerboseTask | undefined => {
+		return verboseData.find((item) => item.id === itemId);
+	};
 </script>
 
 <table>
@@ -14,7 +19,7 @@
 
 	<tbody>
 		{#each tableData as row, index}
-			<slot {row} {index} itemId={tableIds[index]} />
+			<slot {row} {index} itemId={tableIds[index]} thisTask={findTask(tableIds[index])} />
 		{/each}
 	</tbody>
 </table>
