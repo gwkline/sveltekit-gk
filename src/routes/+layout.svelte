@@ -6,14 +6,9 @@
 	import {
 		accessDenied,
 		accessTokenExpiration,
-		filteredTasks,
 		networkError,
-		searchValue,
-		selectedState,
-		selectedTags,
 		shiftPressed,
 		sidebarCollapsed,
-		sortState,
 		validAccessToken,
 		verboseActivityTasks,
 		verboseTasks
@@ -107,27 +102,6 @@
 		}
 	});
 
-	const clearFilters = () => {
-		selectedTags.set([]);
-		selectedState.set('');
-		searchValue.set('');
-		filteredTasks.set([]);
-		sortState.set({ column: null, direction: 0 });
-	};
-
-	let filterOn: boolean;
-	$: if (
-		($filteredTasks.length > 0 && $filteredTasks.length < $verboseTasks.length) ||
-		$selectedTags.length > 0 ||
-		$selectedState != '' ||
-		$searchValue != '' ||
-		$sortState.column != null
-	) {
-		filterOn = true;
-	} else {
-		filterOn = false;
-	}
-
 	import { dev } from '$app/environment';
 	import { inject } from '@vercel/analytics';
 	import type { EventData, VerboseTask } from '../types';
@@ -153,14 +127,6 @@
 			</p>
 		</UpdateBar>
 	{/if}
-	{#if filterOn}
-		<UpdateBar>
-			You're viewing a filtered set of tasks. To clear all filters, <button
-				on:click={clearFilters}
-				class="nav-button">click here.</button
-			>
-		</UpdateBar>
-	{/if}
 	{#if $accessDenied}
 		<UpdateBar color="var(--danger-red)"
 			>Please go to your Project Enigma dashboard and click "use this key" to continue using the bot</UpdateBar
@@ -179,17 +145,6 @@
 <style lang="css" global>
 	@import 'https://fonts.googleapis.com/css?family=Roboto';
 	@import '/global.css';
-
-	.nav-button {
-		background: none;
-		outline: none;
-		border: none;
-		color: var(--off-black);
-	}
-
-	.nav-button:hover {
-		color: var(--light-gray-3);
-	}
 
 	* {
 		font-family: Roboto;

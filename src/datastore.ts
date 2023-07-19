@@ -1,7 +1,15 @@
 import { browser } from '$app/environment';
 import { writable } from 'svelte/store';
 import type { Writable } from 'svelte/store';
-import type { Settings, Task, Account, Schedule, SizePresets, SortState, State } from './types';
+import type {
+	Settings,
+	Task,
+	Account,
+	Schedule,
+	SizePresets,
+	SortState,
+	ActivityTask
+} from './types';
 import { seedAccounts, seedSettings, seedTasks } from './seedData';
 
 // Create a store that syncs with localStorage
@@ -35,8 +43,6 @@ export const accessDenied = writable(false);
 export const networkError = writable(false);
 
 export const searchValue = persistentStore('searchValue', '');
-export const selectedTags = persistentStore<string[]>('selectedTags', []);
-export const selectedState = persistentStore<State | ''>('selectedState', '');
 export const sortState = persistentStore<SortState>('sortState', {
 	column: null,
 	direction: 0 // 0 = not sorted, 1 = ascending, -1 = descending
@@ -45,8 +51,7 @@ export const sortState = persistentStore<SortState>('sortState', {
 export const settings = persistentStore<Settings>('settings', seedSettings);
 export const accounts = persistentStore<Account[]>('accounts', seedAccounts);
 export const verboseTasks = persistentStore<Task[]>('verboseTasks', seedTasks);
-export const verboseActivityTasks = persistentStore<Task[]>('verboseActivityTasks', seedTasks);
-export const filteredTasks = persistentStore<Task[]>('filteredTasks', []);
+export const verboseActivityTasks = persistentStore<ActivityTask[]>('verboseActivityTasks', []);
 export const schedules = persistentStore<Schedule[]>('schedules', []);
 export const sizePresets = persistentStore<SizePresets>('sizePresets', {
 	mens: {
@@ -266,15 +271,7 @@ export const sizePresets = persistentStore<SizePresets>('sizePresets', {
 });
 
 export const checkedCheckoutTasks = persistentStore<number[]>('checkedCheckoutTasks', []);
-export const checkedAllCheckoutTasks = persistentStore('checkedAllCheckoutTasks', false);
-export const lastCheckedCheckoutTasks = persistentStore<number | null>(
-	'lastCheckedCheckoutTasks',
-	null
-);
-export const secondLastCheckedCheckoutTasks = persistentStore<number | null>(
-	'secondLastCheckedCheckoutTasks',
-	null
-);
+
 export const checkoutSettings = persistentStore('checkoutSettings', {
 	browserType: 'Default',
 	retryMode: 'Requeue',

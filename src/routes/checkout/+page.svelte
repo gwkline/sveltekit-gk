@@ -7,24 +7,26 @@
 	import { makeRequest } from '../../helpers';
 	import {
 		verboseTasks,
-		filteredTasks,
-		selectedState,
 		searchValue,
 		settings,
-		selectedTags,
 		showTags,
 		sortState,
-		checkedAllCheckoutTasks,
 		checkedCheckoutTasks,
-		secondLastCheckedCheckoutTasks,
-		lastCheckedCheckoutTasks,
 		shiftPressed
 	} from '../../datastore';
-	import type { Task, HeaderConfigType, TableRowType } from '../../types';
+	import type { Task, HeaderConfigType, TableRowType, State } from '../../types';
 	import TaskModalHelper from './TaskModalHelper.svelte';
+	import UpdateBar from '$lib/UpdateBar.svelte';
 
 	let showModal = false;
 	let isEditing = false;
+	let selectedTags: string[] = [];
+	let selectedState: State | '' = '';
+	let filterOn: boolean = false;
+	let lastChecked: number | null = null;
+	let secondLastChecked: number | null = null;
+	let checkedAll: boolean = false;
+	let filteredTasks: Task[] = [];
 	let tableData: TableRowType[] = [];
 	let tableIds: number[] = [];
 	let allTags: string[] = [];
@@ -90,7 +92,7 @@
 	};
 
 	const updateCheckedAll = (e: CustomEvent) => {
-		checkedAllCheckoutTasks.set(e.detail.checked);
+		checkedAll = e.detail.checked;
 
 		if (e.detail.checked) {
 			let allIds = $verboseTasks.map((task) => task.id);
@@ -101,10 +103,10 @@
 	};
 
 	const updateSelectedState = (e: CustomEvent) => {
-		if ($selectedState === e.detail) {
-			selectedState.set('');
+		if (selectedState === e.detail) {
+			selectedState = '';
 		} else {
-			selectedState.set(e.detail);
+			selectedState = e.detail;
 		}
 	};
 
@@ -117,26 +119,26 @@
 		if (typeof tag === 'string') {
 			// if the tag is already selected, remove it from selectedTags
 			// otherwise, add it to selectedTags
-			const index = $selectedTags.indexOf(tag);
+			const index = selectedTags.indexOf(tag);
 			if (index > -1) {
-				selectedTags.set($selectedTags.filter((t) => t !== tag));
+				selectedTags = selectedTags.filter((t) => t !== tag);
 			} else {
-				selectedTags.set([...$selectedTags, tag]);
+				selectedTags = [...selectedTags, tag];
 			}
 		} else {
 			// user wants to select all tags or no tags
-			selectedTags.set(tag);
+			selectedTags = tag;
 		}
 	};
 
 	const deleteSelectedTags = (e: CustomEvent) => {
-		$selectedTags.forEach((tag) => removeTag(tag));
-		selectedTags.set([]); // Clear selection after deleting
+		selectedTags.forEach((tag) => removeTag(tag));
+		selectedTags = []; // Clear selection after deleting
 	};
 
 	const deleteSelectedTasks = (e: CustomEvent) => {
-		$selectedTags.forEach((tag) => removeTaskWithTag(tag));
-		selectedTags.set([]); // Clear selection after deleting
+		selectedTags.forEach((tag) => removeTaskWithTag(tag));
+		selectedTags = []; // Clear selection after deleting
 	};
 
 	const removeTaskWithTag = (tag: string) => {
@@ -145,7 +147,7 @@
 		verboseTasks.update((tasks) => {
 			return tasks.filter((task) => {
 				let taskHasTag = task.tags.some((t) => t.name === tag);
-				let removingNoTags = $selectedTags.includes('No Tags') && task.tags.length === 0;
+				let removingNoTags = selectedTags.includes('No Tags') && task.tags.length === 0;
 
 				if (taskHasTag || removingNoTags) {
 					// add task id to array of task ids to remove
@@ -202,10 +204,10 @@
 		let updatedTasks: Task[] = [];
 		verboseTasks.update((tasks) => {
 			return tasks.map((task) => {
-				let taskHasSelectedTag = task.tags.some((t) => $selectedTags.includes(t.name));
+				let taskHasSelectedTag = task.tags.some((t) => selectedTags.includes(t.name));
 
 				// If the "No Tags" tag is being edited and the task has no tags
-				if ($selectedTags.includes('No Tags') && task.tags.length === 0) {
+				if (selectedTags.includes('No Tags') && task.tags.length === 0) {
 					// Add the new tag
 					task.tags.push({ name: editedText });
 
@@ -216,7 +218,7 @@
 				else if (taskHasSelectedTag) {
 					// Update the name of the tag
 					task.tags = task.tags.map((t) =>
-						$selectedTags.includes(t.name) ? { ...t, name: editedText } : t
+						selectedTags.includes(t.name) ? { ...t, name: editedText } : t
 					);
 
 					// Add the task to the updatedTasks array
@@ -231,7 +233,7 @@
 			makeRequest('put', 'http://127.0.0.1:23432/tasks?type=checkout', updatedTasks);
 		}
 
-		selectedTags.set([]);
+		selectedTags = [];
 	};
 
 	const addAdditionalTag = (e: CustomEvent) => {
@@ -240,10 +242,10 @@
 
 		verboseTasks.update((tasks) => {
 			return tasks.map((task) => {
-				let taskHasSelectedTag = task.tags.some((t) => $selectedTags.includes(t.name));
+				let taskHasSelectedTag = task.tags.some((t) => selectedTags.includes(t.name));
 
 				// If the "No Tags" tag is selected and the task has no tags
-				if ($selectedTags.includes('No Tags') && task.tags.length === 0) {
+				if (selectedTags.includes('No Tags') && task.tags.length === 0) {
 					task.tags.push({ name: newTagText });
 					updatedTasks.push(task);
 				}
@@ -264,7 +266,7 @@
 		if (updatedTasks.length > 0) {
 			makeRequest('put', 'http://127.0.0.1:23432/tasks?type=checkout', updatedTasks);
 		}
-		selectedTags.set([]);
+		selectedTags = [];
 	};
 
 	const addTagToTasks = (e: CustomEvent) => {
@@ -287,8 +289,8 @@
 	const handleChecked = (e: CustomEvent) => {
 		let itemId: number = e.detail;
 
-		$secondLastCheckedCheckoutTasks = $lastCheckedCheckoutTasks;
-		$lastCheckedCheckoutTasks = itemId;
+		secondLastChecked = lastChecked;
+		lastChecked = itemId;
 
 		checkedCheckoutTasks.update((arrayOfTaskIndexes) => {
 			if ($checkedCheckoutTasks.includes(itemId)) {
@@ -299,13 +301,9 @@
 			return arrayOfTaskIndexes;
 		});
 
-		if (
-			$shiftPressed &&
-			$lastCheckedCheckoutTasks === itemId &&
-			$secondLastCheckedCheckoutTasks !== null
-		) {
-			let start = Math.min($lastCheckedCheckoutTasks, $secondLastCheckedCheckoutTasks);
-			let end = Math.max($lastCheckedCheckoutTasks, $secondLastCheckedCheckoutTasks);
+		if ($shiftPressed && lastChecked === itemId && secondLastChecked !== null) {
+			let start = Math.min(lastChecked, secondLastChecked);
+			let end = Math.max(lastChecked, secondLastChecked);
 
 			for (let i = start + 1; i < end; i++) {
 				let taskWithThisId = $verboseTasks.find((task) => task.id === i);
@@ -349,6 +347,14 @@
 		}
 	};
 
+	const clearFilters = () => {
+		selectedTags = [];
+		selectedState = '';
+		searchValue.set('');
+		filteredTasks = [];
+		sortState.set({ column: null, direction: 0 });
+	};
+
 	$: {
 		let filtered = $verboseTasks.filter((task) => {
 			// Keyword Search
@@ -359,22 +365,22 @@
 
 			// Tag Filtering
 			let tagMatch;
-			if ($selectedTags.includes('No Tags')) {
+			if (selectedTags.includes('No Tags')) {
 				tagMatch =
 					task.tags.length === 0 ||
-					$selectedTags.some((tag) => task.tags.map((tagObj) => tagObj.name).includes(tag));
+					selectedTags.some((tag) => task.tags.map((tagObj) => tagObj.name).includes(tag));
 			} else {
 				tagMatch =
-					$selectedTags.length === 0 ||
-					$selectedTags.some((tag) => task.tags.map((tagObj) => tagObj.name).includes(tag));
+					selectedTags.length === 0 ||
+					selectedTags.some((tag) => task.tags.map((tagObj) => tagObj.name).includes(tag));
 			}
 
 			// State Filtering
-			let stateMatch = !$selectedState || task.state === $selectedState;
+			let stateMatch = !selectedState || task.state === selectedState;
 			return keywordMatch && tagMatch && stateMatch;
 		});
 
-		filteredTasks.set(filtered);
+		filteredTasks = filtered;
 
 		headers = Object.keys(headerConfig);
 		tableIds = [];
@@ -443,28 +449,45 @@
 	$: {
 		// Get all tasks with selected tags, but don't count a task more than once
 		const selectedTasks = new Set();
-		if ($selectedTags.length > 0) {
+		if (selectedTags.length > 0) {
 			$verboseTasks.forEach((task) => {
 				const taskTags = task.tags.map((t) => t.name);
-				if ($selectedTags.some((tag) => taskTags.includes(tag))) {
+				if (selectedTags.some((tag) => taskTags.includes(tag))) {
 					selectedTasks.add(task.id);
 				}
 
 				// If the "No Tags" tag is selected, add tasks that have no tags
-				if ($selectedTags.includes('No Tags') && task.tags.length === 0) {
+				if (selectedTags.includes('No Tags') && task.tags.length === 0) {
 					selectedTasks.add(task.id);
 				}
 			});
 		}
 		totalSelectedTasks = selectedTasks.size;
 	}
+
+	$: if (
+		(filteredTasks.length > 0 && filteredTasks.length < $verboseTasks.length) ||
+		selectedTags.length > 0 ||
+		selectedState != '' ||
+		$searchValue != '' ||
+		$sortState.column != null
+	) {
+		filterOn = true;
+	} else {
+		filterOn = false;
+	}
 </script>
 
-<StatusBar
-	tasks={$filteredTasks}
-	selectedState={$selectedState}
-	on:selectedState={updateSelectedState}
-/>
+{#if filterOn}
+	<UpdateBar>
+		You're viewing a filtered set of tasks. To clear all filters, <button
+			on:click={clearFilters}
+			class="nav-button">click here.</button
+		>
+	</UpdateBar>
+{/if}
+
+<StatusBar tasks={filteredTasks} {selectedState} on:selectedState={updateSelectedState} />
 
 <CheckoutNav searchValue={$searchValue} on:searchValue={updateSearchValue} />
 
@@ -472,7 +495,7 @@
 	<Tags
 		{tagsCount}
 		totalSelectedItems={totalSelectedTasks}
-		selectedTags={$selectedTags}
+		{selectedTags}
 		checkedItems={$checkedCheckoutTasks}
 		on:selectTag={updateSelectedTags}
 		on:deleteSelectedTags={deleteSelectedTags}
@@ -488,9 +511,9 @@
 		{tableData}
 		{headers}
 		{tableIds}
-		verboseData={$filteredTasks}
+		verboseData={filteredTasks}
 		sortState={$sortState}
-		checkedAll={$checkedAllCheckoutTasks}
+		{checkedAll}
 		let:row
 		let:index
 		let:itemId
@@ -522,5 +545,16 @@
 		flex-grow: 1;
 		overflow-y: auto;
 		scroll-behavior: smooth;
+	}
+
+	.nav-button {
+		background: none;
+		outline: none;
+		border: none;
+		color: var(--off-black);
+	}
+
+	.nav-button:hover {
+		color: var(--light-gray-3);
 	}
 </style>
