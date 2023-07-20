@@ -1,6 +1,6 @@
 <script lang="ts">
 </script>
 
-<h1>Account Creation</h1>
+<h1>Account Activity</h1>
 
 <style></style>

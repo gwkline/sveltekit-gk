@@ -7,13 +7,14 @@
 		faRunning,
 		faTrophy,
 		faX,
-		faClock
+		faClock,
+		faCheck
 	} from '@fortawesome/free-solid-svg-icons';
 	import { stateColors } from '../../datastore';
-	import type { State } from '../../types';
+	import type { ActivityState, CheckoutState } from '../../types';
 
 	export let value: string;
-	export let state: State;
+	export let state: CheckoutState | ActivityState;
 
 	const stateIconMapping = {
 		Ready: faPause,
@@ -23,7 +24,8 @@
 		Waiting: faClock,
 		Error: faX,
 		Entered: faClover,
-		Winning: faTrophy
+		Winning: faTrophy,
+		Complete: faCheck
 	};
 </script>
 

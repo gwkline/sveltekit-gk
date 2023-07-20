@@ -9,6 +9,7 @@
 	import { createEventDispatcher } from 'svelte';
 	import type { TableRowType, VerboseTask } from '../types';
 	import CheckboxCell from './TableCells/CheckboxCell.svelte';
+	import ActivityModeCell from './TableCells/ActivityModeCell.svelte';
 
 	export let index: number | null;
 	export let row: TableRowType;
@@ -19,6 +20,11 @@
 	const dispatch = createEventDispatcher();
 	const handleClick = () => {
 		dispatch('checked', itemId);
+	};
+
+	const changeActivityMode = (e: CustomEvent) => {
+		console.log(e);
+		dispatch('edit', { id: itemId, mode: e.detail });
 	};
 </script>
 
@@ -40,6 +46,8 @@
 					<AccountCell {value} />
 				{:else if column === 'Proxy'}
 					<ProxyCell {value} />
+				{:else if column === 'Mode'}
+					<ActivityModeCell mode={thisTask.mode} on:changeActivityMode={changeActivityMode} />
 				{:else if column === 'Profile'}
 					<ProfileCell
 						profileName={thisTask.account?.profile.name || ''}
@@ -52,7 +60,14 @@
 		{/each}
 
 		<td>
-			<ButtonGroup on:delete on:start on:stop on:edit {itemId} state={thisTask?.state || 'Ready'} />
+			<ButtonGroup
+				on:deleteIndiv
+				on:startIndiv
+				on:stopIndiv
+				on:edit
+				{itemId}
+				state={thisTask?.state || 'Ready'}
+			/>
 		</td>
 	{/if}
 </tr>

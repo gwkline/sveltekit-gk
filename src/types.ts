@@ -6,7 +6,7 @@ export type Task = {
 	result: string;
 	created_at: string;
 	updated_at: string;
-	state: State;
+	state: CheckoutState;
 	status: string;
 	headless: boolean;
 	enable_images: boolean;
@@ -31,7 +31,7 @@ export type ActivityTask = {
 	schedule_id: number;
 	created_at: string;
 	updated_at: string;
-	state: State;
+	state: ActivityState;
 	status: string;
 	headless: boolean;
 	enable_images: boolean;
@@ -63,7 +63,7 @@ export type OutboundTask = {
 	result: string;
 	created_at: string;
 	updated_at: string;
-	state: State;
+	state: CheckoutState;
 	status: string;
 	headless: boolean;
 	enable_images: boolean;
@@ -279,12 +279,12 @@ export type EventData = {
 	type: string;
 	data: {
 		id: number;
-		state: State;
+		state: CheckoutState;
 		status: string;
 	};
 };
 
-export type State =
+export type CheckoutState =
 	| 'Ready'
 	| 'Queued'
 	| 'Starting'
@@ -292,7 +292,17 @@ export type State =
 	| 'Waiting'
 	| 'Error'
 	| 'Entered'
-	| 'Winning';
+	| 'Winning'
+	| 'Complete';
+
+export type ActivityState =
+	| 'Ready'
+	| 'Queued'
+	| 'Starting'
+	| 'Running'
+	| 'Waiting'
+	| 'Error'
+	| 'Complete';
 
 export type WhopMembershipStatusType =
 	| 'trialing'

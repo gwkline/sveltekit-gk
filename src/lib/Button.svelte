@@ -29,7 +29,8 @@
 		onclick(event);
 	}
 
-	const generateClassString = () => {
+	let classString: string = '';
+	$: {
 		let classes: string[] = [variant, size];
 		if (isLoading || (icon && !$$slots.default)) classes.push('iconOnly');
 		if (outline === 'outline') classes.push('outline');
@@ -40,18 +41,12 @@
 			classes.push('center-icon');
 		}
 
-		return classes.join(' ');
-	};
+		classString = classes.join(' ');
+	}
 </script>
 
 <div class="container">
-	<button
-		{type}
-		{style}
-		{disabled}
-		class={generateClassString()}
-		on:click|preventDefault={handleClick}
-	>
+	<button {type} {style} {disabled} class={classString} on:click|preventDefault={handleClick}>
 		{#if isLoading}
 			<Fa icon={faCog} spin />
 		{:else}

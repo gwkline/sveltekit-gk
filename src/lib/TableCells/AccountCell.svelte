@@ -4,11 +4,11 @@
 
 <div>
 	<span>{value.split('@')[0]}</span>
-	<span class="sizeValue">{'@' + value.split('@')[1]}</span>
+	<span class="bottom-text">{'@' + value.split('@')[1]}</span>
 </div>
 
 <style>
-	.sizeValue {
+	.bottom-text {
 		display: block;
 		font-size: 11px;
 		color: #888;

@@ -6,12 +6,12 @@
 <div>
 	<span>{value}</span>
 	{#if size}
-		<span class="sizeValue">Size {size}</span>
+		<span class="bottom-text">Size {size}</span>
 	{/if}
 </div>
 
 <style>
-	.sizeValue {
+	.bottom-text {
 		display: block;
 		font-size: 11px;
 		color: #888;

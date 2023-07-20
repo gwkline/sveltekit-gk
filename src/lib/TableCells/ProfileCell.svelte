@@ -5,11 +5,11 @@
 
 <div>
 	<span>{profileName}</span>
-	<span class="sizeValue">{profileTags}</span>
+	<span class="bottom-text">{profileTags}</span>
 </div>
 
 <style>
-	.sizeValue {
+	.bottom-text {
 		display: block;
 		font-size: 11px;
 		color: #888;

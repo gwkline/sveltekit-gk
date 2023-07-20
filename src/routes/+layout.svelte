@@ -119,7 +119,7 @@
 <ThemeToggle />
 
 <div class="{$sidebarCollapsed ? 'collapsed' : ''} master-container">
-	{#if !$validAccessToken || $accessTokenExpiration < Date.now() / 1000}
+	{#if !$validAccessToken}
 		<UpdateBar>
 			<p>
 				You are in sandbox mode. If you are a PE user and would like to use the full functionality,
@@ -136,6 +136,11 @@
 		<UpdateBar color="var(--danger-red)"
 			>Please make sure your Project Enigma is running and that you are connected to the internet.</UpdateBar
 		>
+	{/if}
+	{#if $accessTokenExpiration < Date.now() / 1000}
+		<UpdateBar color="var(--danger-red)"
+			>Your authorization has expired. Please refresh the page to continue using the bot
+		</UpdateBar>
 	{/if}
 	<div class="border-card">
 		<slot />

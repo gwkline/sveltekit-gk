@@ -4,11 +4,11 @@
 
 <div>
 	<span>{value.split(':')[0]}</span>
-	<span class="sizeValue">{value.split(':')[2] + ':' + value.split(':')[3]}</span>
+	<span class="bottom-text">{value.split(':')[2] + ':' + value.split(':')[3]}</span>
 </div>
 
 <style>
-	.sizeValue {
+	.bottom-text {
 		display: block;
 		font-size: 11px;
 		color: #888;

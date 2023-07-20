@@ -2,10 +2,11 @@
 	import Button from '$lib/Button.svelte';
 	import { faPause, faPen, faPlay, faTrash } from '@fortawesome/free-solid-svg-icons';
 	import { createEventDispatcher } from 'svelte';
-	import type { State } from '../../types';
+	import type { ActivityState, CheckoutState } from '../../types';
+	import { isLoading } from '../../datastore';
 
 	export let itemId: number;
-	export let state: State;
+	export let state: CheckoutState | ActivityState;
 	const dispatch = createEventDispatcher();
 
 	const handleEdit = (event: MouseEvent) => {
@@ -15,28 +16,28 @@
 
 	const handleDelete = (event: MouseEvent) => {
 		event.stopPropagation();
-		dispatch('delete', itemId);
+		dispatch('deleteIndiv', itemId);
 	};
 
 	const handleStop = (event: MouseEvent) => {
 		event.stopPropagation();
-		dispatch('stop', itemId);
+		dispatch('stopIndiv', itemId);
 	};
 
 	const handleStart = (event: MouseEvent) => {
 		event.stopPropagation();
-		dispatch('start', itemId);
+		dispatch('startIndiv', itemId);
 	};
 </script>
 
 <div class="button-group">
 	{#if state === 'Ready'}
-		<Button icon={faPlay} onclick={handleStart} />
+		<Button icon={faPlay} onclick={handleStart} isLoading={$isLoading.startIndiv} />
 	{:else}
-		<Button icon={faPause} onclick={handleStop} />
+		<Button icon={faPause} onclick={handleStop} isLoading={$isLoading.stopIndiv} />
 	{/if}
 	<Button icon={faPen} onclick={handleEdit} />
-	<Button icon={faTrash} onclick={handleDelete} />
+	<Button icon={faTrash} onclick={handleDelete} isLoading={$isLoading.deleteIndiv} />
 </div>
 
 <style>

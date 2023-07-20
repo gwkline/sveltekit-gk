@@ -26,7 +26,7 @@
 	{#if title !== ''}
 		<label for={id} class="label">{title}</label>
 	{/if}
-	<select bind:value class={generateClassString()} {style} {id} {disabled}>
+	<select bind:value class={generateClassString()} {style} {id} {disabled} on:click on:change>
 		{#each options as option (option)}
 			<option value={option}>{option}</option>
 		{/each}

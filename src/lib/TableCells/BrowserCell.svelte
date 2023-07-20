@@ -1,6 +1,4 @@
 <script lang="ts">
-	import type { Browser } from '../../types';
-
 	export let value: string;
 
 	interface BrowserLogos {

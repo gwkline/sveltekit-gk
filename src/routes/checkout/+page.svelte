@@ -1,44 +1,61 @@
 <script lang="ts">
-	import CheckoutNav from './CheckoutNav.svelte';
 	import Tags from '$lib/Tags.svelte';
 	import Table from '$lib/Table.svelte';
 	import TableRow from '$lib/TableRow.svelte';
-	import StatusBar from '../../lib/StatusBar.svelte';
+	import StatusBar from '$lib/StatusBar.svelte';
+	import UpdateBar from '$lib/UpdateBar.svelte';
+	import CheckoutNav from './CheckoutNav.svelte';
+	import TaskModalHelper from './TaskModalHelper.svelte';
 	import ConfirmationModal from '$lib/ConfirmationModal.svelte';
 	import { makeRequest } from '../../helpers';
-	import {
-		verboseTasks,
-		searchValue,
-		settings,
-		showTags,
-		sortState,
-		shiftPressed,
-		isLoading
-	} from '../../datastore';
-	import type { Task, HeaderConfigType, TableRowType, State, Settings } from '../../types';
-	import TaskModalHelper from './TaskModalHelper.svelte';
-	import UpdateBar from '$lib/UpdateBar.svelte';
+	import { verboseTasks, settings, showTags, shiftPressed, isLoading } from '../../datastore';
+	import type {
+		Task,
+		HeaderConfigType,
+		TableRowType,
+		CheckoutState,
+		Settings,
+		SortState
+	} from '../../types';
 
 	type settings = 'max_active_tasks' | 'max_starting_tasks';
-	type states = 'start' | 'stop' | 'delete' | 'duplicate' | 'edit' | 'create';
+	type states =
+		| 'start'
+		| 'stop'
+		| 'delete'
+		| 'duplicate'
+		| 'edit'
+		| 'create'
+		| 'startIndiv'
+		| 'stopIndiv'
+		| 'deleteIndiv';
+
+	let searchValue: string = '';
+	let sortState: SortState = { column: null, direction: 0 };
+
 	let showModal = false;
 	let showConfirmationModal = false;
 	let isEditing = false;
 	let isDuplicating = false;
+
 	let buttonTextCount: string;
-	let selectedTags: string[] = [];
-	let selectedState: State | '' = '';
+	let selectedState: CheckoutState | '' = '';
 	let filterOn: boolean = false;
+
 	let lastChecked: number | null = null;
 	let secondLastChecked: number | null = null;
 	let checkedAll: boolean = false;
 	let checkedCheckoutTasks: number[] = [];
+	let totalSelectedTasks: number = 0;
+
 	let filteredTasks: Task[] = [];
 	let tableData: TableRowType[] = [];
 	let tableIds: number[] = [];
+
+	let selectedTags: string[] = [];
 	let allTags: string[] = [];
 	let tagsCount: { tag: string; count: number }[] = [];
-	let totalSelectedTasks: number = 0;
+
 	let headers: string[] = [];
 	let headerConfig: HeaderConfigType<Task> = {
 		SKU: (task: Task) => task?.product?.product_id ?? '',
@@ -80,33 +97,21 @@
 	});
 
 	const updateSortState = (e: CustomEvent) => {
-		sortState.update((currentState) => {
-			let newDirection: 0 | 1 | -1 = 1;
-			let newColumn: string | null = e.detail;
-			if (currentState.column === e.detail) {
-				// Click on same column
-				if (currentState.direction === 1) {
-					// Change direction if currently ascending
-					newDirection = -1;
-				} else if (currentState.direction === -1) {
-					// Remove sorting if currently descending
-					newDirection = 0;
-					newColumn = null;
-				}
+		let currentState = sortState;
+		let newDirection: 0 | 1 | -1 = 1;
+		let newColumn: string | null = e.detail;
+		if (currentState.column === e.detail) {
+			// Click on same column
+			if (currentState.direction === 1) {
+				// Change direction if currently ascending
+				newDirection = -1;
+			} else if (currentState.direction === -1) {
+				// Remove sorting if currently descending
+				newDirection = 0;
+				newColumn = null;
 			}
-			return { column: newColumn, direction: newDirection };
-		});
-	};
-
-	const updateCheckedAll = (e: CustomEvent) => {
-		checkedAll = e.detail.checked;
-
-		if (e.detail.checked) {
-			let allIds = $verboseTasks.map((task) => task.id);
-			checkedCheckoutTasks = allIds;
-		} else {
-			checkedCheckoutTasks = [];
 		}
+		sortState = { column: newColumn, direction: newDirection };
 	};
 
 	const updateSelectedState = (e: CustomEvent) => {
@@ -118,7 +123,7 @@
 	};
 
 	const updateSearchValue = (e: CustomEvent) => {
-		searchValue.set(e.detail);
+		searchValue = e.detail;
 	};
 
 	const updateSelectedTags = (e: CustomEvent) => {
@@ -143,7 +148,7 @@
 		selectedTags = []; // Clear selection after deleting
 	};
 
-	const deleteSelectedTasks = (e: CustomEvent) => {
+	const deleteSelectedTasksByTags = (e: CustomEvent) => {
 		selectedTags.forEach((tag) => removeTaskWithTag(tag));
 		selectedTags = []; // Clear selection after deleting
 	};
@@ -244,9 +249,8 @@
 	};
 
 	const addAdditionalTag = (e: CustomEvent) => {
-		let updatedTasks: Task[] = [];
 		let newTagText = e.detail;
-
+		let updatedTasks: Task[] = [];
 		verboseTasks.update((tasks) => {
 			return tasks.map((task) => {
 				let taskHasSelectedTag = task.tags.some((t) => selectedTags.includes(t.name));
@@ -320,8 +324,18 @@
 		}
 	};
 
+	const handleCheckedAll = (e: CustomEvent) => {
+		checkedAll = e.detail.checked;
+
+		if (e.detail.checked) {
+			let allIds = filteredTasks.map((task) => task.id);
+			checkedCheckoutTasks = allIds;
+		} else {
+			checkedCheckoutTasks = [];
+		}
+	};
+
 	const handleTask = (e: CustomEvent) => {
-		console.log('hey');
 		let taskId: number | null = e.detail;
 		let taskIds: number[];
 		let state = e.type as states;
@@ -336,9 +350,13 @@
 
 		switch (state) {
 			case 'start':
-				makeRequest('post', `http://127.0.0.1:23432/tasks/start?type=undefined`, taskIds);
+			case 'startIndiv':
+				makeRequest('post', `http://127.0.0.1:23432/tasks/start?type=undefined`, taskIds, () => {
+					isLoading.set({ [state]: false });
+				});
 				break;
 			case 'stop':
+			case 'stopIndiv':
 				taskIds = taskIds.filter((id) => {
 					const task = $verboseTasks.find((task: Task) => task.id === id);
 					return task && task.state !== 'Ready';
@@ -348,9 +366,12 @@
 					isLoading.set({ [state]: false });
 					return;
 				}
-				makeRequest('post', `http://127.0.0.1:23432/tasks/stop?type=undefined`, taskIds);
+				makeRequest('post', `http://127.0.0.1:23432/tasks/stop?type=undefined`, taskIds, () => {
+					isLoading.set({ [state]: false });
+				});
 				break;
 			case 'delete':
+			case 'deleteIndiv':
 				makeRequest('delete', `http://127.0.0.1:23432/tasks?type=checkout`, taskIds, () => {
 					// Update verboseTasks by filtering out the tasks that were deleted
 					verboseTasks.update((tasks) => {
@@ -359,6 +380,7 @@
 
 					// Reset checkedCheckoutTasks
 					checkedCheckoutTasks = [];
+					isLoading.set({ [state]: false });
 				});
 				break;
 			case 'edit':
@@ -378,16 +400,13 @@
 				showModal = true;
 				break;
 		}
-
-		isLoading.set({ [state]: false });
 	};
 
 	const clearFilters = () => {
 		selectedTags = [];
 		selectedState = '';
-		searchValue.set('');
-		filteredTasks = [];
-		sortState.set({ column: null, direction: 0 });
+		searchValue = '';
+		sortState = { column: null, direction: 0 };
 	};
 
 	const saveSettings = (e: CustomEvent) => {
@@ -407,12 +426,13 @@
 		return makeRequest(method, url, $settings);
 	};
 
+	// Sets the value of filteredTasks and tableData
 	$: {
 		let filtered = $verboseTasks.filter((task) => {
 			// Keyword Search
 			let keywordMatch = true;
-			if ($searchValue !== '') {
-				keywordMatch = JSON.stringify(task).toLowerCase().includes($searchValue.toLowerCase());
+			if (searchValue !== '') {
+				keywordMatch = JSON.stringify(task).toLowerCase().includes(searchValue.toLowerCase());
 			}
 
 			// Tag Filtering
@@ -427,7 +447,7 @@
 					selectedTags.some((tag) => task.tags.map((tagObj) => tagObj.name).includes(tag));
 			}
 
-			// State Filtering
+			// CheckoutState Filtering
 			let stateMatch = !selectedState || task.state === selectedState;
 			return keywordMatch && tagMatch && stateMatch;
 		});
@@ -446,9 +466,9 @@
 			return rowObject;
 		});
 
-		if (typeof $sortState.column === 'string') {
+		if (typeof sortState.column === 'string') {
 			// Get the getter function for the sort column
-			const getSortValue = headerConfig[$sortState.column];
+			const getSortValue = headerConfig[sortState.column];
 			const indices = tableDataShortenedTemp.map((_, index) => index); // Initialize indices array
 
 			indices.sort((aIndex, bIndex) => {
@@ -457,10 +477,10 @@
 				const bValue = getSortValue(filtered[bIndex]).toLowerCase();
 
 				if (aValue < bValue) {
-					return $sortState.direction === 1 ? -1 : 1;
+					return sortState.direction === 1 ? -1 : 1;
 				}
 				if (aValue > bValue) {
-					return $sortState.direction === 1 ? 1 : -1;
+					return sortState.direction === 1 ? 1 : -1;
 				}
 				return 0;
 			});
@@ -473,6 +493,7 @@
 		tableData = tableDataShortenedTemp;
 	}
 
+	// Sets the value of allTags and tagsCount
 	$: {
 		allTags = $verboseTasks
 			.map((task) => task.tags)
@@ -498,6 +519,7 @@
 		}
 	}
 
+	// Sets the value of totalSelectedTasks
 	$: {
 		// Get all tasks with selected tags, but don't count a task more than once
 		const selectedTasks = new Set();
@@ -517,6 +539,7 @@
 		totalSelectedTasks = selectedTasks.size;
 	}
 
+	// Sets the value of buttonTextCount
 	$: {
 		let items = checkedCheckoutTasks;
 		if ($shiftPressed || items.length == 0) {
@@ -530,11 +553,10 @@
 
 	$: {
 		if (
-			(filteredTasks.length > 0 && filteredTasks.length < $verboseTasks.length) ||
 			selectedTags.length > 0 ||
 			selectedState != '' ||
-			$searchValue != '' ||
-			$sortState.column != null
+			searchValue != '' ||
+			sortState.column != null
 		) {
 			filterOn = true;
 		} else {
@@ -552,11 +574,16 @@
 	</UpdateBar>
 {/if}
 
-<StatusBar tasks={filteredTasks} {selectedState} on:selectedState={updateSelectedState} />
+<StatusBar
+	tasks={filteredTasks}
+	{selectedState}
+	on:selectedState={updateSelectedState}
+	page="checkout"
+/>
 
 <CheckoutNav
-	searchValue={$searchValue}
 	{buttonTextCount}
+	{searchValue}
 	maxStartingTasks={`${$settings.max_starting_tasks}`}
 	maxActiveTasks={`${$settings.max_active_tasks}`}
 	on:searchValue={updateSearchValue}
@@ -574,12 +601,12 @@
 {#if $showTags}
 	<Tags
 		{tagsCount}
-		totalSelectedItems={totalSelectedTasks}
 		{selectedTags}
+		totalSelectedItems={totalSelectedTasks}
 		checkedItems={checkedCheckoutTasks}
 		on:selectTag={updateSelectedTags}
 		on:deleteSelectedTags={deleteSelectedTags}
-		on:deleteSelectedTasks={deleteSelectedTasks}
+		on:deleteSelectedTasks={deleteSelectedTasksByTags}
 		on:updateTagNames={updateTagNames}
 		on:addAdditionalTag={addAdditionalTag}
 		on:addTagToTasks={addTagToTasks}
@@ -588,18 +615,18 @@
 
 <div class="container">
 	<Table
-		{tableData}
-		{headers}
-		{tableIds}
-		verboseData={filteredTasks}
-		sortState={$sortState}
-		{checkedAll}
 		let:row
 		let:index
 		let:itemId
 		let:thisTask
+		{tableData}
+		{headers}
+		{tableIds}
+		{checkedAll}
+		verboseData={filteredTasks}
+		{sortState}
 		on:sort={updateSortState}
-		on:checkedAll={updateCheckedAll}
+		on:checkedAll={handleCheckedAll}
 	>
 		<TableRow
 			{row}
@@ -608,16 +635,16 @@
 			{thisTask}
 			checked={checkedCheckoutTasks.includes(itemId)}
 			on:checked={handleChecked}
-			on:delete={handleTask}
-			on:start={handleTask}
+			on:deleteIndiv={handleTask}
+			on:startIndiv={handleTask}
 			on:edit={handleTask}
-			on:stop={handleTask}
+			on:stopIndiv={handleTask}
 		/>
 	</Table>
 </div>
 
 {#if showModal}
-	<TaskModalHelper bind:showModal bind:isEditing bind:isDuplicating {checkedCheckoutTasks} />
+	<TaskModalHelper {checkedCheckoutTasks} bind:showModal bind:isEditing bind:isDuplicating />
 {/if}
 
 {#if showConfirmationModal}

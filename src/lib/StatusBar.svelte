@@ -8,18 +8,50 @@
 		faX,
 		faPlay,
 		faClock,
-		faListOl
+		faListOl,
+		faCheck
 	} from '@fortawesome/free-solid-svg-icons';
 	import { stateColors } from '../datastore';
-	import type { ActivityTask, State, Task } from '../types';
+	import type { ActivityState, ActivityTask, CheckoutState, Task } from '../types';
 	import { createEventDispatcher } from 'svelte';
 
 	export let tasks: Task[] | ActivityTask[] = [];
-	export let selectedState: State | '' = '';
+	export let selectedState: CheckoutState | ActivityState | '' = '';
+	export let page: 'activity' | 'checkout' = 'checkout';
 
 	const dispatch = createEventDispatcher();
 	// Array of states in the desired order
-	const stateOrder: State[] = [
+	const stateIsRelevant = (
+		state: CheckoutState | ActivityState,
+		page: 'checkout' | 'activity'
+	): boolean => {
+		const checkoutStates: CheckoutState[] = [
+			'Ready',
+			'Queued',
+			'Starting',
+			'Running',
+			'Waiting',
+			'Error',
+			'Entered',
+			'Winning'
+		];
+		const activityStates: ActivityState[] = [
+			'Ready',
+			'Queued',
+			'Starting',
+			'Running',
+			'Error',
+			'Complete'
+		];
+
+		if (page === 'checkout') {
+			return checkoutStates.includes(state as CheckoutState);
+		} else {
+			return activityStates.includes(state as ActivityState);
+		}
+	};
+
+	const stateOrder: (CheckoutState | ActivityState)[] = [
 		'Ready',
 		'Queued',
 		'Starting',
@@ -27,25 +59,70 @@
 		'Waiting',
 		'Error',
 		'Entered',
-		'Winning'
-	];
+		'Winning',
+		'Complete'
+	].filter((state) => stateIsRelevant(state as CheckoutState | ActivityState, page)) as (
+		| CheckoutState
+		| ActivityState
+	)[];
+
 	const capitalizeFirstLetter = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
-	const countTasksByState = (tasks: Task[] | ActivityTask[]): [State, number][] => {
-		const counts = {
-			Ready: 0,
-			Queued: 0,
-			Starting: 0,
-			Running: 0,
-			Waiting: 0,
-			Error: 0,
-			Entered: 0,
-			Winning: 0
-		};
+
+	type ActivityCounts = Record<ActivityState, number>;
+	type CheckoutCounts = Record<CheckoutState, number>;
+
+	function isActivityCounts(counts: ActivityCounts | CheckoutCounts): counts is ActivityCounts {
+		return (counts as ActivityCounts).Complete !== undefined;
+	}
+
+	const countTasksByState = (
+		tasks: Task[] | ActivityTask[]
+	): [CheckoutState | ActivityState, number][] => {
+		let counts: ActivityCounts | CheckoutCounts;
+
+		if (page === 'activity') {
+			counts = {
+				Ready: 0,
+				Queued: 0,
+				Starting: 0,
+				Running: 0,
+				Error: 0,
+				Complete: 0
+			} as ActivityCounts;
+		} else {
+			counts = {
+				Ready: 0,
+				Queued: 0,
+				Starting: 0,
+				Running: 0,
+				Waiting: 0,
+				Error: 0,
+				Entered: 0,
+				Winning: 0
+			} as CheckoutCounts;
+		}
+
 		tasks.forEach((task) => {
-			counts[task.state]++;
+			if (counts.hasOwnProperty(task.state)) {
+				if (isActivityCounts(counts)) {
+					counts[task.state as ActivityState]++;
+				} else {
+					counts[task.state as CheckoutState]++;
+				}
+			}
 		});
-		return Object.entries(counts) as [State, number][]; // Convert object to an array of [key, value] pairs
+
+		return Object.entries(counts) as [CheckoutState | ActivityState, number][];
 	};
+
+	const getColor = (state: CheckoutState | ActivityState) => {
+		if (page === 'activity' && state === 'Complete') {
+			return 'var(--success-green)';
+		} else {
+			return stateColors[state];
+		}
+	};
+
 	const stateIconMapping = {
 		Ready: faPlay,
 		Queued: faListOl,
@@ -54,9 +131,10 @@
 		Waiting: faClock,
 		Error: faX,
 		Entered: faFlag,
-		Winning: faTrophy
+		Winning: faTrophy,
+		Complete: faCheck
 	};
-	const selectState = (state: State) => {
+	const selectState = (state: CheckoutState | ActivityState) => {
 		dispatch('selectedState', state);
 	};
 	$: orderedTasks = tasks
@@ -70,7 +148,7 @@
 			class={`state-item ${state === selectedState ? 'selected' : ''}`}
 			on:click={() => selectState(state)}
 		>
-			<div class="state-color-icon" style="background-color: {stateColors[state]};">
+			<div class="state-color-icon" style="background-color: {getColor(state)};">
 				<Fa icon={stateIconMapping[state]} color="var(--white)" size="sm" />
 			</div>
 			<span class="state-name">{capitalizeFirstLetter(state) + ':'}</span>
@@ -83,7 +161,7 @@
 	{#each orderedTasks as task}
 		<div
 			class="status-section"
-			style="background-color: {stateColors[task['state']]};"
+			style="background-color: {getColor(task['state'])};"
 			title={capitalizeFirstLetter(task['state'])}
 		/>
 	{/each}
@@ -99,11 +177,13 @@
 		flex-shrink: 0;
 		margin: 10px 0px;
 		outline: 1px solid var(--light-gray-3);
+		overflow: hidden;
 	}
 
 	.status-section {
 		flex-grow: 1;
 		text-align: center;
+		transition: background-color 0.3s ease;
 	}
 
 	.state-info {
@@ -127,6 +207,7 @@
 		border: 1px solid var(--light-gray-4);
 		border-radius: 5px;
 		padding: 3px;
+		transition: border-color 0.3s ease;
 	}
 
 	.state-color-icon {
@@ -137,6 +218,7 @@
 		height: 30px;
 		border-radius: 5px;
 		box-sizing: border-box;
+		transition: background-color 0.3s ease;
 	}
 
 	.state-name,
