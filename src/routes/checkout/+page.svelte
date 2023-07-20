@@ -4,6 +4,7 @@
 	import Table from '$lib/Table.svelte';
 	import TableRow from '$lib/TableRow.svelte';
 	import StatusBar from '../../lib/StatusBar.svelte';
+	import ConfirmationModal from '$lib/ConfirmationModal.svelte';
 	import { makeRequest } from '../../helpers';
 	import {
 		verboseTasks,
@@ -11,21 +12,27 @@
 		settings,
 		showTags,
 		sortState,
-		checkedCheckoutTasks,
-		shiftPressed
+		shiftPressed,
+		isLoading
 	} from '../../datastore';
-	import type { Task, HeaderConfigType, TableRowType, State } from '../../types';
+	import type { Task, HeaderConfigType, TableRowType, State, Settings } from '../../types';
 	import TaskModalHelper from './TaskModalHelper.svelte';
 	import UpdateBar from '$lib/UpdateBar.svelte';
 
+	type settings = 'max_active_tasks' | 'max_starting_tasks';
+	type states = 'start' | 'stop' | 'delete' | 'duplicate' | 'edit' | 'create';
 	let showModal = false;
+	let showConfirmationModal = false;
 	let isEditing = false;
+	let isDuplicating = false;
+	let buttonTextCount: string;
 	let selectedTags: string[] = [];
 	let selectedState: State | '' = '';
 	let filterOn: boolean = false;
 	let lastChecked: number | null = null;
 	let secondLastChecked: number | null = null;
 	let checkedAll: boolean = false;
+	let checkedCheckoutTasks: number[] = [];
 	let filteredTasks: Task[] = [];
 	let tableData: TableRowType[] = [];
 	let tableIds: number[] = [];
@@ -96,9 +103,9 @@
 
 		if (e.detail.checked) {
 			let allIds = $verboseTasks.map((task) => task.id);
-			checkedCheckoutTasks.set(allIds);
+			checkedCheckoutTasks = allIds;
 		} else {
-			checkedCheckoutTasks.set([]);
+			checkedCheckoutTasks = [];
 		}
 	};
 
@@ -274,7 +281,7 @@
 		let updatedTasks: Task[] = [];
 		verboseTasks.update((tasks) => {
 			return tasks.map((task) => {
-				if ($checkedCheckoutTasks.includes(task.id)) {
+				if (checkedCheckoutTasks.includes(task.id)) {
 					task.tags.push({ name: newTagText });
 					updatedTasks.push(task);
 				}
@@ -292,14 +299,13 @@
 		secondLastChecked = lastChecked;
 		lastChecked = itemId;
 
-		checkedCheckoutTasks.update((arrayOfTaskIndexes) => {
-			if ($checkedCheckoutTasks.includes(itemId)) {
-				arrayOfTaskIndexes.splice(arrayOfTaskIndexes.indexOf(itemId), 1);
-			} else {
-				arrayOfTaskIndexes.push(itemId);
-			}
-			return arrayOfTaskIndexes;
-		});
+		let arrayOfTaskIndexes = checkedCheckoutTasks;
+		if (checkedCheckoutTasks.includes(itemId)) {
+			arrayOfTaskIndexes.splice(arrayOfTaskIndexes.indexOf(itemId), 1);
+		} else {
+			arrayOfTaskIndexes.push(itemId);
+		}
+		checkedCheckoutTasks = arrayOfTaskIndexes;
 
 		if ($shiftPressed && lastChecked === itemId && secondLastChecked !== null) {
 			let start = Math.min(lastChecked, secondLastChecked);
@@ -307,44 +313,73 @@
 
 			for (let i = start + 1; i < end; i++) {
 				let taskWithThisId = $verboseTasks.find((task) => task.id === i);
-				if (taskWithThisId && !$checkedCheckoutTasks.includes(taskWithThisId.id)) {
-					checkedCheckoutTasks.update((value) => {
-						value.push(i);
-						return value;
-					});
+				if (taskWithThisId && !checkedCheckoutTasks.includes(taskWithThisId.id)) {
+					checkedCheckoutTasks.push(i);
 				}
 			}
 		}
 	};
 
 	const handleTask = (e: CustomEvent) => {
-		let taskId = e.detail;
-		let mode = e.type;
+		console.log('hey');
+		let taskId: number | null = e.detail;
+		let taskIds: number[];
+		let state = e.type as states;
+		isLoading.set({ [state]: true });
 
-		switch (mode) {
+		if (taskId) {
+			taskIds = [taskId];
+		} else {
+			let all = $shiftPressed || checkedCheckoutTasks.filter((item) => item != -1).length === 0;
+			taskIds = all ? $verboseTasks.map((task) => task.id) : checkedCheckoutTasks;
+		}
+
+		switch (state) {
 			case 'start':
-				makeRequest('post', `http://127.0.0.1:23432/tasks/start?type=undefined`, [taskId]);
+				makeRequest('post', `http://127.0.0.1:23432/tasks/start?type=undefined`, taskIds);
 				break;
 			case 'stop':
-				makeRequest('post', `http://127.0.0.1:23432/tasks/stop?type=undefined`, [taskId]);
+				taskIds = taskIds.filter((id) => {
+					const task = $verboseTasks.find((task: Task) => task.id === id);
+					return task && task.state !== 'Ready';
+				});
+				if (taskIds.length === 0) {
+					// If there are no valid tasks to stop, don't proceed.
+					isLoading.set({ [state]: false });
+					return;
+				}
+				makeRequest('post', `http://127.0.0.1:23432/tasks/stop?type=undefined`, taskIds);
 				break;
 			case 'delete':
-				makeRequest('delete', `http://127.0.0.1:23432/tasks?type=checkout`, [taskId], () => {
+				makeRequest('delete', `http://127.0.0.1:23432/tasks?type=checkout`, taskIds, () => {
 					// Update verboseTasks by filtering out the tasks that were deleted
 					verboseTasks.update((tasks) => {
 						return tasks.filter((task) => taskId != task.id);
 					});
 
 					// Reset checkedCheckoutTasks
-					checkedCheckoutTasks.set([]);
+					checkedCheckoutTasks = [];
 				});
 				break;
 			case 'edit':
-				checkedCheckoutTasks.set([taskId]);
+				if (taskId) {
+					checkedCheckoutTasks = [taskId];
+				}
 				isEditing = true;
 				showModal = true;
 				break;
+			case 'create':
+				isEditing = false;
+				showModal = true;
+				break;
+			case 'duplicate':
+				isEditing = true;
+				isDuplicating = true;
+				showModal = true;
+				break;
 		}
+
+		isLoading.set({ [state]: false });
 	};
 
 	const clearFilters = () => {
@@ -353,6 +388,23 @@
 		searchValue.set('');
 		filteredTasks = [];
 		sortState.set({ column: null, direction: 0 });
+	};
+
+	const saveSettings = (e: CustomEvent) => {
+		let settingKey = e.detail.name as settings;
+		let value = e.detail.value;
+
+		settings.update((currentSettings) => {
+			let newSettings = currentSettings as Settings;
+
+			newSettings[settingKey] = value ? parseInt(value) : newSettings[settingKey];
+			return newSettings;
+		});
+
+		const url = 'http://127.0.0.1:23432/settings';
+		const method = 'put';
+
+		return makeRequest(method, url, $settings);
 	};
 
 	$: {
@@ -465,16 +517,29 @@
 		totalSelectedTasks = selectedTasks.size;
 	}
 
-	$: if (
-		(filteredTasks.length > 0 && filteredTasks.length < $verboseTasks.length) ||
-		selectedTags.length > 0 ||
-		selectedState != '' ||
-		$searchValue != '' ||
-		$sortState.column != null
-	) {
-		filterOn = true;
-	} else {
-		filterOn = false;
+	$: {
+		let items = checkedCheckoutTasks;
+		if ($shiftPressed || items.length == 0) {
+			buttonTextCount = 'All';
+		} else if (items.length == $verboseTasks.length) {
+			buttonTextCount = `All (${items.length})`;
+		} else {
+			buttonTextCount = `${items.length}`;
+		}
+	}
+
+	$: {
+		if (
+			(filteredTasks.length > 0 && filteredTasks.length < $verboseTasks.length) ||
+			selectedTags.length > 0 ||
+			selectedState != '' ||
+			$searchValue != '' ||
+			$sortState.column != null
+		) {
+			filterOn = true;
+		} else {
+			filterOn = false;
+		}
 	}
 </script>
 
@@ -489,14 +554,29 @@
 
 <StatusBar tasks={filteredTasks} {selectedState} on:selectedState={updateSelectedState} />
 
-<CheckoutNav searchValue={$searchValue} on:searchValue={updateSearchValue} />
+<CheckoutNav
+	searchValue={$searchValue}
+	{buttonTextCount}
+	maxStartingTasks={`${$settings.max_starting_tasks}`}
+	maxActiveTasks={`${$settings.max_active_tasks}`}
+	on:searchValue={updateSearchValue}
+	on:create={handleTask}
+	on:start={handleTask}
+	on:stop={handleTask}
+	on:edit={handleTask}
+	on:duplicate={handleTask}
+	on:saveSettings={saveSettings}
+	on:showConfirmationModal={() => {
+		showConfirmationModal = true;
+	}}
+/>
 
 {#if $showTags}
 	<Tags
 		{tagsCount}
 		totalSelectedItems={totalSelectedTasks}
 		{selectedTags}
-		checkedItems={$checkedCheckoutTasks}
+		checkedItems={checkedCheckoutTasks}
 		on:selectTag={updateSelectedTags}
 		on:deleteSelectedTags={deleteSelectedTags}
 		on:deleteSelectedTasks={deleteSelectedTasks}
@@ -526,7 +606,7 @@
 			{index}
 			{itemId}
 			{thisTask}
-			checked={$checkedCheckoutTasks.includes(itemId)}
+			checked={checkedCheckoutTasks.includes(itemId)}
 			on:checked={handleChecked}
 			on:delete={handleTask}
 			on:start={handleTask}
@@ -537,7 +617,20 @@
 </div>
 
 {#if showModal}
-	<TaskModalHelper bind:showModal bind:isEditing />
+	<TaskModalHelper bind:showModal bind:isEditing bind:isDuplicating {checkedCheckoutTasks} />
+{/if}
+
+{#if showConfirmationModal}
+	<ConfirmationModal
+		message={`You're about to delete ${buttonTextCount} of your tasks. This cannot be undone. Are you sure you want to continue?`}
+		on:confirm={() => {
+			showConfirmationModal = false;
+			handleTask(new CustomEvent('delete'));
+		}}
+		on:cancel={() => {
+			showConfirmationModal = false;
+		}}
+	/>
 {/if}
 
 <style>

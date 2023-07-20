@@ -43,7 +43,9 @@
 	}
 
 	.state-color-icon {
-		display: inline-flex;
+		display: flex;
+		flex-grow: 0;
+		flex-shrink: 0;
 		align-items: center;
 		justify-content: center;
 		width: 30px;

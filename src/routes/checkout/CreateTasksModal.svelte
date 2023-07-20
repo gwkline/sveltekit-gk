@@ -7,14 +7,7 @@
 	import Toggle from '$lib/Toggle.svelte';
 	import { faSave, faSearch, faStar } from '@fortawesome/free-solid-svg-icons';
 	import { makeRequest } from '../../helpers';
-	import {
-		schedules,
-		accounts,
-		isLoading,
-		checkoutSettings,
-		verboseTasks,
-		checkedCheckoutTasks
-	} from '../../datastore';
+	import { schedules, accounts, isLoading, checkoutSettings, verboseTasks } from '../../datastore';
 	import type { Account, OutboundTask, Tag } from '../../types';
 
 	enum ModalType {
@@ -25,6 +18,7 @@
 	}
 	export let closeModal: () => void;
 	export let currentModal: ModalType;
+	export let checkedCheckoutTasks: number[] = [];
 
 	export let sku = '';
 	export let preferredSizeInput = '';
@@ -117,7 +111,7 @@
 		verboseTasks.update((tasks) => {
 			let iter = 0;
 			return tasks.map((task) => {
-				if ($checkedCheckoutTasks.length === 0 || $checkedCheckoutTasks.includes(task.id)) {
+				if (checkedCheckoutTasks.length === 0 || checkedCheckoutTasks.includes(task.id)) {
 					if (editSku) {
 						task.product.product_id = sku;
 					}
@@ -165,7 +159,7 @@
 		let updatedTasks: any[] = [];
 		let iter = 0;
 		$verboseTasks.forEach((task: OutboundTask) => {
-			if ($checkedCheckoutTasks.length === 0 || $checkedCheckoutTasks.includes(task.id)) {
+			if (checkedCheckoutTasks.length === 0 || checkedCheckoutTasks.includes(task.id)) {
 				task.account = null;
 				task.id = 0;
 
@@ -316,8 +310,7 @@
 
 			predictedTaskCount = filteredAccounts.length;
 		} else {
-			predictedTaskCount =
-				$checkedCheckoutTasks.length === 0 ? 'all' : $checkedCheckoutTasks.length;
+			predictedTaskCount = checkedCheckoutTasks.length === 0 ? 'all' : checkedCheckoutTasks.length;
 		}
 	}
 
