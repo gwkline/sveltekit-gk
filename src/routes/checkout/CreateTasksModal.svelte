@@ -239,7 +239,9 @@
 	makeRequest('get', 'http://127.0.0.1:23432/accounts', null, (response) => {
 		let rawAccounts: Account[] = response.data;
 		let cleanedAccounts = rawAccounts.map((account) => {
-			account['metadata'] = {};
+			account['metadata'] = {
+				logged_in: account.metadata?.logged_in ? account.metadata?.logged_in : false
+			};
 			let profile = account['profile'];
 			let payment = profile['payment'];
 

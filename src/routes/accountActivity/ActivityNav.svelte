@@ -16,9 +16,30 @@
 
 	let maxStartingActivityTaskCount: string;
 	let modeValue: ActivityMode;
+	let scheduleValue: string;
+
+	const valueTitleMap: Record<ActivityMode, string> = {
+		login: 'Login/EA',
+		bp: 'BP Solve',
+		stories: 'Stories',
+		browse: 'Autobrowse',
+		passwordreset: 'Password Reset',
+		addverifiednumber: 'SMS Verify',
+		manual: 'Manual'
+	};
+
+	const titleValueMap: Record<string, ActivityMode> = {
+		'Login/EA': 'login',
+		'BP Solve': 'bp',
+		Stories: 'stories',
+		Autobrowse: 'browse',
+		'Password Reset': 'passwordreset',
+		'SMS Verify': 'addverifiednumber',
+		Manual: 'manual'
+	};
 
 	type settings = 'max_starting_activity_tasks';
-	type states = 'start' | 'stop' | 'delete' | 'duplicate' | 'edit' | 'create';
+	type states = 'start' | 'stop' | 'delete' | 'duplicate' | 'editSchedule' | 'editMode' | 'create';
 
 	const dispatch = createEventDispatcher();
 
@@ -30,8 +51,11 @@
 			case 'stop':
 				dispatch('stop');
 				break;
-			case 'edit':
-				dispatch('edit');
+			case 'editMode':
+				dispatch('changeActivityMode', { mode: titleValueMap[modeValue] });
+				break;
+			case 'editSchedule':
+				dispatch('changeSchedule', scheduleValue);
 				break;
 			case 'delete':
 				dispatch('delete');
@@ -45,17 +69,8 @@
 		maxStartingActivityTaskCount = '';
 	};
 
-	const valueTitleMap: Record<ActivityMode, string> = {
-		login: 'Login/EA',
-		bp: 'BP Solve',
-		stories: 'Stories',
-		browse: 'Autobrowse',
-		passwordreset: 'Password Reset',
-		addverifiednumber: 'SMS Verify',
-		manual: 'Manual'
-	};
-
-	let scheduleNames = ['None', ...schedules.map((schedule) => schedule.name)];
+	let scheduleNames: string[] = [];
+	$: scheduleNames = ['None', ...schedules.map((schedule) => schedule.name)];
 </script>
 
 <div class="container">
@@ -63,7 +78,7 @@
 		<div class="button-group">
 			<Dropdown
 				id="activityMode"
-				style="width: 160px; height: 32px;"
+				style="width: 160px; height: 32px; margin-right: 10px;"
 				options={Object.values(valueTitleMap)}
 				bind:value={modeValue}
 				size="lg"
@@ -72,7 +87,8 @@
 				variant="default"
 				size="md"
 				icon={faPen}
-				onclick={() => handleTaskAction('edit')}
+				isLoading={$isLoading.changeActivityMode}
+				onclick={() => handleTaskAction('editMode')}
 				resizable={false}
 				style="button">Set {buttonTextCount} Modes</Button
 			>
@@ -112,17 +128,18 @@
 		</div>
 		<div class="button-group right-button-group">
 			<Dropdown
-				id="activityMode"
-				style="width: 160px; height: 32px;"
+				id="scheduleDropdown"
+				style="width: 160px; height: 32px; margin-right: 10px;"
 				options={scheduleNames}
-				bind:value={modeValue}
+				bind:value={scheduleValue}
 				size="lg"
 			/>
 			<Button
 				variant="default"
 				size="md"
 				icon={faPen}
-				onclick={() => handleTaskAction('edit')}
+				isLoading={$isLoading.changeSchedule}
+				onclick={() => handleTaskAction('editSchedule')}
 				resizable={false}
 				style="button">Set {buttonTextCount} Schedules</Button
 			>

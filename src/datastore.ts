@@ -29,7 +29,7 @@ const persistentStore = <T>(key: string, startValue: T): Writable<T> => {
 export const sidebarCollapsed = persistentStore('sidebarCollapsed', true);
 export const showTags = persistentStore('showTags', false);
 
-export const isLoading = persistentStore<Record<string, boolean>>('isLoading', {});
+export const isLoading = writable<Record<string, boolean>>({});
 export const shiftPressed = writable(false);
 export const accessDenied = writable(false);
 export const networkError = writable(false);

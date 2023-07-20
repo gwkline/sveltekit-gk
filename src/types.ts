@@ -114,7 +114,7 @@ export type Account = {
 	type: number;
 	updated_at: string;
 	created_at: string;
-	metadata: object;
+	metadata: AccountMetadata | undefined;
 	tags: Tag[];
 	previous_wins: PreviousWins;
 	use_account_name: boolean;
@@ -129,6 +129,19 @@ export type ShortAccount = {
 	proxy: string;
 	profile: ShortProfile;
 	tags: Tag[];
+	metadata: AccountMetadata | undefined;
+};
+
+export type AccountMetadata = {
+	bp_solved_at?: string;
+	has_exclusive_offer?: boolean;
+	local_storage?: object;
+	logged_in: boolean;
+	network_request_headers?: string;
+	raw_cookie?: string;
+	user_details?: object;
+	user_session?: object;
+	watched_stories?: object;
 };
 
 export type ProxyList = {

@@ -13,7 +13,8 @@
 		showTags,
 		shiftPressed,
 		isLoading,
-		schedules
+		schedules,
+		verboseTasks
 	} from '../../datastore';
 	import type {
 		Task,
@@ -84,6 +85,9 @@
 				username: account['username'],
 				proxy: account['proxy'],
 				tags: account['tags'],
+				metadata: {
+					logged_in: account.metadata?.logged_in ? account.metadata?.logged_in : false
+				},
 				profile: {
 					id: account['profile']['id'],
 					name: account['profile']['name'],
@@ -346,6 +350,18 @@
 			case 'delete':
 			case 'deleteIndiv':
 				makeRequest('delete', 'http://127.0.0.1:23432/accounts/sessions', taskIds, () => {
+					verboseActivityTasks.update((tasks) => {
+						return tasks.map((task) => {
+							if (taskIds.includes(task.id)) {
+								if (typeof task.account.metadata === 'undefined') {
+									task.account.metadata = { logged_in: false };
+								} else {
+									task.account.metadata.logged_in = false;
+								}
+							}
+							return task;
+						});
+					});
 					isLoading.set({ [state]: false });
 				});
 				break;
@@ -395,7 +411,53 @@
 			task.mode = mode;
 			return task;
 		});
-		return makeRequest('put', 'http://127.0.0.1:23432/accounts/activity', tasks);
+
+		return makeRequest('put', 'http://127.0.0.1:23432/accounts/activity', tasks, () => {
+			verboseActivityTasks.update((stateTasks) => {
+				for (let task of tasks) {
+					const index = stateTasks.findIndex((t) => t.id === task.id);
+					if (index !== -1) {
+						stateTasks[index] = task;
+					}
+				}
+				return stateTasks;
+			});
+			isLoading.set({ [state]: false });
+		});
+	};
+
+	const changeSchedule = (e: CustomEvent) => {
+		console.log(e);
+		let scheduleName: string = e.detail;
+		let taskIds: number[];
+		let state = e.type as states;
+		isLoading.set({ [state]: true });
+
+		let all = $shiftPressed || checkedCheckoutTasks.filter((item) => item != -1).length === 0;
+		taskIds = all ? $verboseActivityTasks.map((task) => task.id) : checkedCheckoutTasks;
+
+		let tasks = $verboseActivityTasks.filter((task: ActivityTask) => taskIds.includes(task.id));
+		tasks = tasks.map((task) => {
+			let foundSchedule = $schedules.find((schedule) => schedule.name === scheduleName);
+			if (foundSchedule) {
+				task.schedule_id = foundSchedule.id;
+			} else if (scheduleName === 'None' || scheduleName === '') {
+				task.schedule_id = 0;
+			}
+			return task;
+		});
+		return makeRequest('put', 'http://127.0.0.1:23432/accounts/activity', tasks, () => {
+			verboseActivityTasks.update((stateTasks) => {
+				for (let task of tasks) {
+					const index = stateTasks.findIndex((t) => t.id === task.id);
+					if (index !== -1) {
+						stateTasks[index] = task;
+					}
+				}
+				return stateTasks;
+			});
+			isLoading.set({ [state]: false });
+		});
 	};
 
 	// Sets the value of filteredTasks and tableData
@@ -565,7 +627,8 @@
 	on:searchValue={updateSearchValue}
 	on:start={handleTask}
 	on:stop={handleTask}
-	on:edit={handleTask}
+	on:changeActivityMode={changeActivityMode}
+	on:changeSchedule={changeSchedule}
 	on:saveSettings={saveSettings}
 	on:delete={() => {
 		showConfirmationModal = true;

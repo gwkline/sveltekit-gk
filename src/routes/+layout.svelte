@@ -137,7 +137,7 @@
 			>Please make sure your Project Enigma is running and that you are connected to the internet.</UpdateBar
 		>
 	{/if}
-	{#if $accessTokenExpiration < Date.now() / 1000}
+	{#if $accessTokenExpiration < Date.now() / 1000 && $accessTokenExpiration != -1}
 		<UpdateBar color="var(--danger-red)"
 			>Your authorization has expired. Please refresh the page to continue using the bot
 		</UpdateBar>

@@ -80,6 +80,9 @@
 				username: account['username'],
 				proxy: account['proxy'],
 				tags: account['tags'],
+				metadata: {
+					logged_in: account.metadata?.logged_in ? account.metadata?.logged_in : false
+				},
 				profile: {
 					id: account['profile']['id'],
 					name: account['profile']['name'],

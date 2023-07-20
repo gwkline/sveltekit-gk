@@ -1,13 +1,35 @@
 <script lang="ts">
+	import Tooltip from '$lib/Tooltip.svelte';
+	import { faUser } from '@fortawesome/free-solid-svg-icons';
+	import Fa from 'svelte-fa';
+
 	export let value: string = '';
+	export let loggedIn: boolean;
 </script>
 
-<div>
-	<span>{value.split('@')[0]}</span>
-	<span class="bottom-text">{'@' + value.split('@')[1]}</span>
+<div class="container">
+	{#if loggedIn}
+		<Tooltip text="testing">
+			<Fa icon={faUser} />
+		</Tooltip>
+	{/if}
+	<div class="username">
+		<span>{value.split('@')[0]}</span>
+		<span class="bottom-text">{'@' + value.split('@')[1]}</span>
+	</div>
 </div>
 
 <style>
+	.container {
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+	}
+	.username {
+		display: flex;
+		flex-direction: column;
+		margin-left: 10px;
+	}
 	.bottom-text {
 		display: block;
 		font-size: 11px;

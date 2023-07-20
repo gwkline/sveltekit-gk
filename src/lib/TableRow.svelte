@@ -27,7 +27,7 @@
 
 <tr on:click|stopPropagation={handleClick} class={checked ? 'active' : ''}>
 	<td class="Count">
-		<CheckboxCell {index} {checked} on:change={handleClick} />
+		<CheckboxCell {index} {checked} schedule={row.thisTask.schedule_id} on:change={handleClick} />
 	</td>
 
 	{#if row.thisTask}
@@ -41,7 +41,7 @@
 					{:else if column === 'SKU'}
 						<SkuCell {value} size={row.thisTask.product.size || ''} />
 					{:else if column === 'Account'}
-						<AccountCell {value} />
+						<AccountCell {value} loggedIn={row.thisTask.account.metadata?.logged_in || false} />
 					{:else if column === 'Proxy'}
 						<ProxyCell {value} />
 					{:else if column === 'Mode'}
