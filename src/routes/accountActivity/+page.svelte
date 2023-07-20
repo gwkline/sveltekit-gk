@@ -12,7 +12,8 @@
 		settings,
 		showTags,
 		shiftPressed,
-		isLoading
+		isLoading,
+		schedules
 	} from '../../datastore';
 	import type {
 		Task,
@@ -97,6 +98,10 @@
 			return task;
 		});
 		verboseActivityTasks.set(cleanedData);
+	});
+
+	makeRequest('get', 'http://127.0.0.1:23432/schedules', null, (response) => {
+		schedules.set(response.data);
 	});
 
 	const updateSortState = (e: CustomEvent) => {
@@ -319,7 +324,6 @@
 		switch (state) {
 			case 'start':
 			case 'startIndiv':
-				console.log('attempting to start tasks');
 				makeRequest('post', 'http://127.0.0.1:23432/accounts/activity/start', taskIds, () => {
 					isLoading.set({ [state]: false });
 				});
@@ -373,7 +377,6 @@
 	};
 
 	const changeActivityMode = (e: CustomEvent) => {
-		console.log(e);
 		let taskId: number = e.detail.id;
 		let mode: ActivityMode = e.detail.mode;
 		let taskIds: number[];
@@ -426,8 +429,12 @@
 		headers = Object.keys(headerConfig);
 		tableIds = [];
 
-		let tableDataShortenedTemp = filtered.map((row) => {
-			const rowObject: TableRowType = {};
+		let tableDataShortenedTemp = filtered.map((row, index) => {
+			const rowObject: TableRowType = {
+				index: index + 1,
+				itemId: row.id,
+				thisTask: row
+			};
 			for (const header of headers) {
 				rowObject[header] = headerConfig[header](row);
 			}
@@ -553,6 +560,7 @@
 <ActivityNav
 	{buttonTextCount}
 	{searchValue}
+	schedules={$schedules}
 	maxStartingActivityTasks={`${$settings.max_starting_activity_tasks}`}
 	on:searchValue={updateSearchValue}
 	on:start={handleTask}
@@ -580,24 +588,16 @@
 <div class="container">
 	<Table
 		let:row
-		let:index
-		let:itemId
-		let:thisTask
 		{tableData}
 		{headers}
-		{tableIds}
 		{checkedAll}
-		verboseData={filteredTasks}
 		{sortState}
 		on:sort={updateSortState}
 		on:checkedAll={handleCheckedAll}
 	>
 		<TableRow
 			{row}
-			{index}
-			{itemId}
-			{thisTask}
-			checked={checkedCheckoutTasks.includes(itemId)}
+			checked={checkedCheckoutTasks.includes(row.itemId)}
 			on:checked={handleChecked}
 			on:startIndiv={handleTask}
 			on:edit={changeActivityMode}

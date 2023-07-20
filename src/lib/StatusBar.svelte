@@ -33,6 +33,7 @@
 			'Waiting',
 			'Error',
 			'Entered',
+			'Complete',
 			'Winning'
 		];
 		const activityStates: ActivityState[] = [
@@ -59,8 +60,8 @@
 		'Waiting',
 		'Error',
 		'Entered',
-		'Winning',
-		'Complete'
+		'Complete',
+		'Winning'
 	].filter((state) => stateIsRelevant(state as CheckoutState | ActivityState, page)) as (
 		| CheckoutState
 		| ActivityState
@@ -98,6 +99,7 @@
 				Waiting: 0,
 				Error: 0,
 				Entered: 0,
+				Complete: 0,
 				Winning: 0
 			} as CheckoutCounts;
 		}
@@ -159,10 +161,13 @@
 
 <div class="status-bar">
 	{#each orderedTasks as task}
-		<div
+		<button
 			class="status-section"
 			style="background-color: {getColor(task['state'])};"
 			title={capitalizeFirstLetter(task['state'])}
+			on:click={() => {
+				selectState(task['state']);
+			}}
 		/>
 	{/each}
 </div>
@@ -184,6 +189,8 @@
 		flex-grow: 1;
 		text-align: center;
 		transition: background-color 0.3s ease;
+		border: none;
+		outline: none;
 	}
 
 	.state-info {

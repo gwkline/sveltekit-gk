@@ -22,7 +22,7 @@
 	};
 </script>
 
-<div class="container">
+<div class="container" style={title !== '' ? 'height: 50%;' : ''}>
 	{#if title !== ''}
 		<label for={id} class="label">{title}</label>
 	{/if}
@@ -35,21 +35,24 @@
 
 <style>
 	.container {
-		display: block;
+		display: flex;
+		align-items: left;
+		flex-direction: column;
 		text-align: center;
-		height: 50%;
 	}
 
 	label {
 		font-size: 0.8rem;
 		font-weight: 500;
 		margin-bottom: 0.5rem;
-		display: block;
+		display: relative;
 		font-family: Roboto;
 		font-weight: 500;
 		font-size: 12px;
 		line-height: 14px;
 		text-align: start;
+		top: 0;
+		left: 0;
 	}
 
 	select {

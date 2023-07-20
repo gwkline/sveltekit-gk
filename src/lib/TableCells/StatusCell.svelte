@@ -37,6 +37,14 @@
 </div>
 
 <style>
+	p {
+		flex-wrap: wrap;
+		text-overflow: ellipsis;
+		white-space: normal;
+		display: -webkit-box;
+		-webkit-line-clamp: 2;
+		-webkit-box-orient: vertical;
+	}
 	.status-content {
 		display: flex;
 		align-items: center;

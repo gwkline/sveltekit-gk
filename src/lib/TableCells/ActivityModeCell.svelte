@@ -28,7 +28,6 @@
 
 	const dispatch = createEventDispatcher();
 	const handleChange = () => {
-		console.log('hey');
 		dispatch('changeActivityMode', titleValueMap[value]);
 	};
 

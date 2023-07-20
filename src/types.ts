@@ -380,7 +380,12 @@ export type HeaderConfigType<T> = {
 	[key: string]: (object: T) => string;
 };
 
-export type TableRowType = Record<string, string>;
+export interface TableRowType {
+	index: number;
+	itemId: number;
+	thisTask: Task | ActivityTask;
+	[header: string]: any;
+}
 
 export type WhopApiLoad = {
 	apiKey: string;

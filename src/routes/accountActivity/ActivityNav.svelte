@@ -6,12 +6,16 @@
 	import { isLoading, showTags } from '../../datastore';
 	import { faPlay, faStop, faPen, faTrash } from '@fortawesome/free-solid-svg-icons';
 	import { createEventDispatcher } from 'svelte';
+	import Dropdown from '$lib/Dropdown.svelte';
+	import type { ActivityMode, Schedule } from '../../types';
 
 	export let searchValue: string = '';
 	export let buttonTextCount: string;
 	export let maxStartingActivityTasks: string;
+	export let schedules: Schedule[] = [];
 
 	let maxStartingActivityTaskCount: string;
+	let modeValue: ActivityMode;
 
 	type settings = 'max_starting_activity_tasks';
 	type states = 'start' | 'stop' | 'delete' | 'duplicate' | 'edit' | 'create';
@@ -40,9 +44,40 @@
 
 		maxStartingActivityTaskCount = '';
 	};
+
+	const valueTitleMap: Record<ActivityMode, string> = {
+		login: 'Login/EA',
+		bp: 'BP Solve',
+		stories: 'Stories',
+		browse: 'Autobrowse',
+		passwordreset: 'Password Reset',
+		addverifiednumber: 'SMS Verify',
+		manual: 'Manual'
+	};
+
+	let scheduleNames = ['None', ...schedules.map((schedule) => schedule.name)];
 </script>
 
 <div class="container">
+	<div class="button-row push-to-end">
+		<div class="button-group">
+			<Dropdown
+				id="activityMode"
+				style="width: 160px; height: 32px;"
+				options={Object.values(valueTitleMap)}
+				bind:value={modeValue}
+				size="lg"
+			/>
+			<Button
+				variant="default"
+				size="md"
+				icon={faPen}
+				onclick={() => handleTaskAction('edit')}
+				resizable={false}
+				style="button">Set {buttonTextCount} Modes</Button
+			>
+		</div>
+	</div>
 	<div class="button-row">
 		<div class="button-group left-button-group">
 			<Button
@@ -76,13 +111,20 @@
 			>
 		</div>
 		<div class="button-group right-button-group">
+			<Dropdown
+				id="activityMode"
+				style="width: 160px; height: 32px;"
+				options={scheduleNames}
+				bind:value={modeValue}
+				size="lg"
+			/>
 			<Button
 				variant="default"
 				size="md"
 				icon={faPen}
 				onclick={() => handleTaskAction('edit')}
 				resizable={false}
-				style="button">Edit {buttonTextCount} Tasks</Button
+				style="button">Set {buttonTextCount} Schedules</Button
 			>
 		</div>
 	</div>
@@ -108,6 +150,9 @@
 </div>
 
 <style>
+	.button-row.push-to-end {
+		justify-content: end;
+	}
 	.button-row {
 		display: flex;
 		justify-content: space-between;
@@ -116,7 +161,7 @@
 
 	.button-group {
 		display: flex;
-		flex-wrap: wrap;
+		flex-wrap: nowrap;
 		justify-content: space-evenly;
 		align-items: center;
 		padding: 5px 0px;

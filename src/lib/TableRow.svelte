@@ -11,20 +11,17 @@
 	import CheckboxCell from './TableCells/CheckboxCell.svelte';
 	import ActivityModeCell from './TableCells/ActivityModeCell.svelte';
 
-	export let index: number | null;
 	export let row: TableRowType;
-	export let itemId: number;
 	export let checked = false;
-	export let thisTask: VerboseTask | undefined;
+	let index = row.index;
 
 	const dispatch = createEventDispatcher();
 	const handleClick = () => {
-		dispatch('checked', itemId);
+		dispatch('checked', row.itemId);
 	};
 
 	const changeActivityMode = (e: CustomEvent) => {
-		console.log(e);
-		dispatch('edit', { id: itemId, mode: e.detail });
+		dispatch('edit', { id: row.itemId, mode: e.detail });
 	};
 </script>
 
@@ -33,30 +30,33 @@
 		<CheckboxCell {index} {checked} on:change={handleClick} />
 	</td>
 
-	{#if thisTask}
+	{#if row.thisTask}
 		{#each Object.entries(row) as [column, value]}
-			<td class={column}>
-				{#if column === 'Browser'}
-					<BrowserCell {value} />
-				{:else if column === 'Status'}
-					<StatusCell {value} state={thisTask.state || 'Ready'} />
-				{:else if column === 'SKU'}
-					<SkuCell {value} size={thisTask.product.size || ''} />
-				{:else if column === 'Account'}
-					<AccountCell {value} />
-				{:else if column === 'Proxy'}
-					<ProxyCell {value} />
-				{:else if column === 'Mode'}
-					<ActivityModeCell mode={thisTask.mode} on:changeActivityMode={changeActivityMode} />
-				{:else if column === 'Profile'}
-					<ProfileCell
-						profileName={thisTask.account?.profile.name || ''}
-						profileTags={thisTask.account?.profile.tags.map((item) => item.name).join(', ') || ''}
-					/>
-				{:else}
-					{value}
-				{/if}
-			</td>
+			{#if column !== 'index' && column !== 'itemId' && column !== 'thisTask' && column !== 'checked'}
+				<td class={column}>
+					{#if column === 'Browser'}
+						<BrowserCell {value} />
+					{:else if column === 'Status'}
+						<StatusCell {value} state={row.thisTask.state || 'Ready'} />
+					{:else if column === 'SKU'}
+						<SkuCell {value} size={row.thisTask.product.size || ''} />
+					{:else if column === 'Account'}
+						<AccountCell {value} />
+					{:else if column === 'Proxy'}
+						<ProxyCell {value} />
+					{:else if column === 'Mode'}
+						<ActivityModeCell mode={row.thisTask.mode} on:changeActivityMode={changeActivityMode} />
+					{:else if column === 'Profile'}
+						<ProfileCell
+							profileName={row.thisTask.account?.profile.name || ''}
+							profileTags={row.thisTask.account?.profile.tags.map((item) => item.name).join(', ') ||
+								''}
+						/>
+					{:else}
+						{value}
+					{/if}
+				</td>
+			{/if}
 		{/each}
 
 		<td>
@@ -65,8 +65,8 @@
 				on:startIndiv
 				on:stopIndiv
 				on:edit
-				{itemId}
-				state={thisTask?.state || 'Ready'}
+				itemId={row.itemId}
+				state={row.thisTask?.state || 'Ready'}
 			/>
 		</td>
 	{/if}

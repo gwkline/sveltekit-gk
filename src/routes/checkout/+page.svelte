@@ -457,8 +457,12 @@
 		headers = Object.keys(headerConfig);
 		tableIds = [];
 
-		let tableDataShortenedTemp = filtered.map((row) => {
-			const rowObject: TableRowType = {};
+		let tableDataShortenedTemp = filtered.map((row, index) => {
+			const rowObject: TableRowType = {
+				index: index + 1,
+				itemId: row.id,
+				thisTask: row
+			};
 			for (const header of headers) {
 				rowObject[header] = headerConfig[header](row);
 			}
@@ -616,24 +620,16 @@
 <div class="container">
 	<Table
 		let:row
-		let:index
-		let:itemId
-		let:thisTask
 		{tableData}
 		{headers}
-		{tableIds}
 		{checkedAll}
-		verboseData={filteredTasks}
 		{sortState}
 		on:sort={updateSortState}
 		on:checkedAll={handleCheckedAll}
 	>
 		<TableRow
 			{row}
-			{index}
-			{itemId}
-			{thisTask}
-			checked={checkedCheckoutTasks.includes(itemId)}
+			checked={checkedCheckoutTasks.includes(row.itemId)}
 			on:checked={handleChecked}
 			on:deleteIndiv={handleTask}
 			on:startIndiv={handleTask}
