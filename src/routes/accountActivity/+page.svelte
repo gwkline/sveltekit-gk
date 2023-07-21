@@ -6,48 +6,43 @@
 	import UpdateBar from '$lib/UpdateBar.svelte';
 	import ActivityNav from './ActivityNav.svelte';
 	import ConfirmationModal from '$lib/ConfirmationModal.svelte';
-	import { makeRequest } from '../../helpers';
+	import {
+		makeRequest,
+		updateSortState,
+		updateSelectedTags,
+		saveSettings,
+		getSchedules,
+		getSettings,
+		getActivityTasks,
+		removeTags,
+		addTag
+	} from '../../helpers';
 	import {
 		verboseActivityTasks,
 		settings,
 		showTags,
 		shiftPressed,
 		isLoading,
-		schedules,
-		verboseTasks
+		schedules
 	} from '../../datastore';
 	import type {
-		Task,
 		HeaderConfigType,
 		TableRowType,
 		ActivityState,
-		Settings,
 		SortState,
 		ActivityTask,
 		ActivityMode,
 		Account,
-		ShortAccount
+		ShortAccount,
+		states
 	} from '../../types';
-
-	type settings = 'max_active_tasks' | 'max_starting_tasks';
-	type states =
-		| 'start'
-		| 'stop'
-		| 'delete'
-		| 'duplicate'
-		| 'edit'
-		| 'create'
-		| 'startIndiv'
-		| 'stopIndiv'
-		| 'deleteIndiv';
 
 	let searchValue: string = '';
 	let sortState: SortState = { column: null, direction: 0 };
 
+	let showConfirmationModal = false;
 	let showSMSModal = false;
 	let showPasswordModal = false;
-
-	let showConfirmationModal = false;
 
 	let buttonTextCount: string;
 	let selectedState: ActivityState | '' = '';
@@ -77,60 +72,12 @@
 		Status: (task: ActivityTask) => task?.status ?? ''
 	};
 
-	makeRequest('get', 'http://127.0.0.1:23432/settings', null, (response) => {
-		settings.set(response.data);
-	});
+	getSettings();
+	getActivityTasks();
+	getSchedules();
 
-	makeRequest('get', 'http://127.0.0.1:23432/accounts/activity', null, (response) => {
-		let data = response.data;
-		let cleanedData = data.map((task: Task) => {
-			let account = task['account'];
-			task['account'] = {
-				id: account['id'],
-				username: account['username'],
-				proxy: account['proxy'],
-				tags: account['tags'],
-				use_account_name: account['use_account_name'],
-				metadata: {
-					logged_in: account.metadata?.logged_in ? account.metadata?.logged_in : false
-				},
-				profile: {
-					id: account['profile']['id'],
-					name: account['profile']['name'],
-					tags: account['profile']['tags'],
-					payment: {
-						id: account['profile']['payment']['id'],
-						tags: account['profile']['payment']['tags'],
-						card_name: account['profile']['payment']['card_name'],
-						card_type: account['profile']['payment']['card_type']
-					}
-				}
-			};
-			return task;
-		});
-		verboseActivityTasks.set(cleanedData);
-	});
-
-	makeRequest('get', 'http://127.0.0.1:23432/schedules', null, (response) => {
-		schedules.set(response.data);
-	});
-
-	const updateSortState = (e: CustomEvent) => {
-		let currentState = sortState;
-		let newDirection: 0 | 1 | -1 = 1;
-		let newColumn: string | null = e.detail;
-		if (currentState.column === e.detail) {
-			// Click on same column
-			if (currentState.direction === 1) {
-				// Change direction if currently ascending
-				newDirection = -1;
-			} else if (currentState.direction === -1) {
-				// Remove sorting if currently descending
-				newDirection = 0;
-				newColumn = null;
-			}
-		}
-		sortState = { column: newColumn, direction: newDirection };
+	const handleSort = (e: CustomEvent) => {
+		sortState = updateSortState(e, sortState);
 	};
 
 	const updateSelectedState = (e: CustomEvent) => {
@@ -145,89 +92,55 @@
 		searchValue = e.detail;
 	};
 
-	const updateSelectedTags = (e: CustomEvent) => {
-		const tag: string | string[] = e.detail;
-		if (typeof tag === 'string') {
-			// if the tag is already selected, remove it from selectedTags
-			// otherwise, add it to selectedTags
-			const index = selectedTags.indexOf(tag);
-			if (index > -1) {
-				selectedTags = selectedTags.filter((t) => t !== tag);
-			} else {
-				selectedTags = [...selectedTags, tag];
-			}
-		} else {
-			// user wants to select all tags or no tags
-			selectedTags = tag;
-		}
+	const handleSelectTag = (e: CustomEvent) => {
+		selectedTags = updateSelectedTags(e, selectedTags);
 	};
 
-	const deleteSelectedTags = (e: CustomEvent) => {
-		selectedTags.forEach((tag) => removeTag(tag));
-		selectedTags = []; // Clear selection after deleting
-	};
-
-	const removeTag = (tag: string) => {
-		let accountsToUpdate: (Account | ShortAccount)[] = [];
-
+	const deleteSelectedTags = () => {
 		verboseActivityTasks.update((tasks) => {
+			const updatedAccounts = removeTags(
+				tasks.map((task) => task.account),
+				selectedTags,
+				'http://127.0.0.1:23432/accounts'
+			) as Account[];
+
+			// Create a Map of the updated accounts for quick access
+			const updatedAccountsMap = new Map(updatedAccounts.map((account) => [account.id, account]));
+
+			// Update tasks with the updated accounts
 			return tasks.map((task) => {
-				// check if task contains the tag
-				let taskHasTag = task.account.tags.some((t) => t.name === tag);
-
-				if (taskHasTag) {
-					// remove the tag from this task
-					task.account.tags = task.account.tags.filter((t) => t.name !== tag);
-
-					// add task to array of tasks to update
-					accountsToUpdate.push(task.account);
+				const updatedAccount = updatedAccountsMap.get(task.account.id);
+				if (updatedAccount) {
+					task.account = updatedAccount;
 				}
-
-				// return the potentially modified task
 				return task;
 			});
 		});
 
-		if (accountsToUpdate.length > 0) {
-			makeRequest('put', 'http://127.0.0.1:23432/accounts', accountsToUpdate);
-		}
+		selectedTags = []; // Clear selection after deleting
 	};
 
 	const updateTagNames = (e: CustomEvent) => {
 		// Do not proceed with the function if the editedText is empty
 		let editedText = e.detail;
 
-		let updatedAccounts: (Account | ShortAccount)[] = [];
 		verboseActivityTasks.update((tasks) => {
+			const updatedAccounts = addTag(
+				tasks.map((task) => task.account),
+				selectedTags,
+				editedText,
+				'http://127.0.0.1:23432/accounts'
+			) as Account[];
+
+			// Update tasks with the updated accounts
 			return tasks.map((task) => {
-				let taskHasSelectedTag = task.account.tags.some((t) => selectedTags.includes(t.name));
-
-				// If the "No Tags" tag is being edited and the task has no tags
-				if (selectedTags.includes('No Tags') && task.account.tags.length === 0) {
-					// Add the new tag
-					task.account.tags.push({ name: editedText });
-
-					// Add the task to the updatedAccounts array
-					updatedAccounts.push(task.account);
+				const updatedAccount = updatedAccounts.find((account) => account.id === task.account.id);
+				if (updatedAccount) {
+					task.account = updatedAccount;
 				}
-				// If the task has a selected tag
-				else if (taskHasSelectedTag) {
-					// Update the name of the tag
-					task.account.tags = task.account.tags.map((t) =>
-						selectedTags.includes(t.name) ? { ...t, name: editedText } : t
-					);
-
-					// Add the task to the updatedAccounts array
-					updatedAccounts.push(task.account);
-				}
-
 				return task;
 			});
 		});
-
-		if (updatedAccounts.length > 0) {
-			makeRequest('put', 'http://127.0.0.1:23432/tasks?type=checkout', updatedAccounts);
-		}
 
 		selectedTags = [];
 	};
@@ -412,21 +325,8 @@
 		sortState = { column: null, direction: 0 };
 	};
 
-	const saveSettings = (e: CustomEvent) => {
-		let settingKey = e.detail.name as settings;
-		let value = e.detail.value;
-
-		settings.update((currentSettings) => {
-			let newSettings = currentSettings as Settings;
-
-			newSettings[settingKey] = value ? parseInt(value) : newSettings[settingKey];
-			return newSettings;
-		});
-
-		const url = 'http://127.0.0.1:23432/settings';
-		const method = 'put';
-
-		return makeRequest(method, url, $settings);
+	const handleSaveSettings = (e: CustomEvent) => {
+		saveSettings(e);
 	};
 
 	const changeActivityMode = (e: CustomEvent) => {
@@ -467,7 +367,6 @@
 	};
 
 	const changeSchedule = (e: CustomEvent) => {
-		console.log(e);
 		let scheduleName: string = e.detail;
 		let taskIds: number[];
 		let state = e.type as states;
@@ -666,7 +565,7 @@
 	on:stop={handleTask}
 	on:changeActivityMode={changeActivityMode}
 	on:changeSchedule={changeSchedule}
-	on:saveSettings={saveSettings}
+	on:saveSettings={handleSaveSettings}
 	on:delete={() => {
 		showConfirmationModal = true;
 	}}
@@ -679,7 +578,7 @@
 		totalSelectedItems={totalSelectedTasks}
 		checkedItems={checkedCheckoutTasks}
 		showDeleteTasks={false}
-		on:selectTag={updateSelectedTags}
+		on:selectTag={handleSelectTag}
 		on:addTagToTasks={addTagToAccount}
 		on:deleteSelectedTags={deleteSelectedTags}
 		on:updateTagNames={updateTagNames}
@@ -694,7 +593,7 @@
 		{headers}
 		{checkedAll}
 		{sortState}
-		on:sort={updateSortState}
+		on:sort={handleSort}
 		on:checkedAll={handleCheckedAll}
 	>
 		<TableRow
@@ -702,9 +601,8 @@
 			checked={checkedCheckoutTasks.includes(row.itemId)}
 			on:checked={handleChecked}
 			on:startIndiv={handleTask}
-			on:edit={changeActivityMode}
-			on:deleteIndiv={handleTask}
 			on:stopIndiv={handleTask}
+			on:edit={changeActivityMode}
 			page="activity"
 		/>
 	</Table>

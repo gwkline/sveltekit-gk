@@ -8,7 +8,7 @@
 
 	let modal: HTMLElement;
 
-	const handle_keydown = (e: KeyboardEvent) => {
+	const handleKeydown = (e: KeyboardEvent) => {
 		if (e.key === 'Escape') {
 			close();
 			return;
@@ -31,7 +31,7 @@
 	};
 </script>
 
-<svelte:window on:keydown={handle_keydown} />
+<svelte:window on:keydown={handleKeydown} />
 
 <div class="modal-background">
 	<button class="background-button" aria-label="Close modal" on:click={close} />

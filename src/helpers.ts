@@ -1,9 +1,37 @@
 import axios, { AxiosError, type AxiosResponse } from 'axios';
-import type { WhopMembershipType } from './types';
+import type {
+	Account,
+	ActivityTask,
+	Settings,
+	ShortAccount,
+	SortState,
+	Task,
+	WhopMembershipType
+} from './types';
 import { goto } from '$app/navigation';
 import { browser } from '$app/environment';
-import { validAccessToken, accessTokenExpiration, accessDenied, networkError } from './datastore';
-import { get } from 'svelte/store';
+import {
+	validAccessToken,
+	accessTokenExpiration,
+	accessDenied,
+	networkError,
+	settings,
+	verboseTasks,
+	schedules,
+	verboseActivityTasks,
+	accounts
+} from './datastore';
+import { get, type Writable } from 'svelte/store';
+import {
+	faPause,
+	faClock,
+	faHourglassHalf,
+	faRunning,
+	faX,
+	faClover,
+	faTrophy,
+	faCheck
+} from '@fortawesome/free-solid-svg-icons';
 
 export const makeRequest = (
 	method: string,
@@ -80,4 +108,215 @@ export const findMemberships = async (): Promise<WhopMembershipType[]> => {
 
 	const parsed_response = await response.json();
 	return parsed_response.data as WhopMembershipType[];
+};
+
+// Define color mapping
+export const stateColors = {
+	Ready: 'var(--light-gray-3)',
+	Queued: 'var(--warning-yellow)',
+	Starting: 'var(--primary-hover)',
+	Running: 'var(--primary)',
+	Waiting: 'purple',
+	Error: 'var(--danger-red)',
+	Entered: 'var(--success-green)',
+	Complete: 'var(--danger-red-hover)',
+	Winning: '#00801a'
+};
+
+export const stateIconMapping = {
+	Ready: faPause,
+	Queued: faClock,
+	Starting: faHourglassHalf,
+	Running: faRunning,
+	Waiting: faClock,
+	Error: faX,
+	Entered: faClover,
+	Winning: faTrophy,
+	Complete: faCheck
+};
+
+export const updateSortState = (e: CustomEvent, currentState: SortState) => {
+	let newDirection: 0 | 1 | -1 = 1;
+	let newColumn: string | null = e.detail;
+	if (currentState.column === e.detail) {
+		// Click on same column
+		if (currentState.direction === 1) {
+			// Change direction if currently ascending
+			newDirection = -1;
+		} else if (currentState.direction === -1) {
+			// Remove sorting if currently descending
+			newDirection = 0;
+			newColumn = null;
+		}
+	}
+	return { column: newColumn, direction: newDirection };
+};
+
+export const updateSelectedTags = (e: CustomEvent, selectedTags: string[]) => {
+	const tag: string | string[] = e.detail;
+	if (typeof tag === 'string') {
+		// if the tag is already selected, remove it from selectedTags
+		// otherwise, add it to selectedTags
+		const index = selectedTags.indexOf(tag);
+		if (index > -1) {
+			return selectedTags.filter((t) => t !== tag);
+		} else {
+			return [...selectedTags, tag];
+		}
+	} else {
+		// user wants to select all tags or no tags
+		return tag;
+	}
+};
+
+type settings = 'max_active_tasks' | 'max_starting_tasks' | 'max_starting_activity_tasks';
+export const saveSettings = (e: CustomEvent) => {
+	let settingKey = e.detail.name as settings;
+	let value = e.detail.value;
+
+	settings.update((currentSettings) => {
+		let newSettings = currentSettings as Settings;
+
+		newSettings[settingKey] = value ? parseInt(value) : newSettings[settingKey];
+		return newSettings;
+	});
+
+	const url = 'http://127.0.0.1:23432/settings';
+	const method = 'put';
+
+	return makeRequest(method, url, get(settings));
+};
+
+export const getSettings = () => {
+	makeRequest('get', 'http://127.0.0.1:23432/settings', null, (response) => {
+		settings.set(response.data);
+	});
+};
+
+export const getCheckoutTasks = () => {
+	makeRequest('get', 'http://127.0.0.1:23432/tasks?type=checkout', null, (response) => {
+		let data = response.data;
+		let cleanedData = data.map((task: Task) => {
+			task['account'] = cleanAccount(task.account as Account);
+			return task;
+		});
+		verboseTasks.set(cleanedData);
+	});
+};
+
+export const getSchedules = () => {
+	makeRequest('get', 'http://127.0.0.1:23432/schedules', null, (response) => {
+		schedules.set(response.data);
+	});
+};
+
+export const getActivityTasks = () => {
+	makeRequest('get', 'http://127.0.0.1:23432/accounts/activity', null, (response) => {
+		let data = response.data;
+		let cleanedData = data.map((task: Task) => {
+			task['account'] = cleanAccount(task.account as Account);
+			return task;
+		});
+		verboseActivityTasks.set(cleanedData);
+	});
+};
+
+export const getAccounts = () => {
+	makeRequest('get', 'http://127.0.0.1:23432/accounts', null, (response) => {
+		let rawAccounts: Account[] = response.data;
+		let cleanedAccounts = rawAccounts.map((account) => {
+			return cleanAccount(account as Account);
+		});
+
+		accounts.set(cleanedAccounts);
+	});
+};
+
+const cleanAccount = (account: Account): ShortAccount => {
+	return {
+		id: account['id'],
+		username: account['username'],
+		proxy: account['proxy'],
+		tags: account['tags'],
+		use_account_name: account['use_account_name'],
+		metadata: {
+			logged_in: account.metadata?.logged_in ? account.metadata?.logged_in : false
+		},
+		profile: {
+			id: account['profile']['id'],
+			name: account['profile']['name'],
+			tags: account['profile']['tags'],
+			payment: {
+				id: account['profile']['payment']['id'],
+				tags: account['profile']['payment']['tags'],
+				card_name: account['profile']['payment']['card_name'],
+				card_type: account['profile']['payment']['card_type']
+			}
+		}
+	};
+};
+
+export const removeTags = (
+	objects: (Account | ShortAccount | Task)[],
+	tags: string[],
+	url: string
+) => {
+	let objectsToUpdate: (Account | ShortAccount | Task)[] = [];
+
+	objects = objects.map((object) => {
+		const initialTagsLength = object.tags.length;
+		object.tags = object.tags.filter((t) => !tags.includes(t.name));
+
+		if (object.tags.length !== initialTagsLength) {
+			objectsToUpdate.push(object);
+		}
+
+		return object;
+	});
+
+	if (objectsToUpdate.length > 0) {
+		makeRequest('put', url, objectsToUpdate);
+	}
+
+	return objects;
+};
+
+export const addTag = (
+	objects: (Account | ShortAccount | Task)[],
+	selectedTags: string[],
+	newTag: string,
+	url: string
+) => {
+	let objectsToUpdate: (Account | ShortAccount | Task)[] = [];
+
+	objects = objects.map((object) => {
+		let objectHasSelectedTag = object.tags.some((t) => selectedTags.includes(t.name));
+
+		// If the "No Tags" tag is being edited and the object has no tags
+		if (selectedTags.includes('No Tags') && object.tags.length === 0) {
+			// Add the new tag
+			object.tags.push({ name: newTag });
+
+			// Add the object to the objectsToUpdate array
+			objectsToUpdate.push(object);
+		}
+		// If the object has a selected tag
+		else if (objectHasSelectedTag) {
+			// Update the name of the tag
+			object.tags = object.tags.map((t) =>
+				selectedTags.includes(t.name) ? { ...t, name: newTag } : t
+			);
+
+			// Add the object to the objectsToUpdate array
+			objectsToUpdate.push(object);
+		}
+
+		return object;
+	});
+
+	if (objectsToUpdate.length > 0) {
+		makeRequest('put', url, objectsToUpdate);
+	}
+
+	return objects;
 };

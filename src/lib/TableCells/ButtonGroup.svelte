@@ -41,8 +41,8 @@
 	{/if}
 	{#if showEdit}
 		<Button icon={faPen} onclick={handleEdit} />
+		<Button icon={faTrash} onclick={handleDelete} isLoading={$isLoading[`deleteIndiv${itemId}`]} />
 	{/if}
-	<Button icon={faTrash} onclick={handleDelete} isLoading={$isLoading[`deleteIndiv${itemId}`]} />
 </div>
 
 <style>

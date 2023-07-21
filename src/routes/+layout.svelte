@@ -149,7 +149,6 @@
 
 <style lang="css" global>
 	@import 'https://fonts.googleapis.com/css?family=Roboto';
-	@import '/global.css';
 
 	* {
 		font-family: Roboto;

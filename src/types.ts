@@ -442,3 +442,14 @@ export type SortState = {
 };
 
 export type Browser = 'Chrome' | 'Chrome Beta' | 'Edge' | 'Brave';
+
+export type states =
+	| 'start'
+	| 'stop'
+	| 'delete'
+	| 'duplicate'
+	| 'edit'
+	| 'create'
+	| 'startIndiv'
+	| 'stopIndiv'
+	| 'deleteIndiv';

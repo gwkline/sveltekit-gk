@@ -11,7 +11,7 @@
 		faListOl,
 		faCheck
 	} from '@fortawesome/free-solid-svg-icons';
-	import { stateColors } from '../datastore';
+	import { stateColors, stateIconMapping } from '../helpers';
 	import type { ActivityState, ActivityTask, CheckoutState, Task } from '../types';
 	import { createEventDispatcher } from 'svelte';
 
@@ -125,17 +125,6 @@
 		}
 	};
 
-	const stateIconMapping = {
-		Ready: faPlay,
-		Queued: faListOl,
-		Starting: faHourglassHalf,
-		Running: faRunning,
-		Waiting: faClock,
-		Error: faX,
-		Entered: faFlag,
-		Winning: faTrophy,
-		Complete: faCheck
-	};
 	const selectState = (state: CheckoutState | ActivityState) => {
 		dispatch('selectedState', state);
 	};

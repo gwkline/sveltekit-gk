@@ -1,7 +1,15 @@
 import { browser } from '$app/environment';
 import { writable } from 'svelte/store';
 import type { Writable } from 'svelte/store';
-import type { Settings, Task, Account, Schedule, SizePresets, ActivityTask } from './types';
+import type {
+	Settings,
+	Task,
+	Account,
+	Schedule,
+	SizePresets,
+	ActivityTask,
+	ShortAccount
+} from './types';
 import { seedAccounts, seedSettings, seedTasks } from './seedData';
 
 // Create a store that syncs with localStorage
@@ -37,7 +45,7 @@ export const networkError = writable(false);
 export const validAccessToken = persistentStore('validAccessToken', false);
 export const accessTokenExpiration = persistentStore('accessTokenExpiration', -1);
 export const settings = persistentStore<Settings>('settings', seedSettings);
-export const accounts = persistentStore<Account[]>('accounts', seedAccounts);
+export const accounts = persistentStore<ShortAccount[]>('accounts', seedAccounts);
 export const verboseTasks = persistentStore<Task[]>('verboseTasks', seedTasks);
 export const verboseActivityTasks = persistentStore<ActivityTask[]>('verboseActivityTasks', []);
 export const schedules = persistentStore<Schedule[]>('schedules', []);
@@ -267,16 +275,3 @@ export const checkoutSettings = persistentStore('checkoutSettings', {
 	specifyAccountsByAccountTag: false,
 	specifyAccountsByProfileTag: false
 });
-
-// Define color mapping
-export const stateColors = {
-	Ready: 'var(--light-gray-3)',
-	Queued: 'var(--warning-yellow)',
-	Starting: 'var(--primary-hover)',
-	Running: 'var(--primary)',
-	Waiting: 'purple',
-	Error: 'var(--danger-red)',
-	Entered: 'var(--success-green)',
-	Complete: 'var(--danger-red-hover)',
-	Winning: '#00801a'
-};

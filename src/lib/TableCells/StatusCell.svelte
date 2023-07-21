@@ -1,32 +1,10 @@
 <script lang="ts">
 	import Fa from 'svelte-fa';
-	import {
-		faPause,
-		faClover,
-		faHourglassHalf,
-		faRunning,
-		faTrophy,
-		faX,
-		faClock,
-		faCheck
-	} from '@fortawesome/free-solid-svg-icons';
-	import { stateColors } from '../../datastore';
+	import { stateColors, stateIconMapping } from '../../helpers';
 	import type { ActivityState, CheckoutState } from '../../types';
 
 	export let value: string;
 	export let state: CheckoutState | ActivityState;
-
-	const stateIconMapping = {
-		Ready: faPause,
-		Queued: faClock,
-		Starting: faHourglassHalf,
-		Running: faRunning,
-		Waiting: faClock,
-		Error: faX,
-		Entered: faClover,
-		Winning: faTrophy,
-		Complete: faCheck
-	};
 </script>
 
 <div class="status-content">

@@ -6,7 +6,7 @@
 	import MultiDropdown from '$lib/MultiDropdown.svelte';
 	import Toggle from '$lib/Toggle.svelte';
 	import { faSave, faSearch, faStar } from '@fortawesome/free-solid-svg-icons';
-	import { makeRequest } from '../../helpers';
+	import { getAccounts, getSchedules, makeRequest } from '../../helpers';
 	import { schedules, accounts, isLoading, checkoutSettings, verboseTasks } from '../../datastore';
 	import type { Account, OutboundTask, Tag, Task } from '../../types';
 
@@ -262,35 +262,9 @@
 		isDuplicating = false;
 	};
 
-	makeRequest('get', 'http://127.0.0.1:23432/schedules', null, (response) => {
-		schedules.set(response.data);
-	});
+	getSchedules();
 
-	makeRequest('get', 'http://127.0.0.1:23432/accounts', null, (response) => {
-		let rawAccounts: Account[] = response.data;
-		let cleanedAccounts = rawAccounts.map((account) => {
-			account['metadata'] = {
-				logged_in: account.metadata?.logged_in ? account.metadata?.logged_in : false
-			};
-			let profile = account['profile'];
-			let payment = profile['payment'];
-
-			account['profile'] = {
-				name: profile['name'],
-				payment: {
-					id: payment['id'],
-					tags: payment['tags'],
-					card_name: payment['card_name'],
-					card_type: account['profile']['payment']['card_type']
-				},
-				id: profile['id'],
-				tags: profile['tags']
-			};
-			return account;
-		});
-
-		accounts.set(cleanedAccounts);
-	});
+	getAccounts();
 
 	$: {
 		allAccountTags = Array.from(

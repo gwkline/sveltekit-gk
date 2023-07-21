@@ -41,6 +41,9 @@
 		style="width: 100%; height: 32px"
 		options={Object.values(valueTitleMap)}
 		bind:value
+		on:click={(e) => {
+			e.stopPropagation();
+		}}
 		on:change={handleChange}
 	/>
 </div>
