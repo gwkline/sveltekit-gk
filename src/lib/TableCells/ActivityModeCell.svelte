@@ -37,10 +37,10 @@
 <div class="container">
 	<Dropdown
 		id="activityMode"
-		style="width: 100px"
+		size="sm"
+		style="width: 100%; height: 32px"
 		options={Object.values(valueTitleMap)}
 		bind:value
-		size="lg"
 		on:change={handleChange}
 	/>
 </div>

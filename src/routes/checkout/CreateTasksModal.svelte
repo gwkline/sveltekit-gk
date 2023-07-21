@@ -250,7 +250,8 @@
 				payment: {
 					id: payment['id'],
 					tags: payment['tags'],
-					card_name: payment['card_name']
+					card_name: payment['card_name'],
+					card_type: account['profile']['payment']['card_type']
 				},
 				id: profile['id'],
 				tags: profile['tags']

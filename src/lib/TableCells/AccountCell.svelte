@@ -9,7 +9,7 @@
 
 <div class="container">
 	{#if loggedIn}
-		<Tooltip text="testing">
+		<Tooltip text="Account has a valid session">
 			<Fa icon={faUser} />
 		</Tooltip>
 	{/if}

@@ -7,12 +7,13 @@
 	import ButtonGroup from './TableCells/ButtonGroup.svelte';
 	import BrowserCell from './TableCells/BrowserCell.svelte';
 	import { createEventDispatcher } from 'svelte';
-	import type { TableRowType, VerboseTask } from '../types';
+	import type { TableRowType } from '../types';
 	import CheckboxCell from './TableCells/CheckboxCell.svelte';
 	import ActivityModeCell from './TableCells/ActivityModeCell.svelte';
 
 	export let row: TableRowType;
 	export let checked = false;
+	export let page: string;
 	let index = row.index;
 
 	const dispatch = createEventDispatcher();
@@ -51,6 +52,7 @@
 							profileName={row.thisTask.account?.profile.name || ''}
 							profileTags={row.thisTask.account?.profile.tags.map((item) => item.name).join(', ') ||
 								''}
+							sameName={row.thisTask.account.use_account_name}
 						/>
 					{:else}
 						{value}
@@ -65,6 +67,7 @@
 				on:startIndiv
 				on:stopIndiv
 				on:edit
+				{page}
 				itemId={row.itemId}
 				state={row.thisTask?.state || 'Ready'}
 			/>
@@ -77,7 +80,6 @@
 		height: 46px;
 		border-bottom: 1px solid var(--light-gray-3);
 		align-items: center;
-		vertical-align: middle;
 	}
 
 	tr.active,
@@ -86,10 +88,8 @@
 	}
 
 	td {
-		padding: 3px 2px 3px 7px;
-		vertical-align: middle;
+		padding: 3px 7px 3px 2px;
 		font-size: 13px;
-		white-space: nowrap;
 		overflow: hidden;
 		border: none;
 	}

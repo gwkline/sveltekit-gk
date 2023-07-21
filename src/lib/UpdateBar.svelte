@@ -2,15 +2,15 @@
 	export let color = 'var(--primary)';
 </script>
 
-<div class="bar" style={`background-color: ${color}`}>
+<button style={`background-color: ${color}`} on:click>
 	<slot />
-</div>
+</button>
 
 <style>
-	.bar {
+	button {
 		width: 100%;
 		background-color: var(--primary);
-		height: 30px;
+		height: 20px;
 		display: flex;
 		align-items: center;
 		justify-content: center;
@@ -18,6 +18,13 @@
 		font-size: 12px;
 		position: absolute;
 		top: 0;
+		left: 0;
 		z-index: 20;
+		outline: none;
+		border: none;
+	}
+
+	button:hover {
+		background-color: var(--primary-hover) !important;
 	}
 </style>

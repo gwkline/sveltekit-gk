@@ -129,6 +129,7 @@ export type ShortAccount = {
 	proxy: string;
 	profile: ShortProfile;
 	tags: Tag[];
+	use_account_name: boolean;
 	metadata: AccountMetadata | undefined;
 };
 
@@ -194,6 +195,7 @@ export type ShortPayment = {
 	id: number;
 	tags: Tag[];
 	card_name: string;
+	card_type: string;
 };
 
 export type Shipping = {

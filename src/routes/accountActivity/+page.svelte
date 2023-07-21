@@ -24,7 +24,9 @@
 		Settings,
 		SortState,
 		ActivityTask,
-		ActivityMode
+		ActivityMode,
+		Account,
+		ShortAccount
 	} from '../../types';
 
 	type settings = 'max_active_tasks' | 'max_starting_tasks';
@@ -41,6 +43,9 @@
 
 	let searchValue: string = '';
 	let sortState: SortState = { column: null, direction: 0 };
+
+	let showSMSModal = false;
+	let showPasswordModal = false;
 
 	let showConfirmationModal = false;
 
@@ -85,6 +90,7 @@
 				username: account['username'],
 				proxy: account['proxy'],
 				tags: account['tags'],
+				use_account_name: account['use_account_name'],
 				metadata: {
 					logged_in: account.metadata?.logged_in ? account.metadata?.logged_in : false
 				},
@@ -95,7 +101,8 @@
 					payment: {
 						id: account['profile']['payment']['id'],
 						tags: account['profile']['payment']['tags'],
-						card_name: account['profile']['payment']['card_name']
+						card_name: account['profile']['payment']['card_name'],
+						card_type: account['profile']['payment']['card_type']
 					}
 				}
 			};
@@ -161,7 +168,7 @@
 	};
 
 	const removeTag = (tag: string) => {
-		let tasksToUpdate: ActivityTask[] = [];
+		let accountsToUpdate: (Account | ShortAccount)[] = [];
 
 		verboseActivityTasks.update((tasks) => {
 			return tasks.map((task) => {
@@ -173,7 +180,7 @@
 					task.account.tags = task.account.tags.filter((t) => t.name !== tag);
 
 					// add task to array of tasks to update
-					tasksToUpdate.push(task);
+					accountsToUpdate.push(task.account);
 				}
 
 				// return the potentially modified task
@@ -181,8 +188,8 @@
 			});
 		});
 
-		if (tasksToUpdate.length > 0) {
-			makeRequest('put', 'http://127.0.0.1:23432/tasks?type=checkout', tasksToUpdate);
+		if (accountsToUpdate.length > 0) {
+			makeRequest('put', 'http://127.0.0.1:23432/accounts', accountsToUpdate);
 		}
 	};
 
@@ -190,7 +197,7 @@
 		// Do not proceed with the function if the editedText is empty
 		let editedText = e.detail;
 
-		let updatedTasks: ActivityTask[] = [];
+		let updatedAccounts: (Account | ShortAccount)[] = [];
 		verboseActivityTasks.update((tasks) => {
 			return tasks.map((task) => {
 				let taskHasSelectedTag = task.account.tags.some((t) => selectedTags.includes(t.name));
@@ -200,8 +207,8 @@
 					// Add the new tag
 					task.account.tags.push({ name: editedText });
 
-					// Add the task to the updatedTasks array
-					updatedTasks.push(task);
+					// Add the task to the updatedAccounts array
+					updatedAccounts.push(task.account);
 				}
 				// If the task has a selected tag
 				else if (taskHasSelectedTag) {
@@ -210,16 +217,16 @@
 						selectedTags.includes(t.name) ? { ...t, name: editedText } : t
 					);
 
-					// Add the task to the updatedTasks array
-					updatedTasks.push(task);
+					// Add the task to the updatedAccounts array
+					updatedAccounts.push(task.account);
 				}
 
 				return task;
 			});
 		});
 
-		if (updatedTasks.length > 0) {
-			makeRequest('put', 'http://127.0.0.1:23432/tasks?type=checkout', updatedTasks);
+		if (updatedAccounts.length > 0) {
+			makeRequest('put', 'http://127.0.0.1:23432/tasks?type=checkout', updatedAccounts);
 		}
 
 		selectedTags = [];
@@ -227,7 +234,7 @@
 
 	const addAdditionalTag = (e: CustomEvent) => {
 		let newTagText = e.detail;
-		let updatedTasks: ActivityTask[] = [];
+		let updatedAccounts: (Account | ShortAccount)[] = [];
 		verboseActivityTasks.update((tasks) => {
 			return tasks.map((task) => {
 				let taskHasSelectedTag = task.account.tags.some((t) => selectedTags.includes(t.name));
@@ -235,7 +242,7 @@
 				// If the "No Tags" tag is selected and the task has no tags
 				if (selectedTags.includes('No Tags') && task.account.tags.length === 0) {
 					task.account.tags.push({ name: newTagText });
-					updatedTasks.push(task);
+					updatedAccounts.push(task.account);
 				}
 
 				// If the task has a selected tag
@@ -243,34 +250,34 @@
 					// Add the new tag to the task
 					task.account.tags.push({ name: newTagText });
 
-					// Add the task to the updatedTasks array
-					updatedTasks.push(task);
+					// Add the task to the updatedAccounts array
+					updatedAccounts.push(task.account);
 				}
 
 				return task;
 			});
 		});
 
-		if (updatedTasks.length > 0) {
-			makeRequest('put', 'http://127.0.0.1:23432/tasks?type=checkout', updatedTasks);
+		if (updatedAccounts.length > 0) {
+			makeRequest('put', 'http://127.0.0.1:23432/accounts', updatedAccounts);
 		}
 		selectedTags = [];
 	};
 
 	const addTagToAccount = (e: CustomEvent) => {
 		let newTagText = e.detail;
-		let updatedTasks: ActivityTask[] = [];
+		let updatedAccounts: (Account | ShortAccount)[] = [];
 		verboseActivityTasks.update((tasks) => {
 			return tasks.map((task) => {
 				if (checkedCheckoutTasks.includes(task.id)) {
 					task.account.tags.push({ name: newTagText });
-					updatedTasks.push(task);
+					updatedAccounts.push(task.account);
 				}
 				return task;
 			});
 		});
-		if (updatedTasks.length > 0) {
-			makeRequest('put', 'http://127.0.0.1:23432/tasks?type=checkout', updatedTasks);
+		if (updatedAccounts.length > 0) {
+			makeRequest('put', 'http://127.0.0.1:23432/accounts', updatedAccounts);
 		}
 	};
 
@@ -328,6 +335,19 @@
 		switch (state) {
 			case 'start':
 			case 'startIndiv':
+				let theseTasks = $verboseActivityTasks.filter((task) => taskIds.includes(task.id));
+				let theseModes = theseTasks.map((task) => {
+					return task.mode;
+				});
+				if (theseModes.includes('addverifiednumber') && theseModes.includes('passwordreset')) {
+					// Todo: throw error
+				}
+				if (theseModes.includes('addverifiednumber')) {
+					showSMSModal = true;
+				} else if (theseModes.includes('passwordreset')) {
+					showPasswordModal = true;
+				}
+
 				makeRequest('post', 'http://127.0.0.1:23432/accounts/activity/start', taskIds, () => {
 					isLoading.set({ [state]: false });
 				});
@@ -604,12 +624,9 @@
 </script>
 
 {#if filterOn}
-	<UpdateBar>
-		You're viewing a filtered set of tasks. To clear all filters, <button
-			on:click={clearFilters}
-			class="nav-button">click here.</button
-		>
-	</UpdateBar>
+	<UpdateBar on:click={clearFilters}
+		>You're viewing a filtered set of tasks. To clear all filters, click here.</UpdateBar
+	>
 {/if}
 
 <StatusBar
@@ -641,7 +658,9 @@
 		{selectedTags}
 		totalSelectedItems={totalSelectedTasks}
 		checkedItems={checkedCheckoutTasks}
+		showDeleteTasks={false}
 		on:selectTag={updateSelectedTags}
+		on:addTagToTasks={addTagToAccount}
 		on:deleteSelectedTags={deleteSelectedTags}
 		on:updateTagNames={updateTagNames}
 		on:addAdditionalTag={addAdditionalTag}
@@ -666,6 +685,7 @@
 			on:edit={changeActivityMode}
 			on:deleteIndiv={handleTask}
 			on:stopIndiv={handleTask}
+			page="activity"
 		/>
 	</Table>
 </div>
@@ -688,16 +708,5 @@
 		flex-grow: 1;
 		overflow-y: auto;
 		scroll-behavior: smooth;
-	}
-
-	.nav-button {
-		background: none;
-		outline: none;
-		border: none;
-		color: var(--off-black);
-	}
-
-	.nav-button:hover {
-		color: var(--light-gray-3);
 	}
 </style>

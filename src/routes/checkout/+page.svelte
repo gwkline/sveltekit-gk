@@ -80,6 +80,7 @@
 				username: account['username'],
 				proxy: account['proxy'],
 				tags: account['tags'],
+				use_account_name: account['use_account_name'],
 				metadata: {
 					logged_in: account.metadata?.logged_in ? account.metadata?.logged_in : false
 				},
@@ -90,7 +91,8 @@
 					payment: {
 						id: account['profile']['payment']['id'],
 						tags: account['profile']['payment']['tags'],
-						card_name: account['profile']['payment']['card_name']
+						card_name: account['profile']['payment']['card_name'],
+						card_type: account['profile']['payment']['card_type']
 					}
 				}
 			};
@@ -632,6 +634,7 @@
 	>
 		<TableRow
 			{row}
+			page="checkout"
 			checked={checkedCheckoutTasks.includes(row.itemId)}
 			on:checked={handleChecked}
 			on:deleteIndiv={handleTask}

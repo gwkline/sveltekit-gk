@@ -7,6 +7,9 @@
 
 	export let itemId: number;
 	export let state: CheckoutState | ActivityState;
+	export let page: string;
+
+	let showEdit = page == 'activity' ? false : true;
 	const dispatch = createEventDispatcher();
 
 	const handleEdit = (event: MouseEvent) => {
@@ -36,7 +39,9 @@
 	{:else}
 		<Button icon={faPause} onclick={handleStop} isLoading={$isLoading.stopIndiv} />
 	{/if}
-	<Button icon={faPen} onclick={handleEdit} />
+	{#if showEdit}
+		<Button icon={faPen} onclick={handleEdit} />
+	{/if}
 	<Button icon={faTrash} onclick={handleDelete} isLoading={$isLoading.deleteIndiv} />
 </div>
 

@@ -16,6 +16,7 @@
 	export let selectedTags: string[] = [];
 	export let checkedItems: number[] = [];
 	export let totalSelectedItems: number = 0;
+	export let showDeleteTasks: boolean = true;
 
 	type AddOrEdit = 'add' | 'edit';
 	type AddOrEditState = AddOrEdit | null;
@@ -193,7 +194,7 @@
 						}}
 					>
 						<Fa icon={faPlus} size="sm" />
-						Add tags to selected tasks
+						Add tags to selected items
 					</button>
 				{/if}
 			</div>
@@ -210,12 +211,14 @@
 			</button>
 			<button class="clear-all" on:click={deleteSelectedTags}>
 				<Fa icon={faTrash} size="sm" />
-				Delete selected tags
+				Delete selected {showDeleteTasks ? 'tags' : ''}
 			</button>
-			<button class="clear-all" on:click={deleteSelectedTasks}>
-				<Fa icon={faTrash} size="sm" />
-				Delete selected tasks
-			</button>
+			{#if showDeleteTasks}
+				<button class="clear-all" on:click={deleteSelectedTasks}>
+					<Fa icon={faTrash} size="sm" />
+					Delete selected tasks
+				</button>
+			{/if}
 			<div class="input-wrapper">
 				{#if isAddingTag && addOrEdit === 'edit'}
 					<div class={isAddingTag ? 'input-container' : 'input-container hidden'}>

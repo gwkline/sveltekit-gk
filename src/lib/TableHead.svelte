@@ -72,7 +72,7 @@
 		z-index: 2;
 	}
 	.checkbox {
-		padding-left: 40px;
+		padding-left: 35px;
 	}
 
 	.column-heading {
