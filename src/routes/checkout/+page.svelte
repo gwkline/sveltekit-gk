@@ -575,12 +575,9 @@
 </script>
 
 {#if filterOn}
-	<UpdateBar>
-		You're viewing a filtered set of tasks. To clear all filters, <button
-			on:click={clearFilters}
-			class="nav-button">click here.</button
-		>
-	</UpdateBar>
+	<UpdateBar on:click={clearFilters}
+		>You're viewing a filtered set of tasks. To clear all filters, click here.</UpdateBar
+	>
 {/if}
 
 <StatusBar

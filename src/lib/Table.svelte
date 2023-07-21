@@ -27,6 +27,6 @@
 		border-collapse: collapse;
 		max-height: 100vh;
 		margin-bottom: 100px;
-		table-layout: fixed;
+		table-layout: auto;
 	}
 </style>

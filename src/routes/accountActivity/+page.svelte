@@ -413,8 +413,12 @@
 	};
 
 	const changeActivityMode = (e: CustomEvent) => {
+		console.log(e);
 		let taskId: number = e.detail.id;
 		let mode: ActivityMode = e.detail.mode;
+		if (mode === undefined) {
+			return;
+		}
 		let taskIds: number[];
 		let state = e.type as states;
 		isLoading.set({ [state]: true });

@@ -70,6 +70,7 @@
 		font-size: 15px;
 		border: none;
 		z-index: 2;
+		white-space: nowrap;
 	}
 	.checkbox {
 		padding-left: 35px;

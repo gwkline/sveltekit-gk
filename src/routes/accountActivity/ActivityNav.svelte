@@ -173,7 +173,7 @@
 	.button-row {
 		display: flex;
 		justify-content: space-between;
-		margin: 10px 0;
+		margin: 2px 0;
 	}
 
 	.button-group {
@@ -186,6 +186,7 @@
 
 	.button-group.left-button-group {
 		justify-content: start;
+		flex-wrap: wrap;
 	}
 
 	.button-group.right-button-group {

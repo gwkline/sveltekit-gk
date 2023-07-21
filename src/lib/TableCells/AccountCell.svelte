@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Tooltip from '$lib/Tooltip.svelte';
-	import { faUser } from '@fortawesome/free-solid-svg-icons';
+	import { faUser, faUserSlash } from '@fortawesome/free-solid-svg-icons';
 	import Fa from 'svelte-fa';
 
 	export let value: string = '';
@@ -10,9 +10,14 @@
 <div class="container">
 	{#if loggedIn}
 		<Tooltip text="Account has a valid session">
-			<Fa icon={faUser} />
+			<Fa icon={faUser} color="var(--primary)" />
+		</Tooltip>
+	{:else}
+		<Tooltip text="Account has a valid session">
+			<Fa icon={faUserSlash} color="var(--danger-red)" />
 		</Tooltip>
 	{/if}
+
 	<div class="username">
 		<span>{value.split('@')[0]}</span>
 		<span class="bottom-text">{'@' + value.split('@')[1]}</span>

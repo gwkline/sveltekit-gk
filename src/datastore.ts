@@ -270,7 +270,7 @@ export const checkoutSettings = persistentStore('checkoutSettings', {
 
 // Define color mapping
 export const stateColors = {
-	Ready: 'var(--light-gray-2)',
+	Ready: 'var(--light-gray-3)',
 	Queued: 'var(--warning-yellow)',
 	Starting: 'var(--primary-hover)',
 	Running: 'var(--primary)',

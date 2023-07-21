@@ -34,7 +34,7 @@
 </script>
 
 <div class="button-group">
-	{#if state === 'Ready'}
+	{#if state === 'Ready' || state === 'Complete' || state === 'Error'}
 		<Button icon={faPlay} onclick={handleStart} isLoading={$isLoading.startIndiv} />
 	{:else}
 		<Button icon={faPause} onclick={handleStop} isLoading={$isLoading.stopIndiv} />

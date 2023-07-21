@@ -11,7 +11,7 @@
 <div class="container">
 	{#if sameName}
 		<Tooltip text="Checkout will use account first/last name">
-			<Fa icon={faCreditCard} />
+			<Fa icon={faCreditCard} color="var(--light-gray-4)" />
 		</Tooltip>
 	{/if}
 	<div class="username">

@@ -293,7 +293,7 @@
 <style>
 	.count-info {
 		font-size: 12px;
-		margin-right: 1rem;
+		margin: 0 1rem 0 0;
 	}
 	.input-wrapper {
 		display: flex;
@@ -321,7 +321,7 @@
 	.clear-all {
 		cursor: pointer;
 		border: none;
-		margin-right: 1rem;
+		margin: 0.5rem 1rem 0.5rem 0rem;
 		font-size: 11px;
 		display: inline;
 		background-color: inherit;
@@ -360,7 +360,6 @@
 	}
 	.container-wrapper {
 		position: relative;
-		padding-bottom: 10px;
 		display: flex;
 		flex-direction: column;
 	}
