@@ -8,7 +8,7 @@
 	import { faSave, faSearch, faStar } from '@fortawesome/free-solid-svg-icons';
 	import { makeRequest } from '../../helpers';
 	import { schedules, accounts, isLoading, checkoutSettings, verboseTasks } from '../../datastore';
-	import type { Account, OutboundTask, Tag } from '../../types';
+	import type { Account, OutboundTask, Tag, Task } from '../../types';
 
 	enum ModalType {
 		None = 'None',
@@ -104,7 +104,37 @@
 			};
 		});
 
-		return makeRequest('post', 'http://127.0.0.1:23432/tasks?type=checkout', tasks);
+		return makeRequest('post', 'http://127.0.0.1:23432/tasks?type=checkout', tasks, (response) => {
+			let newTasks = response.data.created;
+			let cleanedData = newTasks.map((task: Task) => {
+				let account = task['account'];
+				task['account'] = {
+					id: account['id'],
+					username: account['username'],
+					proxy: account['proxy'],
+					tags: account['tags'],
+					use_account_name: account['use_account_name'],
+					metadata: {
+						logged_in: account.metadata?.logged_in ? account.metadata?.logged_in : false
+					},
+					profile: {
+						id: account['profile']['id'],
+						name: account['profile']['name'],
+						tags: account['profile']['tags'],
+						payment: {
+							id: account['profile']['payment']['id'],
+							tags: account['profile']['payment']['tags'],
+							card_name: account['profile']['payment']['card_name'],
+							card_type: account['profile']['payment']['card_type']
+						}
+					}
+				};
+				return task;
+			});
+			verboseTasks.update((tasks) => {
+				return tasks.concat(cleanedData);
+			});
+		});
 	};
 	const editTasks = () => {
 		let updatedTasks: any[] = [];

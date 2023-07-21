@@ -344,7 +344,12 @@
 		let taskId: number | null = e.detail;
 		let taskIds: number[];
 		let state = e.type as states;
-		isLoading.set({ [state]: true });
+
+		if (state.includes('Indiv')) {
+			isLoading.set({ [`${state}${taskId}`]: true });
+		} else {
+			isLoading.set({ [state]: true });
+		}
 
 		if (taskId) {
 			taskIds = [taskId];
@@ -357,7 +362,11 @@
 			case 'start':
 			case 'startIndiv':
 				makeRequest('post', `http://127.0.0.1:23432/tasks/start?type=undefined`, taskIds, () => {
-					isLoading.set({ [state]: false });
+					if (state.includes('Indiv')) {
+						isLoading.set({ [`${state}${taskId}`]: false });
+					} else {
+						isLoading.set({ [state]: false });
+					}
 				});
 				break;
 			case 'stop':
@@ -372,7 +381,11 @@
 					return;
 				}
 				makeRequest('post', `http://127.0.0.1:23432/tasks/stop?type=undefined`, taskIds, () => {
-					isLoading.set({ [state]: false });
+					if (state.includes('Indiv')) {
+						isLoading.set({ [`${state}${taskId}`]: false });
+					} else {
+						isLoading.set({ [state]: false });
+					}
 				});
 				break;
 			case 'delete':
@@ -380,12 +393,16 @@
 				makeRequest('delete', `http://127.0.0.1:23432/tasks?type=checkout`, taskIds, () => {
 					// Update verboseTasks by filtering out the tasks that were deleted
 					verboseTasks.update((tasks) => {
-						return tasks.filter((task) => taskId != task.id);
+						return tasks.filter((task) => !taskIds.includes(task.id));
 					});
 
 					// Reset checkedCheckoutTasks
 					checkedCheckoutTasks = [];
-					isLoading.set({ [state]: false });
+					if (state.includes('Indiv')) {
+						isLoading.set({ [`${state}${taskId}`]: false });
+					} else {
+						isLoading.set({ [state]: false });
+					}
 				});
 				break;
 			case 'edit':
@@ -664,16 +681,5 @@
 		flex-grow: 1;
 		overflow-y: auto;
 		scroll-behavior: smooth;
-	}
-
-	.nav-button {
-		background: none;
-		outline: none;
-		border: none;
-		color: var(--off-black);
-	}
-
-	.nav-button:hover {
-		color: var(--light-gray-3);
 	}
 </style>

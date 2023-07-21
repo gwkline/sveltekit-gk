@@ -35,14 +35,14 @@
 
 <div class="button-group">
 	{#if state === 'Ready' || state === 'Complete' || state === 'Error'}
-		<Button icon={faPlay} onclick={handleStart} isLoading={$isLoading.startIndiv} />
+		<Button icon={faPlay} onclick={handleStart} isLoading={$isLoading[`startIndiv${itemId}`]} />
 	{:else}
-		<Button icon={faPause} onclick={handleStop} isLoading={$isLoading.stopIndiv} />
+		<Button icon={faPause} onclick={handleStop} isLoading={$isLoading[`stopIndiv${itemId}`]} />
 	{/if}
 	{#if showEdit}
 		<Button icon={faPen} onclick={handleEdit} />
 	{/if}
-	<Button icon={faTrash} onclick={handleDelete} isLoading={$isLoading.deleteIndiv} />
+	<Button icon={faTrash} onclick={handleDelete} isLoading={$isLoading[`deleteIndiv${itemId}`]} />
 </div>
 
 <style>

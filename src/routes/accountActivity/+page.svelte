@@ -323,7 +323,12 @@
 		let taskId: number | null = e.detail;
 		let taskIds: number[];
 		let state = e.type as states;
-		isLoading.set({ [state]: true });
+
+		if (state.includes('Indiv')) {
+			isLoading.set({ [`${state}${taskId}`]: true });
+		} else {
+			isLoading.set({ [state]: true });
+		}
 
 		if (taskId) {
 			taskIds = [taskId];
@@ -349,7 +354,11 @@
 				}
 
 				makeRequest('post', 'http://127.0.0.1:23432/accounts/activity/start', taskIds, () => {
-					isLoading.set({ [state]: false });
+					if (state.includes('Indiv')) {
+						isLoading.set({ [`${state}${taskId}`]: false });
+					} else {
+						isLoading.set({ [state]: false });
+					}
 				});
 				break;
 			case 'stop':
@@ -364,7 +373,11 @@
 					return;
 				}
 				makeRequest('post', 'http://127.0.0.1:23432/accounts/activity/stop', taskIds, () => {
-					isLoading.set({ [state]: false });
+					if (state.includes('Indiv')) {
+						isLoading.set({ [`${state}${taskId}`]: false });
+					} else {
+						isLoading.set({ [state]: false });
+					}
 				});
 				break;
 			case 'delete':
@@ -382,7 +395,11 @@
 							return task;
 						});
 					});
-					isLoading.set({ [state]: false });
+					if (state.includes('Indiv')) {
+						isLoading.set({ [`${state}${taskId}`]: false });
+					} else {
+						isLoading.set({ [state]: false });
+					}
 				});
 				break;
 		}
@@ -413,7 +430,6 @@
 	};
 
 	const changeActivityMode = (e: CustomEvent) => {
-		console.log(e);
 		let taskId: number = e.detail.id;
 		let mode: ActivityMode = e.detail.mode;
 		if (mode === undefined) {

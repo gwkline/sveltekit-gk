@@ -48,7 +48,7 @@
 <div class="container">
 	<button {type} {style} {disabled} class={classString} on:click|preventDefault={handleClick}>
 		{#if isLoading}
-			<Fa icon={faCog} spin />
+			<Fa icon={faCog} {size} spin />
 		{:else}
 			{#if icon && !(size === 'xs' && resizable)}
 				<Fa {icon} {size} class={$$slots.default ? 'icon-with-text' : 'icon-only'} />
