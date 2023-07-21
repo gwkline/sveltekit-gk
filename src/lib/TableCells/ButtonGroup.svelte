@@ -14,34 +14,34 @@
 
 	const handleEdit = (event: MouseEvent) => {
 		event.stopPropagation();
-		dispatch('edit', itemId);
+		dispatch('edit', { id: itemId });
 	};
 
 	const handleDelete = (event: MouseEvent) => {
 		event.stopPropagation();
-		dispatch('deleteIndiv', itemId);
+		dispatch('delete', { id: itemId });
 	};
 
 	const handleStop = (event: MouseEvent) => {
 		event.stopPropagation();
-		dispatch('stopIndiv', itemId);
+		dispatch('stop', { id: itemId });
 	};
 
 	const handleStart = (event: MouseEvent) => {
 		event.stopPropagation();
-		dispatch('startIndiv', itemId);
+		dispatch('start', { id: itemId });
 	};
 </script>
 
 <div class="button-group">
 	{#if state === 'Ready' || state === 'Complete' || state === 'Error'}
-		<Button icon={faPlay} onclick={handleStart} isLoading={$isLoading[`startIndiv${itemId}`]} />
+		<Button icon={faPlay} onclick={handleStart} isLoading={$isLoading[`start${itemId}`]} />
 	{:else}
-		<Button icon={faPause} onclick={handleStop} isLoading={$isLoading[`stopIndiv${itemId}`]} />
+		<Button icon={faPause} onclick={handleStop} isLoading={$isLoading[`stop${itemId}`]} />
 	{/if}
 	{#if showEdit}
 		<Button icon={faPen} onclick={handleEdit} />
-		<Button icon={faTrash} onclick={handleDelete} isLoading={$isLoading[`deleteIndiv${itemId}`]} />
+		<Button icon={faTrash} onclick={handleDelete} isLoading={$isLoading[`delete${itemId}`]} />
 	{/if}
 </div>
 

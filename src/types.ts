@@ -452,4 +452,11 @@ export type states =
 	| 'create'
 	| 'startIndiv'
 	| 'stopIndiv'
-	| 'deleteIndiv';
+	| 'deleteIndiv'
+	| 'editActivity'
+	| 'editSchedule';
+
+export type SettingsKeys =
+	| 'max_active_tasks'
+	| 'max_starting_tasks'
+	| 'max_starting_activity_tasks';

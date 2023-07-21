@@ -1,16 +1,5 @@
 <script lang="ts">
 	import Fa from 'svelte-fa';
-	import {
-		faFlag,
-		faHourglassHalf,
-		faRunning,
-		faTrophy,
-		faX,
-		faPlay,
-		faClock,
-		faListOl,
-		faCheck
-	} from '@fortawesome/free-solid-svg-icons';
 	import { stateColors, stateIconMapping } from '../helpers';
 	import type { ActivityState, ActivityTask, CheckoutState, Task } from '../types';
 	import { createEventDispatcher } from 'svelte';
@@ -150,7 +139,9 @@
 
 <div class="status-bar">
 	{#each orderedTasks as task}
-		<button
+		<!-- svelte-ignore a11y-no-static-element-interactions -->
+		<!-- svelte-ignore a11y-click-events-have-key-events -->
+		<div
 			class="status-section"
 			style="background-color: {getColor(task['state'])};"
 			title={capitalizeFirstLetter(task['state'])}

@@ -1,12 +1,12 @@
 import axios, { AxiosError, type AxiosResponse } from 'axios';
 import type {
 	Account,
-	ActivityTask,
 	Settings,
 	ShortAccount,
 	SortState,
 	Task,
-	WhopMembershipType
+	WhopMembershipType,
+	SettingsKeys
 } from './types';
 import { goto } from '$app/navigation';
 import { browser } from '$app/environment';
@@ -21,7 +21,7 @@ import {
 	verboseActivityTasks,
 	accounts
 } from './datastore';
-import { get, type Writable } from 'svelte/store';
+import { get } from 'svelte/store';
 import {
 	faPause,
 	faClock,
@@ -110,7 +110,6 @@ export const findMemberships = async (): Promise<WhopMembershipType[]> => {
 	return parsed_response.data as WhopMembershipType[];
 };
 
-// Define color mapping
 export const stateColors = {
 	Ready: 'var(--light-gray-3)',
 	Queued: 'var(--warning-yellow)',
@@ -169,11 +168,7 @@ export const updateSelectedTags = (e: CustomEvent, selectedTags: string[]) => {
 	}
 };
 
-type settings = 'max_active_tasks' | 'max_starting_tasks' | 'max_starting_activity_tasks';
-export const saveSettings = (e: CustomEvent) => {
-	let settingKey = e.detail.name as settings;
-	let value = e.detail.value;
-
+export const saveSettings = (settingKey: SettingsKeys, value: string) => {
 	settings.update((currentSettings) => {
 		let newSettings = currentSettings as Settings;
 

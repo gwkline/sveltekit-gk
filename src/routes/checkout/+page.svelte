@@ -232,36 +232,25 @@
 	};
 
 	const handleTask = (e: CustomEvent) => {
-		let taskId: number | null = e.detail;
-		let taskIds: number[];
 		let state = e.type as states;
+		let taskId: number | null = e.detail?.id || null;
+		isLoading.set({ [`${state}${taskId}`]: true });
 
-		if (state.includes('Indiv')) {
-			isLoading.set({ [`${state}${taskId}`]: true });
-		} else {
-			isLoading.set({ [state]: true });
-		}
-
+		let taskIds: number[];
 		if (taskId) {
 			taskIds = [taskId];
 		} else {
 			let all = $shiftPressed || checkedCheckoutTasks.filter((item) => item != -1).length === 0;
-			taskIds = all ? $verboseTasks.map((task) => task.id) : checkedCheckoutTasks;
+			taskIds = all ? filteredTasks.map((task) => task.id) : checkedCheckoutTasks;
 		}
 
 		switch (state) {
 			case 'start':
-			case 'startIndiv':
 				makeRequest('post', `http://127.0.0.1:23432/tasks/start?type=undefined`, taskIds, () => {
-					if (state.includes('Indiv')) {
-						isLoading.set({ [`${state}${taskId}`]: false });
-					} else {
-						isLoading.set({ [state]: false });
-					}
+					isLoading.set({ [`${state}${taskId}`]: false });
 				});
 				break;
 			case 'stop':
-			case 'stopIndiv':
 				taskIds = taskIds.filter((id) => {
 					const task = $verboseTasks.find((task: Task) => task.id === id);
 					return task && task.state !== 'Ready';
@@ -272,15 +261,10 @@
 					return;
 				}
 				makeRequest('post', `http://127.0.0.1:23432/tasks/stop?type=undefined`, taskIds, () => {
-					if (state.includes('Indiv')) {
-						isLoading.set({ [`${state}${taskId}`]: false });
-					} else {
-						isLoading.set({ [state]: false });
-					}
+					isLoading.set({ [`${state}${taskId}`]: false });
 				});
 				break;
 			case 'delete':
-			case 'deleteIndiv':
 				makeRequest('delete', `http://127.0.0.1:23432/tasks?type=checkout`, taskIds, () => {
 					// Update verboseTasks by filtering out the tasks that were deleted
 					verboseTasks.update((tasks) => {
@@ -289,11 +273,7 @@
 
 					// Reset checkedCheckoutTasks
 					checkedCheckoutTasks = [];
-					if (state.includes('Indiv')) {
-						isLoading.set({ [`${state}${taskId}`]: false });
-					} else {
-						isLoading.set({ [state]: false });
-					}
+					isLoading.set({ [`${state}${taskId}`]: false });
 				});
 				break;
 			case 'edit':
@@ -323,7 +303,7 @@
 	};
 
 	const handleSaveSettings = (e: CustomEvent) => {
-		saveSettings(e);
+		saveSettings(e.detail.name, e.detail.value);
 	};
 
 	// Sets the value of filteredTasks and tableData
@@ -476,10 +456,10 @@
 {/if}
 
 <StatusBar
+	page="checkout"
 	tasks={filteredTasks}
 	{selectedState}
 	on:selectedState={updateSelectedState}
-	page="checkout"
 />
 
 <CheckoutNav
@@ -529,10 +509,10 @@
 			page="checkout"
 			checked={checkedCheckoutTasks.includes(row.itemId)}
 			on:checked={handleChecked}
-			on:deleteIndiv={handleTask}
-			on:startIndiv={handleTask}
+			on:delete={handleTask}
+			on:start={handleTask}
 			on:edit={handleTask}
-			on:stopIndiv={handleTask}
+			on:stop={handleTask}
 		/>
 	</Table>
 </div>

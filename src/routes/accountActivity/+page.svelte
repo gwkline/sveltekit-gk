@@ -233,26 +233,20 @@
 	};
 
 	const handleTask = (e: CustomEvent) => {
-		let taskId: number | null = e.detail;
-		let taskIds: number[];
 		let state = e.type as states;
+		let taskId: number | null = e.detail?.id || null;
+		isLoading.set({ [`${state}${taskId}`]: true });
 
-		if (state.includes('Indiv')) {
-			isLoading.set({ [`${state}${taskId}`]: true });
-		} else {
-			isLoading.set({ [state]: true });
-		}
-
+		let taskIds: number[];
 		if (taskId) {
 			taskIds = [taskId];
 		} else {
 			let all = $shiftPressed || checkedCheckoutTasks.filter((item) => item != -1).length === 0;
-			taskIds = all ? $verboseActivityTasks.map((task) => task.id) : checkedCheckoutTasks;
+			taskIds = all ? filteredTasks.map((task) => task.id) : checkedCheckoutTasks;
 		}
 
 		switch (state) {
 			case 'start':
-			case 'startIndiv':
 				let theseTasks = $verboseActivityTasks.filter((task) => taskIds.includes(task.id));
 				let theseModes = theseTasks.map((task) => {
 					return task.mode;
@@ -267,15 +261,10 @@
 				}
 
 				makeRequest('post', 'http://127.0.0.1:23432/accounts/activity/start', taskIds, () => {
-					if (state.includes('Indiv')) {
-						isLoading.set({ [`${state}${taskId}`]: false });
-					} else {
-						isLoading.set({ [state]: false });
-					}
+					isLoading.set({ [`${state}${taskId}`]: false });
 				});
 				break;
 			case 'stop':
-			case 'stopIndiv':
 				taskIds = taskIds.filter((id) => {
 					const task = $verboseActivityTasks.find((task: ActivityTask) => task.id === id);
 					return task && task.state !== 'Ready';
@@ -286,15 +275,10 @@
 					return;
 				}
 				makeRequest('post', 'http://127.0.0.1:23432/accounts/activity/stop', taskIds, () => {
-					if (state.includes('Indiv')) {
-						isLoading.set({ [`${state}${taskId}`]: false });
-					} else {
-						isLoading.set({ [state]: false });
-					}
+					isLoading.set({ [`${state}${taskId}`]: false });
 				});
 				break;
 			case 'delete':
-			case 'deleteIndiv':
 				makeRequest('delete', 'http://127.0.0.1:23432/accounts/sessions', taskIds, () => {
 					verboseActivityTasks.update((tasks) => {
 						return tasks.map((task) => {
@@ -308,11 +292,57 @@
 							return task;
 						});
 					});
-					if (state.includes('Indiv')) {
-						isLoading.set({ [`${state}${taskId}`]: false });
-					} else {
-						isLoading.set({ [state]: false });
+					isLoading.set({ [`${state}${taskId}`]: false });
+				});
+				break;
+			case 'editActivity':
+				let mode: ActivityMode = e.detail.mode;
+				if (mode === undefined) {
+					return;
+				}
+				let activityTasks = filteredTasks.filter((task: ActivityTask) => taskIds.includes(task.id));
+				activityTasks = activityTasks.map((task) => {
+					task.mode = mode;
+					return task;
+				});
+
+				makeRequest('put', 'http://127.0.0.1:23432/accounts/activity', activityTasks, () => {
+					verboseActivityTasks.update((stateTasks) => {
+						for (let task of activityTasks) {
+							const index = stateTasks.findIndex((t) => t.id === task.id);
+							if (index !== -1) {
+								stateTasks[index] = task;
+							}
+						}
+						return stateTasks;
+					});
+					isLoading.set({ [state]: false });
+				});
+				break;
+
+			case 'editSchedule':
+				let scheduleName: string = e.detail.scheduleName;
+				let scheduleTasks = filteredTasks.filter((task: ActivityTask) => taskIds.includes(task.id));
+				scheduleTasks = scheduleTasks.map((task) => {
+					let foundSchedule = $schedules.find((schedule) => schedule.name === scheduleName);
+					if (foundSchedule) {
+						task.schedule_id = foundSchedule.id;
+					} else if (scheduleName === 'None' || scheduleName === '') {
+						task.schedule_id = 0;
 					}
+					return task;
+				});
+				makeRequest('put', 'http://127.0.0.1:23432/accounts/activity', scheduleTasks, () => {
+					verboseActivityTasks.update((stateTasks) => {
+						for (let task of scheduleTasks) {
+							const index = stateTasks.findIndex((t) => t.id === task.id);
+							if (index !== -1) {
+								stateTasks[index] = task;
+							}
+						}
+						return stateTasks;
+					});
+					isLoading.set({ [state]: false });
 				});
 				break;
 		}
@@ -326,77 +356,7 @@
 	};
 
 	const handleSaveSettings = (e: CustomEvent) => {
-		saveSettings(e);
-	};
-
-	const changeActivityMode = (e: CustomEvent) => {
-		let taskId: number = e.detail.id;
-		let mode: ActivityMode = e.detail.mode;
-		if (mode === undefined) {
-			return;
-		}
-		let taskIds: number[];
-		let state = e.type as states;
-		isLoading.set({ [state]: true });
-
-		if (taskId) {
-			taskIds = [taskId];
-		} else {
-			let all = $shiftPressed || checkedCheckoutTasks.filter((item) => item != -1).length === 0;
-			taskIds = all ? $verboseActivityTasks.map((task) => task.id) : checkedCheckoutTasks;
-		}
-
-		let tasks = $verboseActivityTasks.filter((task: ActivityTask) => taskIds.includes(task.id));
-		tasks = tasks.map((task) => {
-			task.mode = mode;
-			return task;
-		});
-
-		return makeRequest('put', 'http://127.0.0.1:23432/accounts/activity', tasks, () => {
-			verboseActivityTasks.update((stateTasks) => {
-				for (let task of tasks) {
-					const index = stateTasks.findIndex((t) => t.id === task.id);
-					if (index !== -1) {
-						stateTasks[index] = task;
-					}
-				}
-				return stateTasks;
-			});
-			isLoading.set({ [state]: false });
-		});
-	};
-
-	const changeSchedule = (e: CustomEvent) => {
-		let scheduleName: string = e.detail;
-		let taskIds: number[];
-		let state = e.type as states;
-		isLoading.set({ [state]: true });
-
-		let all = $shiftPressed || checkedCheckoutTasks.filter((item) => item != -1).length === 0;
-		taskIds = all ? $verboseActivityTasks.map((task) => task.id) : checkedCheckoutTasks;
-
-		let tasks = $verboseActivityTasks.filter((task: ActivityTask) => taskIds.includes(task.id));
-		tasks = tasks.map((task) => {
-			let foundSchedule = $schedules.find((schedule) => schedule.name === scheduleName);
-			if (foundSchedule) {
-				task.schedule_id = foundSchedule.id;
-			} else if (scheduleName === 'None' || scheduleName === '') {
-				task.schedule_id = 0;
-			}
-			return task;
-		});
-		return makeRequest('put', 'http://127.0.0.1:23432/accounts/activity', tasks, () => {
-			verboseActivityTasks.update((stateTasks) => {
-				for (let task of tasks) {
-					const index = stateTasks.findIndex((t) => t.id === task.id);
-					if (index !== -1) {
-						stateTasks[index] = task;
-					}
-				}
-				return stateTasks;
-			});
-			isLoading.set({ [state]: false });
-		});
+		saveSettings(e.detail.name, e.detail.value);
 	};
 
 	// Sets the value of filteredTasks and tableData
@@ -563,8 +523,8 @@
 	on:searchValue={updateSearchValue}
 	on:start={handleTask}
 	on:stop={handleTask}
-	on:changeActivityMode={changeActivityMode}
-	on:changeSchedule={changeSchedule}
+	on:editActivity={handleTask}
+	on:editSchedule={handleTask}
 	on:saveSettings={handleSaveSettings}
 	on:delete={() => {
 		showConfirmationModal = true;
@@ -600,9 +560,9 @@
 			{row}
 			checked={checkedCheckoutTasks.includes(row.itemId)}
 			on:checked={handleChecked}
-			on:startIndiv={handleTask}
-			on:stopIndiv={handleTask}
-			on:edit={changeActivityMode}
+			on:start={handleTask}
+			on:stop={handleTask}
+			on:editActivity={handleTask}
 			page="activity"
 		/>
 	</Table>

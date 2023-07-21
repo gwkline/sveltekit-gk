@@ -21,8 +21,8 @@
 		dispatch('checked', row.itemId);
 	};
 
-	const changeActivityMode = (e: CustomEvent) => {
-		dispatch('edit', { id: row.itemId, mode: e.detail });
+	const editActivity = (e: CustomEvent) => {
+		dispatch('editActivity', { id: row.itemId, mode: e.detail.mode });
 	};
 </script>
 
@@ -46,7 +46,7 @@
 					{:else if column === 'Proxy'}
 						<ProxyCell {value} />
 					{:else if column === 'Mode'}
-						<ActivityModeCell mode={row.thisTask.mode} on:changeActivityMode={changeActivityMode} />
+						<ActivityModeCell mode={row.thisTask.mode} on:editActivity={editActivity} />
 					{:else if column === 'Profile'}
 						<ProfileCell
 							profileName={row.thisTask.account?.profile.name || ''}
@@ -63,13 +63,13 @@
 
 		<td>
 			<ButtonGroup
-				on:deleteIndiv
-				on:startIndiv
-				on:stopIndiv
-				on:edit
 				{page}
 				itemId={row.itemId}
 				state={row.thisTask?.state || 'Ready'}
+				on:delete
+				on:start
+				on:stop
+				on:edit
 			/>
 		</td>
 	{/if}

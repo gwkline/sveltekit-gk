@@ -52,10 +52,10 @@
 				dispatch('stop');
 				break;
 			case 'editMode':
-				dispatch('changeActivityMode', { mode: titleValueMap[modeValue] });
+				dispatch('editActivity', { mode: titleValueMap[modeValue] });
 				break;
 			case 'editSchedule':
-				dispatch('changeSchedule', scheduleValue);
+				dispatch('editSchedule', { scheduleName: scheduleValue });
 				break;
 			case 'delete':
 				dispatch('delete');

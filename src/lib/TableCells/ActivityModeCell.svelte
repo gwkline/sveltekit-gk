@@ -28,7 +28,7 @@
 
 	const dispatch = createEventDispatcher();
 	const handleChange = () => {
-		dispatch('changeActivityMode', titleValueMap[value]);
+		dispatch('editActivity', { mode: titleValueMap[value] });
 	};
 
 	$: value = valueTitleMap[mode];
