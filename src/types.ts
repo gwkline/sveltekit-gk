@@ -102,7 +102,6 @@ export type Account = {
 	proxy_list: ProxyList;
 	username: string;
 	password: string;
-	creation_method: string;
 	email: string;
 	email_password: string;
 	email_type: string;
@@ -114,7 +113,8 @@ export type Account = {
 	type: number;
 	updated_at: string;
 	created_at: string;
-	metadata: AccountMetadata | undefined;
+	creation_method: string;
+	metadata: AccountMetadata;
 	tags: Tag[];
 	previous_wins: PreviousWins;
 	use_account_name: boolean;
@@ -125,12 +125,32 @@ export type Account = {
 
 export type ShortAccount = {
 	id: number;
-	username: string;
+	profile_id: number;
+	proxy_list_id: number;
 	proxy: string;
 	profile: ShortProfile;
+	proxy_list: ProxyList;
+	username: string;
+	password: string;
+	email: string;
+	email_password: string;
+	email_type: string;
+	email_provider: string;
+	login_after_reset: boolean;
+	send_reset_only: boolean;
+	email_login_only: boolean;
+	user_provided_password: string;
+	type: number;
+	updated_at: string;
+	created_at: string;
+	creation_method: string;
+	metadata: AccountMetadata;
 	tags: Tag[];
+	previous_wins: PreviousWins;
 	use_account_name: boolean;
-	metadata: AccountMetadata | undefined;
+	archived: boolean;
+	status: string;
+	analytics_properties: object | null;
 };
 
 export type AccountMetadata = {
@@ -148,8 +168,8 @@ export type AccountMetadata = {
 export type ProxyList = {
 	id: number;
 	name: string;
-	proxies: string[];
-	updated_at: string;
+	proxies?: string[];
+	updated_at?: string;
 	previous_wins: PreviousWins;
 	archived: boolean;
 };
@@ -395,10 +415,17 @@ export type HeaderConfigType<T> = {
 	[key: string]: (object: T) => string;
 };
 
-export interface TableRowType {
+export interface TaskTableRowType {
 	index: number;
 	itemId: number;
-	thisTask: Task | ActivityTask;
+	thisItem: Task | ActivityTask;
+	[header: string]: any;
+}
+
+export interface AccountTableRowType {
+	index: number;
+	itemId: number;
+	thisItem: ShortAccount;
 	[header: string]: any;
 }
 

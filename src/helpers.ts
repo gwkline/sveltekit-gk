@@ -209,6 +209,9 @@ export const getActivityTasks = () => {
 	makeRequest('get', 'http://127.0.0.1:23432/accounts/activity', null, (response) => {
 		let data = response.data;
 		let cleanedData = data.map((task: Task) => {
+			if (task.account.username === 'geek.mousers-01@icloud.com') {
+				console.log(task);
+			}
 			task['account'] = cleanAccount(task.account as Account);
 			return task;
 		});
@@ -229,25 +232,50 @@ export const getAccounts = () => {
 
 const cleanAccount = (account: Account): ShortAccount => {
 	return {
-		id: account['id'],
-		username: account['username'],
-		proxy: account['proxy'],
-		tags: account['tags'],
-		use_account_name: account['use_account_name'],
+		id: account.id,
+		profile_id: account.profile_id,
+		proxy_list_id: account.proxy_list_id,
+		proxy: account.proxy,
+		profile: {
+			id: account.profile.id,
+			name: account.profile.name,
+			tags: account.profile.tags,
+			payment: {
+				id: account.profile.payment.id,
+				tags: account.profile.payment.tags,
+				card_name: account.profile.payment.card_name,
+				card_type: account.profile.payment.card_type
+			}
+		},
+		proxy_list: {
+			id: account.proxy_list.id,
+			name: account.proxy_list.name,
+			previous_wins: account.proxy_list.previous_wins,
+			archived: account.proxy_list.archived
+		},
+		username: account.username,
+		password: account.password,
+		email: account.email,
+		email_password: account.email_password,
+		email_type: account.email_type,
+		email_provider: account.email_provider,
+		login_after_reset: account.login_after_reset,
+		send_reset_only: account.send_reset_only,
+		email_login_only: account.email_login_only,
+		user_provided_password: account.user_provided_password,
+		type: account.type,
+		updated_at: account.updated_at,
+		created_at: account.created_at,
+		creation_method: account.creation_method,
 		metadata: {
 			logged_in: account.metadata?.logged_in ? account.metadata?.logged_in : false
 		},
-		profile: {
-			id: account['profile']['id'],
-			name: account['profile']['name'],
-			tags: account['profile']['tags'],
-			payment: {
-				id: account['profile']['payment']['id'],
-				tags: account['profile']['payment']['tags'],
-				card_name: account['profile']['payment']['card_name'],
-				card_type: account['profile']['payment']['card_type']
-			}
-		}
+		tags: account.tags,
+		previous_wins: account.previous_wins,
+		use_account_name: account.use_account_name,
+		archived: account.archived,
+		status: account.status,
+		analytics_properties: account.analytics_properties
 	};
 };
 

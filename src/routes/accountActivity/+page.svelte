@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Tags from '$lib/Tags.svelte';
 	import Table from '$lib/Table.svelte';
-	import TableRow from '$lib/TableRow.svelte';
+	import TaskTableRow from '$lib/TaskTableRow.svelte';
 	import StatusBar from '$lib/StatusBar.svelte';
 	import UpdateBar from '$lib/UpdateBar.svelte';
 	import ActivityNav from './ActivityNav.svelte';
@@ -27,7 +27,7 @@
 	} from '../../datastore';
 	import type {
 		HeaderConfigType,
-		TableRowType,
+		TaskTableRowType,
 		ActivityState,
 		SortState,
 		ActivityTask,
@@ -55,7 +55,7 @@
 	let totalSelectedTasks: number = 0;
 
 	let filteredTasks: ActivityTask[] = [];
-	let tableData: TableRowType[] = [];
+	let tableData: TaskTableRowType[] = [];
 	let tableIds: number[] = [];
 
 	let selectedTags: string[] = [];
@@ -391,10 +391,10 @@
 		tableIds = [];
 
 		let tableDataShortenedTemp = filtered.map((row, index) => {
-			const rowObject: TableRowType = {
+			const rowObject: TaskTableRowType = {
 				index: index + 1,
 				itemId: row.id,
-				thisTask: row
+				thisItem: row
 			};
 			for (const header of headers) {
 				rowObject[header] = headerConfig[header](row);
@@ -481,13 +481,14 @@
 		let items = checkedCheckoutTasks;
 		if ($shiftPressed || items.length == 0) {
 			buttonTextCount = 'All';
-		} else if (items.length == $verboseActivityTasks.length) {
+		} else if (items.length == filteredTasks.length) {
 			buttonTextCount = `All (${items.length})`;
 		} else {
 			buttonTextCount = `${items.length}`;
 		}
 	}
 
+	// Sets the value of filterOn
 	$: {
 		if (
 			selectedTags.length > 0 ||
@@ -556,7 +557,7 @@
 		on:sort={handleSort}
 		on:checkedAll={handleCheckedAll}
 	>
-		<TableRow
+		<TaskTableRow
 			{row}
 			checked={checkedCheckoutTasks.includes(row.itemId)}
 			on:checked={handleChecked}

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Tags from '$lib/Tags.svelte';
 	import Table from '$lib/Table.svelte';
-	import TableRow from '$lib/TableRow.svelte';
+	import TaskTableRow from '$lib/TaskTableRow.svelte';
 	import StatusBar from '$lib/StatusBar.svelte';
 	import UpdateBar from '$lib/UpdateBar.svelte';
 	import CheckoutNav from './CheckoutNav.svelte';
@@ -21,7 +21,7 @@
 	import type {
 		Task,
 		HeaderConfigType,
-		TableRowType,
+		TaskTableRowType,
 		CheckoutState,
 		SortState,
 		states
@@ -46,7 +46,7 @@
 	let totalSelectedTasks: number = 0;
 
 	let filteredTasks: Task[] = [];
-	let tableData: TableRowType[] = [];
+	let tableData: TaskTableRowType[] = [];
 	let tableIds: number[] = [];
 
 	let selectedTags: string[] = [];
@@ -338,10 +338,10 @@
 		tableIds = [];
 
 		let tableDataShortenedTemp = filtered.map((row, index) => {
-			const rowObject: TableRowType = {
+			const rowObject: TaskTableRowType = {
 				index: index + 1,
 				itemId: row.id,
-				thisTask: row
+				thisItem: row
 			};
 			for (const header of headers) {
 				rowObject[header] = headerConfig[header](row);
@@ -435,6 +435,7 @@
 		}
 	}
 
+	// Sets the value of filterOn
 	$: {
 		if (
 			selectedTags.length > 0 ||
@@ -494,7 +495,7 @@
 	/>
 {/if}
 
-<div class="container">
+<div class="table-container">
 	<Table
 		let:row
 		{tableData}
@@ -504,7 +505,7 @@
 		on:sort={handleSort}
 		on:checkedAll={handleCheckedAll}
 	>
-		<TableRow
+		<TaskTableRow
 			{row}
 			page="checkout"
 			checked={checkedCheckoutTasks.includes(row.itemId)}
@@ -535,7 +536,7 @@
 {/if}
 
 <style>
-	.container {
+	.table-container {
 		flex-grow: 1;
 		overflow-y: auto;
 		scroll-behavior: smooth;
