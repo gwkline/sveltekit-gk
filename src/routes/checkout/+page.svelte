@@ -26,6 +26,7 @@
 		SortState,
 		states
 	} from '../../types';
+	import { fade } from 'svelte/transition';
 
 	let searchValue: string = '';
 	let sortState: SortState = { column: null, direction: 0 };

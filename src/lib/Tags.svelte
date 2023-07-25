@@ -11,6 +11,8 @@
 		faSave
 	} from '@fortawesome/free-solid-svg-icons';
 	import { onMount, onDestroy, createEventDispatcher } from 'svelte';
+	import { fade, blur, fly, slide, scale, draw, crossfade } from 'svelte/transition';
+	import { cubicInOut, cubicOut } from 'svelte/easing';
 
 	export let tagsCount: { tag: string; count: number }[] = [];
 	export let selectedTags: string[] = [];
@@ -146,7 +148,10 @@
 	};
 </script>
 
-<div class="container-wrapper">
+<div
+	transition:slide={{ axis: 'y', duration: 1000, delay: 0, easing: cubicInOut }}
+	class="container-wrapper"
+>
 	<div class="selection-info">
 		<p class="count-info">
 			{selectedTags.length}
@@ -211,7 +216,7 @@
 			</button>
 			<button class="clear-all" on:click={deleteSelectedTags}>
 				<Fa icon={faTrash} size="sm" />
-				Delete selected {showDeleteTasks ? 'tags' : ''}
+				Delete selected tags
 			</button>
 			{#if showDeleteTasks}
 				<button class="clear-all" on:click={deleteSelectedTasks}>

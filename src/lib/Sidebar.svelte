@@ -51,7 +51,7 @@
 			page: 'accounts',
 			text: 'Accounts',
 			icon: faUsers,
-			disabled: true
+			disabled: false
 		},
 		{
 			page: 'profiles',

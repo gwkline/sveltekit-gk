@@ -1,7 +1,6 @@
 <script lang="ts">
 	import Tags from '$lib/Tags.svelte';
 	import Table from '$lib/Table.svelte';
-	import TaskTableRow from '$lib/TaskTableRow.svelte';
 	import UpdateBar from '$lib/UpdateBar.svelte';
 	import AccountNav from './AccountNav.svelte';
 	import ConfirmationModal from '$lib/ConfirmationModal.svelte';
@@ -40,8 +39,6 @@
 	let sortState: SortState = { column: null, direction: 0 };
 
 	let showConfirmationModal = false;
-	let showSMSModal = false;
-	let showPasswordModal = false;
 
 	let buttonTextCount: string;
 	let selectedState: ActivityState | '' = '';
@@ -74,14 +71,6 @@
 
 	const handleSort = (e: CustomEvent) => {
 		sortState = updateSortState(e, sortState);
-	};
-
-	const updateSelectedState = (e: CustomEvent) => {
-		if (selectedState === e.detail) {
-			selectedState = '';
-		} else {
-			selectedState = e.detail;
-		}
 	};
 
 	const updateSearchValue = (e: CustomEvent) => {
@@ -269,9 +258,7 @@
 		sortState = { column: null, direction: 0 };
 	};
 
-	const handleSaveSettings = (e: CustomEvent) => {
-		saveSettings(e.detail.name, e.detail.value);
-	};
+	const handleEdit = () => {};
 
 	// Sets the value of filteredAccounts and tableData
 	$: {
@@ -426,13 +413,8 @@
 	{buttonTextCount}
 	{searchValue}
 	schedules={$schedules}
-	maxStartingActivityTasks={`${$settings.max_starting_activity_tasks}`}
 	on:searchValue={updateSearchValue}
-	on:start={handleTask}
-	on:stop={handleTask}
-	on:editActivity={handleTask}
-	on:editSchedule={handleTask}
-	on:saveSettings={handleSaveSettings}
+	on:edit={handleEdit}
 	on:delete={() => {
 		showConfirmationModal = true;
 	}}
