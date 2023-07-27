@@ -1,26 +1,34 @@
 <script lang="ts">
+	import StatusCell from '../TableCells/StatusCell.svelte';
 	import AccountCell from '../TableCells/AccountCell.svelte';
+	import SkuCell from '../TableCells/SkuCell.svelte';
 	import ProxyCell from '../TableCells/ProxyCell.svelte';
 	import ProfileCell from '../TableCells/ProfileCell.svelte';
+	import ButtonGroup from '../TableCells/ButtonGroup.svelte';
 	import BrowserCell from '../TableCells/BrowserCell.svelte';
 	import { createEventDispatcher } from 'svelte';
+	import type { ActivityTask, TableRowType, Task } from '../../types';
 	import CheckboxCell from '../TableCells/CheckboxCell.svelte';
-	import type { TableRowType, Account } from '../../types';
-	import DateAddedCell from '../TableCells/DateAddedCell.svelte';
+	import ActivityModeCell from '../TableCells/ActivityModeCell.svelte';
 
-	export let row: TableRowType<Account>;
+	export let row: TableRowType<ActivityTask>;
 	export let checked = false;
+	export let page: string;
 	let index = row.index;
 
 	const dispatch = createEventDispatcher();
 	const handleClick = () => {
 		dispatch('checked', row.itemId);
 	};
+
+	const editActivity = (e: CustomEvent) => {
+		dispatch('editActivity', { id: row.itemId, mode: e.detail.mode });
+	};
 </script>
 
 <tr on:click|stopPropagation={handleClick} class={checked ? 'active' : ''}>
 	<td class="Count">
-		<CheckboxCell {index} {checked} schedule={0} on:change={handleClick} />
+		<CheckboxCell {index} {checked} schedule={row.thisItem.schedule_id} on:change={handleClick} />
 	</td>
 
 	{#if row.thisItem}
@@ -29,24 +37,39 @@
 				<td class={column}>
 					{#if column === 'Browser'}
 						<BrowserCell {value} />
+					{:else if column === 'Status'}
+						<StatusCell {value} state={row.thisItem.state || 'Ready'} {page} />
 					{:else if column === 'Account'}
-						<AccountCell {value} loggedIn={row.thisItem.metadata?.logged_in || false} />
+						<AccountCell {value} loggedIn={row.thisItem.account?.metadata?.logged_in || false} />
 					{:else if column === 'Proxy'}
 						<ProxyCell {value} />
+					{:else if column === 'Mode'}
+						<ActivityModeCell mode={row.thisItem.mode} on:editActivity={editActivity} />
 					{:else if column === 'Profile'}
 						<ProfileCell
-							profileName={row.thisItem.profile.name || ''}
-							profileTags={row.thisItem.profile.tags.map((item) => item.name).join(', ') || ''}
-							sameName={row.thisItem.use_account_name || false}
+							profileName={row.thisItem.account?.profile.name || ''}
+							profileTags={row.thisItem.account?.profile.tags.map((item) => item.name).join(', ') ||
+								''}
+							sameName={row.thisItem.account?.use_account_name || false}
 						/>
-					{:else if column === 'Date Added'}
-						<DateAddedCell {value} />
 					{:else}
 						{value}
 					{/if}
 				</td>
 			{/if}
 		{/each}
+
+		<td>
+			<ButtonGroup
+				{page}
+				itemId={row.itemId}
+				state={row.thisItem?.state || 'Ready'}
+				on:delete
+				on:start
+				on:stop
+				on:edit
+			/>
+		</td>
 	{/if}
 </tr>
 

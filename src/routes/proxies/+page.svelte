@@ -15,11 +15,11 @@
 	import { shiftPressed, isLoading, schedules, proxy_lists } from '../../datastore';
 	import type {
 		HeaderConfigType,
-		ProxyListTableRowType,
 		ActivityState,
 		SortState,
 		ProxyList,
-		states
+		states,
+		TableRowType
 	} from '../../types';
 	import ProxyListTableRow from '$lib/TableRows/ProxyListTableRow.svelte';
 
@@ -39,7 +39,7 @@
 	let totalSelectedTasks: number = 0;
 
 	let filteredProxyLists: ProxyList[] = [];
-	let tableData: ProxyListTableRowType[] = [];
+	let tableData: TableRowType<ProxyList>[] = [];
 	let tableIds: number[] = [];
 
 	let selectedTags: string[] = [];
@@ -162,7 +162,7 @@
 		tableIds = [];
 
 		let tableDataShortenedTemp = filtered.map((row, index) => {
-			const rowObject: ProxyListTableRowType = {
+			const rowObject: TableRowType<ProxyList> = {
 				index: index + 1,
 				itemId: row.id,
 				thisItem: row

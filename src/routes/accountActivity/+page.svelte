@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Tags from '$lib/Tags.svelte';
 	import Table from '$lib/Table.svelte';
-	import TaskTableRow from '$lib/TableRows/TaskTableRow.svelte';
+	import TaskTableRow from '$lib/TableRows/CheckoutTableRow.svelte';
 	import StatusBar from '$lib/StatusBar.svelte';
 	import UpdateBar from '$lib/UpdateBar.svelte';
 	import ActivityNav from './ActivityNav.svelte';
@@ -27,7 +27,7 @@
 	} from '../../datastore';
 	import type {
 		HeaderConfigType,
-		TaskTableRowType,
+		TableRowType,
 		ActivityState,
 		SortState,
 		ActivityTask,
@@ -55,7 +55,7 @@
 	let totalSelectedTasks: number = 0;
 
 	let filteredTasks: ActivityTask[] = [];
-	let tableData: TaskTableRowType[] = [];
+	let tableData: TableRowType<ActivityTask>[] = [];
 	let tableIds: number[] = [];
 
 	let selectedTags: string[] = [];
@@ -391,7 +391,7 @@
 		tableIds = [];
 
 		let tableDataShortenedTemp = filtered.map((row, index) => {
-			const rowObject: TaskTableRowType = {
+			const rowObject: TableRowType<ActivityTask> = {
 				index: index + 1,
 				itemId: row.id,
 				thisItem: row

@@ -16,8 +16,6 @@
 	import { findMemberships } from '../helpers';
 	import UpdateBar from '$lib/UpdateBar.svelte';
 
-	export const ssr = false;
-	export const prerender = true;
 	let eventSource: EventSource;
 
 	const handleKeydown = (event: KeyboardEvent) => {

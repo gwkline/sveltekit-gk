@@ -415,38 +415,10 @@ export type HeaderConfigType<T> = {
 	[key: string]: (object: T) => string;
 };
 
-export interface TaskTableRowType {
+export interface TableRowType<T> {
 	index: number;
 	itemId: number;
-	thisItem: Task | ActivityTask;
-	[header: string]: any;
-}
-
-export interface ProfileTableRowType {
-	index: number;
-	itemId: number;
-	thisItem: Profile;
-	[header: string]: any;
-}
-
-export interface PaymentTableRowType {
-	index: number;
-	itemId: number;
-	thisItem: Payment;
-	[header: string]: any;
-}
-
-export interface ProxyListTableRowType {
-	index: number;
-	itemId: number;
-
-	thisItem: ProxyList;
-	[header: string]: any;
-}
-export interface AccountTableRowType {
-	index: number;
-	itemId: number;
-	thisItem: ShortAccount;
+	thisItem: T;
 	[header: string]: any;
 }
 

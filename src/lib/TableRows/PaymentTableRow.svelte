@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { createEventDispatcher } from 'svelte';
 	import CheckboxCell from '../TableCells/CheckboxCell.svelte';
-	import type { PaymentTableRowType } from '../../types';
 	import DateAddedCell from '../TableCells/DateAddedCell.svelte';
+	import { createEventDispatcher } from 'svelte';
+	import type { Payment, TableRowType } from '../../types';
 
-	export let row: PaymentTableRowType;
+	export let row: TableRowType<Payment>;
 	export let checked = false;
 	let index = row.index;
 

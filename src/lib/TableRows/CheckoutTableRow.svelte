@@ -7,11 +7,11 @@
 	import ButtonGroup from '../TableCells/ButtonGroup.svelte';
 	import BrowserCell from '../TableCells/BrowserCell.svelte';
 	import { createEventDispatcher } from 'svelte';
-	import type { TaskTableRowType } from '../../types';
+	import type { ActivityTask, TableRowType, Task } from '../../types';
 	import CheckboxCell from '../TableCells/CheckboxCell.svelte';
 	import ActivityModeCell from '../TableCells/ActivityModeCell.svelte';
 
-	export let row: TaskTableRowType;
+	export let row: TableRowType<Task>;
 	export let checked = false;
 	export let page: string;
 	let index = row.index;
@@ -39,14 +39,12 @@
 						<BrowserCell {value} />
 					{:else if column === 'Status'}
 						<StatusCell {value} state={row.thisItem.state || 'Ready'} {page} />
-					{:else if column === 'SKU'}
+					{:else if column === 'SKU' && typeof row.thisItem.product !== 'undefined'}
 						<SkuCell {value} size={row.thisItem.product.size || ''} />
 					{:else if column === 'Account'}
 						<AccountCell {value} loggedIn={row.thisItem.account?.metadata?.logged_in || false} />
 					{:else if column === 'Proxy'}
 						<ProxyCell {value} />
-					{:else if column === 'Mode'}
-						<ActivityModeCell mode={row.thisItem.mode} on:editActivity={editActivity} />
 					{:else if column === 'Profile'}
 						<ProfileCell
 							profileName={row.thisItem.account?.profile.name || ''}
