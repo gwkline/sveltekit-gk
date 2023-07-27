@@ -1,24 +1,16 @@
 <script lang="ts">
-	import AccountCell from './TableCells/AccountCell.svelte';
-	import ProxyCell from './TableCells/ProxyCell.svelte';
-	import ProfileCell from './TableCells/ProfileCell.svelte';
-	import BrowserCell from './TableCells/BrowserCell.svelte';
 	import { createEventDispatcher } from 'svelte';
-	import CheckboxCell from './TableCells/CheckboxCell.svelte';
-	import type { AccountTableRowType } from '../types';
-	import DateAddedCell from './TableCells/DateAddedCell.svelte';
+	import CheckboxCell from '../TableCells/CheckboxCell.svelte';
+	import type { PaymentTableRowType } from '../../types';
+	import DateAddedCell from '../TableCells/DateAddedCell.svelte';
 
-	export let row: AccountTableRowType;
+	export let row: PaymentTableRowType;
 	export let checked = false;
 	let index = row.index;
 
 	const dispatch = createEventDispatcher();
 	const handleClick = () => {
 		dispatch('checked', row.itemId);
-	};
-
-	const editActivity = (e: CustomEvent) => {
-		dispatch('editActivity', { id: row.itemId, mode: e.detail.mode });
 	};
 </script>
 
@@ -31,19 +23,7 @@
 		{#each Object.entries(row) as [column, value]}
 			{#if column !== 'index' && column !== 'itemId' && column !== 'thisItem' && column !== 'checked'}
 				<td class={column}>
-					{#if column === 'Browser'}
-						<BrowserCell {value} />
-					{:else if column === 'Account'}
-						<AccountCell {value} loggedIn={row.thisItem.metadata?.logged_in || false} />
-					{:else if column === 'Proxy'}
-						<ProxyCell {value} />
-					{:else if column === 'Profile'}
-						<ProfileCell
-							profileName={row.thisItem.profile.name || ''}
-							profileTags={row.thisItem.profile.tags.map((item) => item.name).join(', ') || ''}
-							sameName={row.thisItem.use_account_name || false}
-						/>
-					{:else if column === 'Date Added'}
+					{#if column === 'Date Added'}
 						<DateAddedCell {value} />
 					{:else}
 						{value}

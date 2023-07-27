@@ -23,7 +23,7 @@
 		Profile,
 		states
 	} from '../../types';
-	import ProfileTableRow from '$lib/ProfileTableRow.svelte';
+	import ProfileTableRow from '$lib/TableRows/ProfileTableRow.svelte';
 
 	let searchValue: string = '';
 	let sortState: SortState = { column: null, direction: 0 };
@@ -51,10 +51,10 @@
 	let headers: string[] = [];
 	let headerConfig: HeaderConfigType<Profile> = {
 		'Profile Name': (profile) => profile.name,
-		'Line 1': (profile) => profile.shipping.address_1,
-		'Line 2': (profile) => profile.shipping.address_2,
-		Zip: (profile) => profile.shipping.zip,
-		State: (profile) => profile.shipping.state,
+		'Line 1': (profile) => profile.shipping?.address_1 || '',
+		'Line 2': (profile) => profile.shipping?.address_2 || '',
+		Zip: (profile) => profile.shipping?.zip || '',
+		State: (profile) => profile.shipping?.state || '',
 		Payment: (profile) => profile.payment.card_name,
 		Wins: (profile) => profile.previous_wins.number_of_wins.toString()
 	};

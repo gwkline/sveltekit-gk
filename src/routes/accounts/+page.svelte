@@ -33,7 +33,7 @@
 		ShortAccount,
 		states
 	} from '../../types';
-	import AccountTableRow from '$lib/AccountTableRow.svelte';
+	import AccountTableRow from '$lib/TableRows/AccountTableRow.svelte';
 
 	let searchValue: string = '';
 	let sortState: SortState = { column: null, direction: 0 };

@@ -1,12 +1,8 @@
 <script lang="ts">
-	import AccountCell from './TableCells/AccountCell.svelte';
-	import ProxyCell from './TableCells/ProxyCell.svelte';
-	import ProfileCell from './TableCells/ProfileCell.svelte';
-	import BrowserCell from './TableCells/BrowserCell.svelte';
 	import { createEventDispatcher } from 'svelte';
-	import CheckboxCell from './TableCells/CheckboxCell.svelte';
-	import type { ProfileTableRowType } from '../types';
-	import DateAddedCell from './TableCells/DateAddedCell.svelte';
+	import CheckboxCell from '../TableCells/CheckboxCell.svelte';
+	import type { ProfileTableRowType } from '../../types';
+	import DateAddedCell from '../TableCells/DateAddedCell.svelte';
 
 	export let row: ProfileTableRowType;
 	export let checked = false;
@@ -15,10 +11,6 @@
 	const dispatch = createEventDispatcher();
 	const handleClick = () => {
 		dispatch('checked', row.itemId);
-	};
-
-	const editActivity = (e: CustomEvent) => {
-		dispatch('editActivity', { id: row.itemId, mode: e.detail.mode });
 	};
 </script>
 

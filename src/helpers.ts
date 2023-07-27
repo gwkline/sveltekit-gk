@@ -7,7 +7,8 @@ import type {
 	Task,
 	WhopMembershipType,
 	SettingsKeys,
-	Profile
+	Profile,
+	Payment
 } from './types';
 import { goto } from '$app/navigation';
 import { browser } from '$app/environment';
@@ -21,7 +22,8 @@ import {
 	schedules,
 	verboseActivityTasks,
 	accounts,
-	profiles
+	profiles,
+	payments
 } from './datastore';
 import { get } from 'svelte/store';
 import {
@@ -238,6 +240,12 @@ export const getProfiles = () => {
 	});
 };
 
+export const getPayments = () => {
+	makeRequest('get', 'http://127.0.0.1:23432/payments', null, (response) => {
+		payments.set(response.data);
+	});
+};
+
 const cleanAccount = (account: Account): ShortAccount => {
 	return {
 		id: account.id,
@@ -288,11 +296,11 @@ const cleanAccount = (account: Account): ShortAccount => {
 };
 
 export const removeTags = (
-	objects: (Account | ShortAccount | Task | Profile)[],
+	objects: (Account | ShortAccount | Task | Profile | Payment)[],
 	tags: string[],
 	url: string
 ) => {
-	let objectsToUpdate: (Account | ShortAccount | Task | Profile)[] = [];
+	let objectsToUpdate: (Account | ShortAccount | Task | Profile | Payment)[] = [];
 
 	objects = objects.map((object) => {
 		const initialTagsLength = object.tags.length;
@@ -313,12 +321,12 @@ export const removeTags = (
 };
 
 export const addTag = (
-	objects: (Account | ShortAccount | Task | Profile)[],
+	objects: (Account | ShortAccount | Task | Profile | Payment)[],
 	selectedTags: string[],
 	newTag: string,
 	url: string
 ) => {
-	let objectsToUpdate: (Account | ShortAccount | Task | Profile)[] = [];
+	let objectsToUpdate: (Account | ShortAccount | Task | Profile | Payment)[] = [];
 
 	objects = objects.map((object) => {
 		let objectHasSelectedTag = object.tags.some((t) => selectedTags.includes(t.name));

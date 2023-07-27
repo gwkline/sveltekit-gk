@@ -429,6 +429,13 @@ export interface ProfileTableRowType {
 	[header: string]: any;
 }
 
+export interface PaymentTableRowType {
+	index: number;
+	itemId: number;
+	thisItem: Payment;
+	[header: string]: any;
+}
+
 export interface AccountTableRowType {
 	index: number;
 	itemId: number;

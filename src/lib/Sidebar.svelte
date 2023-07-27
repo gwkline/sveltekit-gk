@@ -63,7 +63,7 @@
 			page: 'payments',
 			text: 'Payments',
 			icon: faCreditCard,
-			disabled: true
+			disabled: false
 		},
 		{
 			page: 'proxies',
