@@ -21,7 +21,7 @@
 		states,
 		TableRowType
 	} from '../../types';
-	import ProxyListTableRow from '$lib/TableRows/ProxyListTableRow.svelte';
+	import ProxyListTableRow from '$lib/TableRows/SchedulesTableRow.svelte';
 
 	let searchValue: string = '';
 	let sortState: SortState = { column: null, direction: 0 };

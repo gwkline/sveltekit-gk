@@ -11,11 +11,17 @@
 <table>
 	<TableHead {headers} {sortState} {checkedAll} on:sort on:checkedAll />
 
-	<tbody>
-		{#each tableData as row}
-			<slot {row} />
-		{/each}
-	</tbody>
+	{#if tableData.length > 0}
+		<tbody>
+			{#each tableData as row}
+				<slot {row} />
+			{/each}
+		</tbody>
+	{:else}
+		<div class="loading-state">
+			<p>There's nothing to show right now...</p>
+		</div>
+	{/if}
 </table>
 
 <style>
@@ -28,5 +34,19 @@
 		max-height: 100vh;
 		margin-bottom: 100px;
 		table-layout: auto;
+	}
+
+	.loading-state {
+		display: flex;
+		flex-grow: 1;
+		width: 100%;
+		justify-content: center;
+		align-items: center;
+		height: 200px; /* adjust as needed */
+		border: 2px solid var(--light-gray-4);
+		border-radius: 10px; /* rounded rectangle */
+		margin: 10px;
+		font-size: 1.2em; /* adjust as needed */
+		color: var(--light-gray-4);
 	}
 </style>

@@ -75,7 +75,7 @@
 			page: 'schedules',
 			text: 'Schedules',
 			icon: faClock,
-			disabled: true
+			disabled: false
 		},
 		{
 			page: 'winTracker',

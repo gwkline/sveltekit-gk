@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
 	import CheckboxCell from '../TableCells/CheckboxCell.svelte';
-	import type { TableRowType, Schedule } from '../../types';
+	import type { TableRowType, ProxyList } from '../../types';
 	import DateAddedCell from '../TableCells/DateAddedCell.svelte';
 
-	export let row: TableRowType<Schedule>;
+	export let row: TableRowType<ProxyList>;
 	export let checked = false;
 	let index = row.index;
 
