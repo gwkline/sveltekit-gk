@@ -6,7 +6,8 @@ import type {
 	SortState,
 	Task,
 	WhopMembershipType,
-	SettingsKeys
+	SettingsKeys,
+	Profile
 } from './types';
 import { goto } from '$app/navigation';
 import { browser } from '$app/environment';
@@ -19,7 +20,8 @@ import {
 	verboseTasks,
 	schedules,
 	verboseActivityTasks,
-	accounts
+	accounts,
+	profiles
 } from './datastore';
 import { get } from 'svelte/store';
 import {
@@ -230,6 +232,12 @@ export const getAccounts = () => {
 	});
 };
 
+export const getProfiles = () => {
+	makeRequest('get', 'http://127.0.0.1:23432/profiles', null, (response) => {
+		profiles.set(response.data);
+	});
+};
+
 const cleanAccount = (account: Account): ShortAccount => {
 	return {
 		id: account.id,
@@ -280,11 +288,11 @@ const cleanAccount = (account: Account): ShortAccount => {
 };
 
 export const removeTags = (
-	objects: (Account | ShortAccount | Task)[],
+	objects: (Account | ShortAccount | Task | Profile)[],
 	tags: string[],
 	url: string
 ) => {
-	let objectsToUpdate: (Account | ShortAccount | Task)[] = [];
+	let objectsToUpdate: (Account | ShortAccount | Task | Profile)[] = [];
 
 	objects = objects.map((object) => {
 		const initialTagsLength = object.tags.length;
@@ -305,12 +313,12 @@ export const removeTags = (
 };
 
 export const addTag = (
-	objects: (Account | ShortAccount | Task)[],
+	objects: (Account | ShortAccount | Task | Profile)[],
 	selectedTags: string[],
 	newTag: string,
 	url: string
 ) => {
-	let objectsToUpdate: (Account | ShortAccount | Task)[] = [];
+	let objectsToUpdate: (Account | ShortAccount | Task | Profile)[] = [];
 
 	objects = objects.map((object) => {
 		let objectHasSelectedTag = object.tags.some((t) => selectedTags.includes(t.name));

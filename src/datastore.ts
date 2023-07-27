@@ -8,7 +8,8 @@ import type {
 	Schedule,
 	SizePresets,
 	ActivityTask,
-	ShortAccount
+	ShortAccount,
+	Profile
 } from './types';
 import { seedAccounts, seedSettings, seedTasks } from './seedData';
 
@@ -46,6 +47,7 @@ export const validAccessToken = persistentStore('validAccessToken', false);
 export const accessTokenExpiration = persistentStore('accessTokenExpiration', -1);
 export const settings = persistentStore<Settings>('settings', seedSettings);
 export const accounts = persistentStore<ShortAccount[]>('accounts', seedAccounts);
+export const profiles = persistentStore<Profile[]>('profiles', []);
 export const verboseTasks = persistentStore<Task[]>('verboseTasks', seedTasks);
 export const verboseActivityTasks = persistentStore<ActivityTask[]>('verboseActivityTasks', []);
 export const schedules = persistentStore<Schedule[]>('schedules', []);

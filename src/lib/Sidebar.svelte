@@ -57,7 +57,7 @@
 			page: 'profiles',
 			text: 'Profiles',
 			icon: faAddressCard,
-			disabled: true
+			disabled: false
 		},
 		{
 			page: 'payments',

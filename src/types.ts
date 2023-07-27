@@ -422,6 +422,13 @@ export interface TaskTableRowType {
 	[header: string]: any;
 }
 
+export interface ProfileTableRowType {
+	index: number;
+	itemId: number;
+	thisItem: Profile;
+	[header: string]: any;
+}
+
 export interface AccountTableRowType {
 	index: number;
 	itemId: number;
