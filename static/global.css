@@ -7,6 +7,7 @@
 
 	/* --primary: #045996;
 --primary-hover: #00355a; */
+	color-scheme: dark;
 	--primary: #0072bd;
 	--primary-hover: #005791;
 	--danger-red: #cf222e;
@@ -32,6 +33,7 @@
 }
 
 :root[color-theme='light'] {
+	color-scheme: light;
 	--black: #000000;
 	--off-black: #333333;
 	--gray: #757575;

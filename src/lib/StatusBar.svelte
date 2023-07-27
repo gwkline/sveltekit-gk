@@ -129,7 +129,7 @@
 			on:click={() => selectState(state)}
 		>
 			<div class="state-color-icon" style="background-color: {getColor(state)};">
-				<Fa icon={stateIconMapping[state]} color="var(--white)" size="sm" />
+				<Fa icon={stateIconMapping[state]} color="var(--white)" size="md" />
 			</div>
 			<span class="state-name">{capitalizeFirstLetter(state) + ':'}</span>
 			<span class="state-count">{count}</span>
@@ -216,5 +216,6 @@
 
 	.state-count {
 		font-weight: bold;
+		width: 25px;
 	}
 </style>

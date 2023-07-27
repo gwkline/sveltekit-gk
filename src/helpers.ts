@@ -28,7 +28,7 @@ import {
 	faHourglassHalf,
 	faRunning,
 	faX,
-	faClover,
+	faTicket,
 	faTrophy,
 	faCheck
 } from '@fortawesome/free-solid-svg-icons';
@@ -129,7 +129,7 @@ export const stateIconMapping = {
 	Running: faRunning,
 	Waiting: faClock,
 	Error: faX,
-	Entered: faClover,
+	Entered: faTicket,
 	Winning: faTrophy,
 	Complete: faCheck
 };

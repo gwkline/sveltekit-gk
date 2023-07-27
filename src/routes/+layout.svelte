@@ -134,7 +134,8 @@
 	{/if}
 	{#if $networkError}
 		<UpdateBar color="var(--danger-red)"
-			>Please make sure your Project Enigma is running and that you are connected to the internet.</UpdateBar
+			>Please make sure your Project Enigma is running, your extension is enabled, and that you are
+			connected to the internet.</UpdateBar
 		>
 	{/if}
 	{#if $accessTokenExpiration < Date.now() / 1000 && $accessTokenExpiration != -1}

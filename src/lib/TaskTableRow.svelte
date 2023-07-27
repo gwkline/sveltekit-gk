@@ -38,7 +38,7 @@
 					{#if column === 'Browser'}
 						<BrowserCell {value} />
 					{:else if column === 'Status'}
-						<StatusCell {value} state={row.thisItem.state || 'Ready'} />
+						<StatusCell {value} state={row.thisItem.state || 'Ready'} {page} />
 					{:else if column === 'SKU'}
 						<SkuCell {value} size={row.thisItem.product.size || ''} />
 					{:else if column === 'Account'}

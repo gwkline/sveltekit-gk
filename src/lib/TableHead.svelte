@@ -78,7 +78,6 @@
 
 	.column-heading {
 		text-align: start;
-		padding-left: 10px;
 	}
 
 	.icon-container {

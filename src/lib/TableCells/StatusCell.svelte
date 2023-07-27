@@ -5,10 +5,19 @@
 
 	export let value: string;
 	export let state: CheckoutState | ActivityState;
+	export let page: string;
+
+	const getColor = (state: CheckoutState | ActivityState) => {
+		if (page === 'activity' && state === 'Complete') {
+			return 'var(--success-green)';
+		} else {
+			return stateColors[state];
+		}
+	};
 </script>
 
 <div class="status-content">
-	<div class="state-color-icon" style="background-color: {stateColors[state]};">
+	<div class="state-color-icon" style="background-color: {getColor(state)};">
 		<Fa icon={stateIconMapping[state]} color="var(--white)" size="md" />
 	</div>
 	<p>{value}</p>
@@ -36,10 +45,11 @@
 		flex-shrink: 0;
 		align-items: center;
 		justify-content: center;
-		width: 30px;
-		height: 30px;
+		width: 25px;
+		height: 25px;
 		border-radius: 5px;
 		box-sizing: border-box;
+		outline: 0.15em solid #fafafa8f;
 	}
 
 	@media (max-width: 900px) {

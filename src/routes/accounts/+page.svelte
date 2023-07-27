@@ -60,10 +60,24 @@
 
 	let headers: string[] = [];
 	let headerConfig: HeaderConfigType<ShortAccount> = {
-		Account: (account: ShortAccount) => account?.username ?? '',
-		Proxy: (account: ShortAccount) => account?.proxy ?? '',
-		Profile: (account: ShortAccount) => account?.profile?.name ?? '',
-		Payment: (account: ShortAccount) => account.profile.payment.card_name || ''
+		Account: (account) => account?.username ?? '',
+		Proxy: (account) => account?.proxy ?? '',
+		Profile: (account) => account?.profile?.name ?? '',
+		Payment: (account) => account.profile.payment.card_name || '',
+		Email: (account) => account.email || '',
+		'Date Added': (account) => cleanDate(account.created_at),
+		Wins: (account) => account.previous_wins.number_of_wins.toString()
+	};
+
+	const cleanDate = (dateString: string) => {
+		let date = new Date(dateString);
+		return (
+			(date.getMonth() + 1).toString().padStart(2, '0') +
+			'/' +
+			date.getDate().toString().padStart(2, '0') +
+			'/' +
+			date.getFullYear()
+		);
 	};
 
 	getSettings();

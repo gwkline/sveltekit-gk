@@ -6,6 +6,7 @@
 	import { createEventDispatcher } from 'svelte';
 	import CheckboxCell from './TableCells/CheckboxCell.svelte';
 	import type { AccountTableRowType } from '../types';
+	import DateAddedCell from './TableCells/DateAddedCell.svelte';
 
 	export let row: AccountTableRowType;
 	export let checked = false;
@@ -42,6 +43,8 @@
 							profileTags={row.thisItem.profile.tags.map((item) => item.name).join(', ') || ''}
 							sameName={row.thisItem.use_account_name || false}
 						/>
+					{:else if column === 'Date Added'}
+						<DateAddedCell {value} />
 					{:else}
 						{value}
 					{/if}
