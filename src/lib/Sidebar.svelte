@@ -69,7 +69,7 @@
 			page: 'proxies',
 			text: 'Proxies',
 			icon: faSignal,
-			disabled: true
+			disabled: false
 		},
 		{
 			page: 'schedules',

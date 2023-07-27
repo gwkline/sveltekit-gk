@@ -10,7 +10,8 @@ import type {
 	ActivityTask,
 	ShortAccount,
 	Profile,
-	Payment
+	Payment,
+	ProxyList
 } from './types';
 import { seedAccounts, seedSettings, seedTasks } from './seedData';
 
@@ -49,6 +50,7 @@ export const accessTokenExpiration = persistentStore('accessTokenExpiration', -1
 export const settings = persistentStore<Settings>('settings', seedSettings);
 export const accounts = persistentStore<ShortAccount[]>('accounts', seedAccounts);
 export const payments = persistentStore<Payment[]>('payments', []);
+export const proxy_lists = persistentStore<ProxyList[]>('proxy_lists', []);
 export const profiles = persistentStore<Profile[]>('profiles', []);
 export const verboseTasks = persistentStore<Task[]>('verboseTasks', seedTasks);
 export const verboseActivityTasks = persistentStore<ActivityTask[]>('verboseActivityTasks', []);

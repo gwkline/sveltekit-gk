@@ -23,7 +23,8 @@ import {
 	verboseActivityTasks,
 	accounts,
 	profiles,
-	payments
+	payments,
+	proxy_lists
 } from './datastore';
 import { get } from 'svelte/store';
 import {
@@ -243,6 +244,12 @@ export const getProfiles = () => {
 export const getPayments = () => {
 	makeRequest('get', 'http://127.0.0.1:23432/payments', null, (response) => {
 		payments.set(response.data);
+	});
+};
+
+export const getProxies = () => {
+	makeRequest('get', 'http://127.0.0.1:23432/proxy_lists', null, (response) => {
+		proxy_lists.set(response.data);
 	});
 };
 

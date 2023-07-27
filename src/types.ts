@@ -436,6 +436,13 @@ export interface PaymentTableRowType {
 	[header: string]: any;
 }
 
+export interface ProxyListTableRowType {
+	index: number;
+	itemId: number;
+
+	thisItem: ProxyList;
+	[header: string]: any;
+}
 export interface AccountTableRowType {
 	index: number;
 	itemId: number;
