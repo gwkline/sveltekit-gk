@@ -24,7 +24,7 @@
 	} from '../../datastore';
 	import type {
 		HeaderConfigType,
-		AccountTableRowType,
+		TableRowType,
 		ActivityState,
 		SortState,
 		ActivityTask,
@@ -51,7 +51,7 @@
 	let totalSelectedTasks: number = 0;
 
 	let filteredAccounts: ShortAccount[] = [];
-	let tableData: AccountTableRowType[] = [];
+	let tableData: TableRowType<Account>[] = [];
 	let tableIds: number[] = [];
 
 	let selectedTags: string[] = [];
@@ -305,7 +305,7 @@
 		tableIds = [];
 
 		let tableDataShortenedTemp = filtered.map((row, index) => {
-			const rowObject: AccountTableRowType = {
+			const rowObject: TableRowType<Account> = {
 				index: index + 1,
 				itemId: row.id,
 				thisItem: row

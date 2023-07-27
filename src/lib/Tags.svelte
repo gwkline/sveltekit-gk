@@ -11,8 +11,8 @@
 		faSave
 	} from '@fortawesome/free-solid-svg-icons';
 	import { onMount, onDestroy, createEventDispatcher } from 'svelte';
-	import { fade, blur, fly, slide, scale, draw, crossfade } from 'svelte/transition';
-	import { cubicInOut, cubicOut } from 'svelte/easing';
+	import { slide } from 'svelte/transition';
+	import { cubicInOut } from 'svelte/easing';
 
 	export let tagsCount: { tag: string; count: number }[] = [];
 	export let selectedTags: string[] = [];

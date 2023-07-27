@@ -1,12 +1,9 @@
 <script lang="ts">
-	import { faSearch } from '@fortawesome/free-solid-svg-icons';
 	import Search from '$lib/Search.svelte';
 	import Input from '$lib/Input.svelte';
 
-	let type = ['', 'paragraph'];
 	let sizes = ['sm', 'md', 'lg'];
 	let variants = ['', 'valid', 'invalid', 'noOutline', 'disabled'];
-	let enabled = [true, true, true, false];
 </script>
 
 <main>

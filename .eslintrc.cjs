@@ -28,10 +28,11 @@ module.exports = {
 		}
 	],
 	rules: {
-		"no-await-in-loop": true,
-		"no-constant-binary-expression": true,
-		"no-duplicate-imports": true,
-		"no-self-compare": true,
-		"no-unreachable-loop": true,
+		"no-await-in-loop": 2,
+		"no-constant-binary-expression": 2,
+		"no-duplicate-imports": 2,
+		"no-self-compare": 2,
+		"no-unreachable-loop": 2,
+		"no-unused-vars": 2
 	}
 };

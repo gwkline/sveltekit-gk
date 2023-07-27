@@ -175,7 +175,7 @@ export const updateSelectedTags = (e: CustomEvent, selectedTags: string[]) => {
 
 export const saveSettings = (settingKey: SettingsKeys, value: string) => {
 	settings.update((currentSettings) => {
-		let newSettings = currentSettings as Settings;
+		const newSettings = currentSettings as Settings;
 
 		newSettings[settingKey] = value ? parseInt(value) : newSettings[settingKey];
 		return newSettings;
@@ -195,8 +195,8 @@ export const getSettings = () => {
 
 export const getCheckoutTasks = () => {
 	makeRequest('get', 'http://127.0.0.1:23432/tasks?type=checkout', null, (response) => {
-		let data = response.data;
-		let cleanedData = data.map((task: Task) => {
+		const data = response.data;
+		const cleanedData = data.map((task: Task) => {
 			task['account'] = cleanAccount(task.account as Account);
 			return task;
 		});
@@ -212,8 +212,8 @@ export const getSchedules = () => {
 
 export const getActivityTasks = () => {
 	makeRequest('get', 'http://127.0.0.1:23432/accounts/activity', null, (response) => {
-		let data = response.data;
-		let cleanedData = data.map((task: Task) => {
+		const data = response.data;
+		const cleanedData = data.map((task: Task) => {
 			if (task.account.username === 'geek.mousers-01@icloud.com') {
 				console.log(task);
 			}
@@ -226,8 +226,8 @@ export const getActivityTasks = () => {
 
 export const getAccounts = () => {
 	makeRequest('get', 'http://127.0.0.1:23432/accounts', null, (response) => {
-		let rawAccounts: Account[] = response.data;
-		let cleanedAccounts = rawAccounts.map((account) => {
+		const rawAccounts: Account[] = response.data;
+		const cleanedAccounts = rawAccounts.map((account) => {
 			return cleanAccount(account as Account);
 		});
 
@@ -253,7 +253,7 @@ export const getProxies = () => {
 	});
 };
 
-const cleanAccount = (account: Account): ShortAccount => {
+export const cleanAccount = (account: Account): ShortAccount => {
 	return {
 		id: account.id,
 		profile_id: account.profile_id,
@@ -307,7 +307,7 @@ export const removeTags = (
 	tags: string[],
 	url: string
 ) => {
-	let objectsToUpdate: (Account | ShortAccount | Task | Profile | Payment)[] = [];
+	const objectsToUpdate: (Account | ShortAccount | Task | Profile | Payment)[] = [];
 
 	objects = objects.map((object) => {
 		const initialTagsLength = object.tags.length;
@@ -333,10 +333,10 @@ export const addTag = (
 	newTag: string,
 	url: string
 ) => {
-	let objectsToUpdate: (Account | ShortAccount | Task | Profile | Payment)[] = [];
+	const objectsToUpdate: (Account | ShortAccount | Task | Profile | Payment)[] = [];
 
 	objects = objects.map((object) => {
-		let objectHasSelectedTag = object.tags.some((t) => selectedTags.includes(t.name));
+		const objectHasSelectedTag = object.tags.some((t) => selectedTags.includes(t.name));
 
 		// If the "No Tags" tag is being edited and the object has no tags
 		if (selectedTags.includes('No Tags') && object.tags.length === 0) {

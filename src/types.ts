@@ -419,7 +419,7 @@ export interface TableRowType<T> {
 	index: number;
 	itemId: number;
 	thisItem: T;
-	[header: string]: any;
+	[header: string]: string | number | T;
 }
 
 export type WhopApiLoad = {
