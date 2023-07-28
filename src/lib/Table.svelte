@@ -1,8 +1,8 @@
 <script lang="ts">
 	import TableHead from './TableHead.svelte';
-	import type { SortState, TableRowType } from '../types';
+	import type { SortState } from '../types';
 
-	export let tableData: TableRowType<any>[];
+	export let tableData: any[];
 	export let headers: string[] = [];
 	export let sortState: SortState;
 	export let checkedAll: boolean;

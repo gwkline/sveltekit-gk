@@ -42,7 +42,7 @@
 <style>
 	button {
 		width: 100%;
-		height: 50px;
+		height: 45px;
 		font-family: inherit;
 		display: inline-flex;
 		border: 1px solid transparent;

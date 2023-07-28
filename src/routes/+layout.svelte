@@ -154,7 +154,7 @@
 	.master-container {
 		position: relative;
 		right: 0;
-		margin-left: 225px;
+		margin-left: 200px;
 		height: 100%;
 		width: calc(100% - 230px);
 		display: flex;

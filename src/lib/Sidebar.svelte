@@ -81,7 +81,7 @@
 			page: 'winTracker',
 			text: 'Win Tracker',
 			icon: faTrophy,
-			disabled: true
+			disabled: false
 		},
 		{
 			page: 'dashboard',
@@ -98,54 +98,56 @@
 	];
 </script>
 
-<div class={$sidebarCollapsed ? 'collapsed' : 'sidebar'}>
-	<ul>
-		<li style="margin-top: 20px; margin-bottom: 20px;">
-			<SidebarElement
-				icon={null}
-				collapsed={$sidebarCollapsed}
-				page={''}
-				image_src="../bluelogo.png"
-				disabled={false}
-			/>
-		</li>
-		{#each sidebar as item}
-			<li>
-				<div class={url.includes(item.page) ? 'active' : ''}>
-					<SidebarElement
-						text={item.text}
-						page={item.page}
-						icon={item.icon}
-						collapsed={$sidebarCollapsed}
-						disabled={item.disabled}
-					/>
-				</div>
+<div class="sidebar-container">
+	<div class={$sidebarCollapsed ? 'collapsed' : 'sidebar'}>
+		<ul>
+			<li style="margin-top: 20px; margin-bottom: 20px;">
+				<SidebarElement
+					icon={null}
+					collapsed={$sidebarCollapsed}
+					page={''}
+					image_src="../bluelogo.png"
+					disabled={false}
+				/>
 			</li>
-		{/each}
-	</ul>
-</div>
-<div class={$sidebarCollapsed ? 'collapse-collapsed' : 'collapse'}>
-	<SidebarElement
-		text={'Collapse'}
-		icon={$sidebarCollapsed ? faArrowRight : faArrowLeft}
-		style={'settings'}
-		collapsed={$sidebarCollapsed}
-		page={null}
-		onclick={toggle}
-		disabled={false}
-	/>
-</div>
-
-<div class={$sidebarCollapsed ? 'settings-collapsed' : 'settings'}>
-	<div class={url.includes('settings') ? 'active' : ''}>
+			{#each sidebar as item}
+				<li>
+					<div class={url.includes(item.page) ? 'active' : ''}>
+						<SidebarElement
+							text={item.text}
+							page={item.page}
+							icon={item.icon}
+							collapsed={$sidebarCollapsed}
+							disabled={item.disabled}
+						/>
+					</div>
+				</li>
+			{/each}
+		</ul>
+	</div>
+	<div class={$sidebarCollapsed ? 'collapse-collapsed' : 'collapse'}>
 		<SidebarElement
-			text={'Settings'}
-			page={'settings'}
-			icon={faGear}
+			text={'Collapse'}
+			icon={$sidebarCollapsed ? faArrowRight : faArrowLeft}
 			style={'settings'}
 			collapsed={$sidebarCollapsed}
-			disabled={true}
+			page={null}
+			onclick={toggle}
+			disabled={false}
 		/>
+	</div>
+
+	<div class={$sidebarCollapsed ? 'settings-collapsed' : 'settings'}>
+		<div class={url.includes('settings') ? 'active' : ''}>
+			<SidebarElement
+				text={'Settings'}
+				page={'settings'}
+				icon={faGear}
+				style={'settings'}
+				collapsed={$sidebarCollapsed}
+				disabled={true}
+			/>
+		</div>
 	</div>
 </div>
 
@@ -168,7 +170,7 @@
 		position: fixed;
 		top: 0;
 		left: 0;
-		width: 225px;
+		width: 200px;
 		height: 100vh;
 		border-right: 1px solid var(--light-gray-1);
 		background-color: var(--sidebar-background);
@@ -211,7 +213,7 @@
 	.settings {
 		bottom: 0;
 		position: fixed;
-		width: 224px;
+		width: 200px;
 	}
 	.settings-collapsed {
 		bottom: 0;
@@ -220,12 +222,12 @@
 	}
 
 	.collapse {
-		bottom: 50px;
+		bottom: 45px;
 		position: fixed;
-		width: 224px;
+		width: 200px;
 	}
 	.collapse-collapsed {
-		bottom: 50px;
+		bottom: 45px;
 		position: fixed;
 		width: 50px;
 	}

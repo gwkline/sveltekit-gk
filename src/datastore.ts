@@ -9,7 +9,8 @@ import type {
 	ShortAccount,
 	Profile,
 	Payment,
-	ProxyList
+	ProxyList,
+	Win
 } from './types';
 import { seedAccounts, seedSettings, seedTasks } from './seedData';
 
@@ -49,6 +50,7 @@ export const settings = persistentStore<Settings>('settings', seedSettings);
 export const accounts = persistentStore<ShortAccount[]>('accounts', seedAccounts);
 export const payments = persistentStore<Payment[]>('payments', []);
 export const proxy_lists = persistentStore<ProxyList[]>('proxy_lists', []);
+export const wins = persistentStore<Win[]>('wins', []);
 export const profiles = persistentStore<Profile[]>('profiles', []);
 export const verboseTasks = persistentStore<Task[]>('verboseTasks', seedTasks);
 export const verboseActivityTasks = persistentStore<ActivityTask[]>('verboseActivityTasks', []);

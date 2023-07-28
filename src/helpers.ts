@@ -8,7 +8,8 @@ import type {
 	WhopMembershipType,
 	SettingsKeys,
 	Profile,
-	Payment
+	Payment,
+	Win
 } from './types';
 import { goto } from '$app/navigation';
 import { browser } from '$app/environment';
@@ -24,7 +25,8 @@ import {
 	accounts,
 	profiles,
 	payments,
-	proxy_lists
+	proxy_lists,
+	wins
 } from './datastore';
 import { get } from 'svelte/store';
 import {
@@ -253,6 +255,20 @@ export const getProxies = () => {
 	});
 };
 
+export const getWins = () => {
+	makeRequest('get', 'http://127.0.0.1:23432/wins', null, (response) => {
+		let cleanedWins: Win[] = response.data.map((win: Win) => {
+			if (win.tags === null) {
+				win.tags = [];
+			}
+			return win;
+		});
+		cleanedWins = cleanedWins.sort((a, b) => b.checkout_date.localeCompare(a.checkout_date));
+
+		wins.set(cleanedWins);
+	});
+};
+
 export const cleanAccount = (account: Account): ShortAccount => {
 	return {
 		id: account.id,
@@ -302,12 +318,9 @@ export const cleanAccount = (account: Account): ShortAccount => {
 	};
 };
 
-export const removeTags = (
-	objects: (Account | ShortAccount | Task | Profile | Payment)[],
-	tags: string[],
-	url: string
-) => {
-	const objectsToUpdate: (Account | ShortAccount | Task | Profile | Payment)[] = [];
+type HasTag = Account | ShortAccount | Task | Profile | Payment | Win;
+export const removeTags = (objects: HasTag[], tags: string[], url: string) => {
+	const objectsToUpdate: HasTag[] = [];
 
 	objects = objects.map((object) => {
 		const initialTagsLength = object.tags.length;
@@ -327,13 +340,8 @@ export const removeTags = (
 	return objects;
 };
 
-export const addTag = (
-	objects: (Account | ShortAccount | Task | Profile | Payment)[],
-	selectedTags: string[],
-	newTag: string,
-	url: string
-) => {
-	const objectsToUpdate: (Account | ShortAccount | Task | Profile | Payment)[] = [];
+export const addTag = (objects: HasTag[], selectedTags: string[], newTag: string, url: string) => {
+	const objectsToUpdate: HasTag[] = [];
 
 	objects = objects.map((object) => {
 		const objectHasSelectedTag = object.tags.some((t) => selectedTags.includes(t.name));
@@ -365,4 +373,15 @@ export const addTag = (
 	}
 
 	return objects;
+};
+
+export const cleanDate = (dateString: string) => {
+	const date = new Date(dateString);
+	return (
+		(date.getMonth() + 1).toString().padStart(2, '0') +
+		'/' +
+		date.getDate().toString().padStart(2, '0') +
+		'/' +
+		date.getFullYear()
+	);
 };

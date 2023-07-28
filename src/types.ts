@@ -480,3 +480,33 @@ export type SettingsKeys =
 	| 'max_active_tasks'
 	| 'max_starting_tasks'
 	| 'max_starting_activity_tasks';
+
+export interface Win {
+	id: number;
+	site: string;
+	account_name: string;
+	product_name: string;
+	style_color_code: string;
+	order_status: string;
+	tracking_number: string;
+	order_number: string;
+	size: string;
+	image_url: string;
+	shipping_address: string;
+	profile_name: string;
+	browser_mode: string;
+	declined: boolean;
+	proxy: string;
+	experimental_mode: boolean;
+	browser_type: string;
+	subtotal: number;
+	taxtotal: number;
+	total: number;
+	tax_percentage: number;
+	bypass_applied: boolean;
+	checkout_date: string;
+	last_modified: string;
+	tags: Tag[];
+	order_first_name: string;
+	order_last_name: string;
+}
