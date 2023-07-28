@@ -7,7 +7,7 @@
 
 <form
 	method="POST"
-	use:enhance={({ action }) => {
+	use:enhance={() => {
 		const theme = document.documentElement.getAttribute('color-theme');
 
 		if (theme === 'dark') {

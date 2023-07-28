@@ -26,8 +26,6 @@
 		SortState,
 		states
 	} from '../../types';
-	import { fade } from 'svelte/transition';
-	import CheckoutTableRow from '$lib/TableRows/CheckoutTableRow.svelte';
 
 	let searchValue: string = '';
 	let sortState: SortState = { column: null, direction: 0 };
@@ -116,7 +114,7 @@
 		selectedTags = [];
 	};
 
-	const deleteSelectedTasksByTags = (e: CustomEvent) => {
+	const deleteSelectedTasksByTags = () => {
 		let taskIdsToRemove: number[] = [];
 		verboseTasks.update((tasks) => {
 			return tasks.filter((task) => {

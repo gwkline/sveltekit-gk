@@ -116,7 +116,7 @@
 		});
 	};
 	const editTasks = () => {
-		let updatedTasks: any[] = [];
+		let updatedTasks: OutboundTask[] = [];
 		verboseTasks.update((tasks) => {
 			let iter = 0;
 			return tasks.map((task) => {
@@ -165,7 +165,7 @@
 	};
 
 	const duplicateTasks = () => {
-		let updatedTasks: any[] = [];
+		let updatedTasks: OutboundTask[] = [];
 		let iter = 0;
 		$verboseTasks.forEach((task: OutboundTask) => {
 			if (checkedCheckoutTasks.length === 0 || checkedCheckoutTasks.includes(task.id)) {

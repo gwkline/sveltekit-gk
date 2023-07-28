@@ -1,8 +1,8 @@
 <script lang="ts">
 	type OrientationType = 'horizontal' | 'vertical';
 	export let orientation: OrientationType = 'horizontal';
-	export let options: Array<{ label: string; value: any }> = [];
-	export let selectedValue: any;
+	export let options: Array<{ label: string; value: string }> = [];
+	export let selectedValue: string;
 </script>
 
 <form class={orientation}>

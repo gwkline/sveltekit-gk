@@ -30,7 +30,7 @@
 	const dispatch = createEventDispatcher();
 
 	onMount(() => {
-		window.addEventListener('keydown', handleKeydown as EventListener);
+		window.addEventListener('keydown', handleKeydown);
 
 		if (browser) {
 			// Listen for mouse click events outside of the tag to stop editing
@@ -141,10 +141,8 @@
 		newTagText = '';
 		isAddingTag = false;
 	};
-
-	const saveInput = (event: { target: any }) => {
-		const input = event.target;
-		newTagText = input.value;
+	const saveInput = (event: { target: { value: string } }) => {
+		newTagText = event.target.value;
 	};
 </script>
 

@@ -33,6 +33,7 @@ module.exports = {
 		"no-duplicate-imports": 2,
 		"no-self-compare": 2,
 		"no-unreachable-loop": 2,
-		"no-unused-vars": 2
+		"no-unused-vars": 0,
+		"@typescript-eslint/no-unused-vars": 2
 	}
 };

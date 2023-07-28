@@ -1,7 +1,6 @@
 <script lang="ts">
 	import Fa from 'svelte-fa';
-	import { faCog } from '@fortawesome/free-solid-svg-icons';
-	import type { IconDefinition } from '@fortawesome/free-solid-svg-icons';
+	import { faCog, type IconDefinition } from '@fortawesome/free-solid-svg-icons';
 
 	type ButtonVariants = 'default' | 'primary' | 'secondary' | 'danger' | 'warning' | 'success';
 	type ButtonTypes = 'button' | 'submit' | 'reset';

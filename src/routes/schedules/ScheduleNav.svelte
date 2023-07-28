@@ -3,14 +3,9 @@
 	import Button from '$lib/Button.svelte';
 	import { isLoading } from '../../datastore';
 	import { faPen } from '@fortawesome/free-solid-svg-icons';
-	import type { Schedule } from '../../types';
 
 	export let searchValue: string = '';
 	export let buttonTextCount: string;
-	export let schedules: Schedule[] = [];
-
-	let scheduleNames: string[] = [];
-	$: scheduleNames = ['None', ...schedules.map((schedule) => schedule.name)];
 </script>
 
 <div class="container">

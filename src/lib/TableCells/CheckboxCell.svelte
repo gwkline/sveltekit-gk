@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { faClock, faUser } from '@fortawesome/free-solid-svg-icons';
+	import { faClock } from '@fortawesome/free-solid-svg-icons';
 	import Checkbox from '../Checkbox.svelte';
 	import Fa from 'svelte-fa';
 	import Tooltip from '$lib/Tooltip.svelte';

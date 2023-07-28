@@ -53,15 +53,15 @@
 
 	//Todo: Error state
 	const handleSaveNewPreset = () => {
-		if (selectedSizeType === 'mens' && !newPresetSizes.match(/^[0-9,\.]*$/)) {
+		if (selectedSizeType === 'mens' && !newPresetSizes.match(/^[0-9,.]*$/)) {
 			return;
-		} else if (selectedSizeType === 'womens' && !newPresetSizes.match(/^[0-9,\.]*$/)) {
+		} else if (selectedSizeType === 'womens' && !newPresetSizes.match(/^[0-9,.]*$/)) {
 			return;
-		} else if (selectedSizeType === 'youth' && !newPresetSizes.match(/^[0-9,\.Y]*$/)) {
+		} else if (selectedSizeType === 'youth' && !newPresetSizes.match(/^[0-9,.Y]*$/)) {
 			return;
-		} else if (selectedSizeType === 'preschool' && !newPresetSizes.match(/^[0-9,\.CY]*$/)) {
+		} else if (selectedSizeType === 'preschool' && !newPresetSizes.match(/^[0-9,.CY]*$/)) {
 			return;
-		} else if (selectedSizeType === 'toddler' && !newPresetSizes.match(/^[0-9,\.C]*$/)) {
+		} else if (selectedSizeType === 'toddler' && !newPresetSizes.match(/^[0-9,.C]*$/)) {
 			return;
 		}
 

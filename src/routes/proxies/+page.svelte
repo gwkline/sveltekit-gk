@@ -3,16 +3,8 @@
 	import UpdateBar from '$lib/UpdateBar.svelte';
 	import ProxyNav from './ProxyNav.svelte';
 	import ConfirmationModal from '$lib/ConfirmationModal.svelte';
-	import {
-		makeRequest,
-		updateSortState,
-		updateSelectedTags,
-		getSettings,
-		removeTags,
-		addTag,
-		getProxies
-	} from '../../helpers';
-	import { shiftPressed, isLoading, schedules, proxy_lists } from '../../datastore';
+	import { makeRequest, updateSortState, getSettings, getProxies } from '../../helpers';
+	import { shiftPressed, isLoading, proxy_lists } from '../../datastore';
 	import type {
 		HeaderConfigType,
 		ActivityState,
@@ -36,15 +28,12 @@
 	let secondLastChecked: number | null = null;
 	let checkedAll: boolean = false;
 	let checkedCheckoutTasks: number[] = [];
-	let totalSelectedTasks: number = 0;
 
 	let filteredProxyLists: ProxyList[] = [];
 	let tableData: TableRowType<ProxyList>[] = [];
 	let tableIds: number[] = [];
 
 	let selectedTags: string[] = [];
-	let allTags: string[] = [];
-	let tagsCount: { tag: string; count: number }[] = [];
 
 	let headers: string[] = [];
 	let headerConfig: HeaderConfigType<ProxyList> = {
@@ -237,7 +226,6 @@
 <ProxyNav
 	{buttonTextCount}
 	{searchValue}
-	schedules={$schedules}
 	on:searchValue={updateSearchValue}
 	on:edit={handleEdit}
 	on:delete={() => {

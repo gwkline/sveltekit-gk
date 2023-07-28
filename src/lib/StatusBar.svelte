@@ -94,7 +94,7 @@
 		}
 
 		tasks.forEach((task) => {
-			if (counts.hasOwnProperty(task.state)) {
+			if (Object.prototype.hasOwnProperty.call(counts, task.state)) {
 				if (isActivityCounts(counts)) {
 					counts[task.state as ActivityState]++;
 				} else {

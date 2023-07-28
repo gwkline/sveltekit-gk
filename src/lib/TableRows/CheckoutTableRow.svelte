@@ -7,9 +7,8 @@
 	import ButtonGroup from '../TableCells/ButtonGroup.svelte';
 	import BrowserCell from '../TableCells/BrowserCell.svelte';
 	import { createEventDispatcher } from 'svelte';
-	import type { ActivityTask, TableRowType, Task } from '../../types';
+	import type { TableRowType, Task } from '../../types';
 	import CheckboxCell from '../TableCells/CheckboxCell.svelte';
-	import ActivityModeCell from '../TableCells/ActivityModeCell.svelte';
 
 	export let row: TableRowType<Task>;
 	export let checked = false;
@@ -19,10 +18,6 @@
 	const dispatch = createEventDispatcher();
 	const handleClick = () => {
 		dispatch('checked', row.itemId);
-	};
-
-	const editActivity = (e: CustomEvent) => {
-		dispatch('editActivity', { id: row.itemId, mode: e.detail.mode });
 	};
 </script>
 

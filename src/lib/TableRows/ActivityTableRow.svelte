@@ -1,13 +1,12 @@
 <script lang="ts">
 	import StatusCell from '../TableCells/StatusCell.svelte';
 	import AccountCell from '../TableCells/AccountCell.svelte';
-	import SkuCell from '../TableCells/SkuCell.svelte';
 	import ProxyCell from '../TableCells/ProxyCell.svelte';
 	import ProfileCell from '../TableCells/ProfileCell.svelte';
 	import ButtonGroup from '../TableCells/ButtonGroup.svelte';
 	import BrowserCell from '../TableCells/BrowserCell.svelte';
 	import { createEventDispatcher } from 'svelte';
-	import type { ActivityTask, TableRowType, Task } from '../../types';
+	import type { ActivityTask, TableRowType } from '../../types';
 	import CheckboxCell from '../TableCells/CheckboxCell.svelte';
 	import ActivityModeCell from '../TableCells/ActivityModeCell.svelte';
 

@@ -1,31 +1,16 @@
 <script lang="ts">
 	import Search from '$lib/Search.svelte';
 	import Button from '$lib/Button.svelte';
-	import Input from '$lib/Input.svelte';
-	import Toggle from '$lib/Toggle.svelte';
-	import { isLoading, showTags } from '../../datastore';
-	import { faPlay, faStop, faPen, faTrash } from '@fortawesome/free-solid-svg-icons';
+	import { isLoading } from '../../datastore';
+	import { faPen } from '@fortawesome/free-solid-svg-icons';
 	import { createEventDispatcher } from 'svelte';
-	import Dropdown from '$lib/Dropdown.svelte';
-	import type { ActivityMode, Schedule } from '../../types';
+	import type { ActivityMode } from '../../types';
 
 	export let searchValue: string = '';
 	export let buttonTextCount: string;
-	export let schedules: Schedule[] = [];
 
-	let maxStartingActivityTaskCount: string;
 	let modeValue: ActivityMode;
 	let scheduleValue: string;
-
-	const valueTitleMap: Record<ActivityMode, string> = {
-		login: 'Login/EA',
-		bp: 'BP Solve',
-		stories: 'Stories',
-		browse: 'Autobrowse',
-		passwordreset: 'Password Reset',
-		addverifiednumber: 'SMS Verify',
-		manual: 'Manual'
-	};
 
 	const titleValueMap: Record<string, ActivityMode> = {
 		'Login/EA': 'login',
@@ -37,7 +22,6 @@
 		Manual: 'manual'
 	};
 
-	type settings = 'max_starting_activity_tasks';
 	type states = 'start' | 'stop' | 'delete' | 'duplicate' | 'editSchedule' | 'editMode' | 'create';
 
 	const dispatch = createEventDispatcher();
@@ -61,15 +45,6 @@
 				break;
 		}
 	};
-
-	const saveSettings = (settingKey: settings, value: string) => {
-		dispatch('saveSettings', { name: settingKey, value: value });
-
-		maxStartingActivityTaskCount = '';
-	};
-
-	let scheduleNames: string[] = [];
-	$: scheduleNames = ['None', ...schedules.map((schedule) => schedule.name)];
 </script>
 
 <div class="container">

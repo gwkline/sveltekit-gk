@@ -1,8 +1,8 @@
 <script lang="ts">
 	import TableHead from './TableHead.svelte';
-	import type { SortState } from '../types';
+	import type { SortState, TableRowType } from '../types';
 
-	export let tableData: any[];
+	export let tableData: TableRowType<any>[];
 	export let headers: string[] = [];
 	export let sortState: SortState;
 	export let checkedAll: boolean;
@@ -11,18 +11,17 @@
 <table>
 	<TableHead {headers} {sortState} {checkedAll} on:sort on:checkedAll />
 
-	{#if tableData.length > 0}
-		<tbody>
-			{#each tableData as row}
-				<slot {row} />
-			{/each}
-		</tbody>
-	{:else}
-		<div class="loading-state">
-			<p>There's nothing to show right now...</p>
-		</div>
-	{/if}
+	<tbody>
+		{#each tableData as row}
+			<slot {row} />
+		{/each}
+	</tbody>
 </table>
+{#if tableData.length == 0}
+	<div class="loading-state">
+		<p>There's nothing to show right now...</p>
+	</div>
+{/if}
 
 <style>
 	table {
@@ -32,14 +31,12 @@
 		text-align: left;
 		border-collapse: collapse;
 		max-height: 100vh;
-		margin-bottom: 100px;
+		margin-bottom: 50px;
 		table-layout: auto;
 	}
 
 	.loading-state {
 		display: flex;
-		flex-grow: 1;
-		width: 100%;
 		justify-content: center;
 		align-items: center;
 		height: 200px; /* adjust as needed */

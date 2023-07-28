@@ -2,7 +2,6 @@
 	import Tooltip from '$lib/Tooltip.svelte';
 	import {
 		faAdjust,
-		faArchive,
 		faHourglass,
 		faStar,
 		type IconDefinition

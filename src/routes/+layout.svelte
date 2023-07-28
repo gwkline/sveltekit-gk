@@ -1,7 +1,10 @@
 <script lang="ts">
 	import Sidebar from '$lib/Sidebar.svelte';
+	import UpdateBar from '$lib/UpdateBar.svelte';
 	import ThemeToggle from '$lib/ThemeToggle.svelte';
-	import { browser } from '$app/environment';
+	import { inject } from '@vercel/analytics';
+	import { findMemberships } from '../helpers';
+	import { browser, dev } from '$app/environment';
 	import { onDestroy, onMount } from 'svelte';
 	import {
 		accessDenied,
@@ -13,8 +16,8 @@
 		verboseActivityTasks,
 		verboseTasks
 	} from '../datastore';
-	import { findMemberships } from '../helpers';
-	import UpdateBar from '$lib/UpdateBar.svelte';
+	import type { Writable } from 'svelte/store';
+	import type { EventData, VerboseTask } from '../types';
 
 	let eventSource: EventSource;
 
@@ -99,11 +102,6 @@
 			eventSource.close();
 		}
 	});
-
-	import { dev } from '$app/environment';
-	import { inject } from '@vercel/analytics';
-	import type { EventData, VerboseTask } from '../types';
-	import type { Writable } from 'svelte/store';
 
 	inject({ mode: dev ? 'development' : 'production' });
 </script>

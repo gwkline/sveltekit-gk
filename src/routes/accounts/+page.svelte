@@ -8,27 +8,17 @@
 		makeRequest,
 		updateSortState,
 		updateSelectedTags,
-		saveSettings,
 		getSettings,
 		removeTags,
 		addTag,
 		getAccounts
 	} from '../../helpers';
-	import {
-		accounts,
-		settings,
-		showTags,
-		shiftPressed,
-		isLoading,
-		schedules
-	} from '../../datastore';
+	import { accounts, showTags, shiftPressed, isLoading } from '../../datastore';
 	import type {
 		HeaderConfigType,
 		TableRowType,
 		ActivityState,
 		SortState,
-		ActivityTask,
-		ActivityMode,
 		Account,
 		ShortAccount,
 		states
@@ -133,7 +123,7 @@
 
 			// Update tasks with the updated accounts
 			return accounts.map((account) => {
-				const updatedAccount = updatedAccounts.find((account) => account.id === account.id);
+				const updatedAccount = updatedAccounts.find((thisAccount) => thisAccount.id === account.id);
 				if (updatedAccount) {
 					account = updatedAccount;
 				}
@@ -426,7 +416,6 @@
 <AccountNav
 	{buttonTextCount}
 	{searchValue}
-	schedules={$schedules}
 	on:searchValue={updateSearchValue}
 	on:edit={handleEdit}
 	on:delete={() => {

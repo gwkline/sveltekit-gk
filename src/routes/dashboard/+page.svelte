@@ -1,8 +1,7 @@
 <script lang="ts">
-	import Fa from 'svelte-fa';
 	import Button from '$lib/Button.svelte';
 	import Input from '$lib/Input.svelte';
-	import { faPencil, faCheck, faX } from '@fortawesome/free-solid-svg-icons';
+	import { faPencil, faX } from '@fortawesome/free-solid-svg-icons';
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 	import { browser } from '$app/environment';
@@ -100,7 +99,7 @@
 							id="nicknameForm"
 							action="/dashboard?/setNickname&nickname={nicknameInput}&memId={mem.id}&redirectTo={$page
 								.url.pathname}"
-							use:enhance={({ action }) => {}}
+							use:enhance={() => {}}
 							on:submit|preventDefault
 						>
 							<Input
