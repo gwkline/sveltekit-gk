@@ -21,7 +21,7 @@
 			'Running',
 			'Waiting',
 			'Error',
-			'Entered',
+			'AwaitingResults',
 			'Complete',
 			'Winning'
 		];
@@ -48,7 +48,7 @@
 		'Running',
 		'Waiting',
 		'Error',
-		'Entered',
+		'AwaitingResults',
 		'Complete',
 		'Winning'
 	].filter((state) => stateIsRelevant(state as CheckoutState | ActivityState, page)) as (
@@ -56,7 +56,13 @@
 		| ActivityState
 	)[];
 
-	const capitalizeFirstLetter = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
+	const capitalizeFirstLetter = (str: string) => {
+		if (str === 'AwaitingResults') {
+			return 'Entered';
+		}
+
+		return str.charAt(0).toUpperCase() + str.slice(1);
+	};
 
 	type ActivityCounts = Record<ActivityState, number>;
 	type CheckoutCounts = Record<CheckoutState, number>;
@@ -87,7 +93,7 @@
 				Running: 0,
 				Waiting: 0,
 				Error: 0,
-				Entered: 0,
+				AwaitingResults: 0,
 				Complete: 0,
 				Winning: 0
 			} as CheckoutCounts;

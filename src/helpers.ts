@@ -124,7 +124,7 @@ export const stateColors = {
 	Running: 'var(--primary)',
 	Waiting: 'purple',
 	Error: 'var(--danger-red)',
-	Entered: 'var(--success-green)',
+	AwaitingResults: 'var(--success-green)',
 	Complete: 'var(--danger-red-hover)',
 	Winning: '#00801a'
 };
@@ -136,7 +136,7 @@ export const stateIconMapping = {
 	Running: faRunning,
 	Waiting: faClock,
 	Error: faX,
-	Entered: faTicket,
+	AwaitingResults: faTicket,
 	Winning: faTrophy,
 	Complete: faCheck
 };

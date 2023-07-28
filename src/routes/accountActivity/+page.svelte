@@ -36,6 +36,7 @@
 		ShortAccount,
 		states
 	} from '../../types';
+	import ActivityTableRow from '$lib/TableRows/ActivityTableRow.svelte';
 
 	let searchValue: string = '';
 	let sortState: SortState = { column: null, direction: 0 };
@@ -557,7 +558,7 @@
 		on:sort={handleSort}
 		on:checkedAll={handleCheckedAll}
 	>
-		<TaskTableRow
+		<ActivityTableRow
 			{row}
 			checked={checkedCheckoutTasks.includes(row.itemId)}
 			on:checked={handleChecked}

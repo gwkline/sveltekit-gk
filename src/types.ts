@@ -326,7 +326,7 @@ export type CheckoutState =
 	| 'Running'
 	| 'Waiting'
 	| 'Error'
-	| 'Entered'
+	| 'AwaitingResults'
 	| 'Winning'
 	| 'Complete';
 

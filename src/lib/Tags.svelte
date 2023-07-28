@@ -141,8 +141,9 @@
 		newTagText = '';
 		isAddingTag = false;
 	};
-	const saveInput = (event: { target: { value: string } }) => {
-		newTagText = event.target.value;
+	const saveInput = (event: Event) => {
+		const target = event.target as HTMLInputElement; // `target` is an HTMLInputElement
+		newTagText = target.value;
 	};
 </script>
 
@@ -154,7 +155,7 @@
 		<p class="count-info">
 			{selectedTags.length}
 			{selectedTags.length === 1 ? 'tag' : 'tags'} selected ({totalSelectedItems}
-			total tasks)
+			total items)
 		</p>
 		<button class="clear-all" on:click={selectAllTags}>
 			<Fa icon={faCheck} size="sm" />
@@ -168,7 +169,9 @@
 							type="text"
 							class="tag-add-input"
 							value={newTagText}
-							on:input={saveInput}
+							on:input={(e) => {
+								saveInput(e);
+							}}
 							on:keydown={(e) => e.key === 'Enter' && addTagToTasks()}
 							on:blur={addTagToTasks}
 						/>
