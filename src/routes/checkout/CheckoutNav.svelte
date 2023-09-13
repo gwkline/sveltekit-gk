@@ -1,21 +1,11 @@
 <script lang="ts">
 	import Search from '$lib/Search.svelte';
-	import Button from '$lib/Button.svelte';
 	import Input from '$lib/Input.svelte';
 	import Toggle from '$lib/Toggle.svelte';
-	import { settings, isLoading, showTags } from '../../datastore';
-	import {
-		faPlay,
-		faStop,
-		faTrash,
-		faPen,
-		faCopy,
-		faPlus
-	} from '@fortawesome/free-solid-svg-icons';
+	import { showTags } from '../../datastore';
 	import { createEventDispatcher } from 'svelte';
 
 	export let searchValue: string = '';
-	export let buttonTextCount: string;
 	export let maxActiveTasks: string;
 	export let maxStartingTasks: string;
 
@@ -26,33 +16,6 @@
 	type states = 'start' | 'stop' | 'delete' | 'duplicate' | 'edit' | 'create';
 
 	const dispatch = createEventDispatcher();
-
-	const triggerModal = () => {
-		dispatch('showConfirmationModal');
-	};
-
-	const handleTaskAction = (state: states) => {
-		switch (state) {
-			case 'delete':
-				dispatch('delete');
-				break;
-			case 'start':
-				dispatch('start');
-				break;
-			case 'stop':
-				dispatch('stop');
-				break;
-			case 'duplicate':
-				dispatch('duplicate');
-				break;
-			case 'edit':
-				dispatch('edit');
-				break;
-			case 'create':
-				dispatch('create');
-				break;
-		}
-	};
 
 	const saveSettings = (settingKey: settings, value: string) => {
 		dispatch('saveSettings', { name: settingKey, value: value });
@@ -76,6 +39,7 @@
 				<Input
 					placeholder="Max Starting Tasks: {maxStartingTasks}"
 					style="width: 175px;"
+					variant="transparent"
 					bind:value={maxStartingTaskCount}
 					on:blur={() => saveSettings('max_starting_tasks', maxStartingTaskCount)}
 				/>
@@ -84,6 +48,7 @@
 				<Input
 					placeholder="Max Active Tasks: {maxActiveTasks}"
 					style="width: 175px;"
+					variant="transparent"
 					bind:value={maxActiveTaskCount}
 					on:blur={() => saveSettings('max_active_tasks', maxActiveTaskCount)}
 				/>

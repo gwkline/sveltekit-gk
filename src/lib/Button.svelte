@@ -85,6 +85,7 @@
 		border: 1px solid transparent;
 		border-radius: 7px;
 		margin-right: 10px;
+		cursor: pointer;
 	}
 
 	.square {
@@ -94,7 +95,6 @@
 	}
 
 	button.fill {
-		/* Force the button to fill the container of the div */
 		width: 100%;
 		height: 100%;
 	}

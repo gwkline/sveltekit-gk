@@ -132,6 +132,7 @@
 	input:hover,
 	textarea:hover {
 		background-color: var(--light-gray-1);
+		outline: 1px solid var(--gray);
 	}
 
 	input:disabled,
@@ -178,10 +179,15 @@
 			var(--shadow-1) 0px 0px 0px 0px,
 			var(--shadow-1) 0px 0px 0px 0px,
 			var(--shadow-4) 0px 2px 5px 0px;
-		transition: all 0.15s ease;
+		transition:
+			background-color 0.24s ease 0s,
+			box-shadow 0.24s ease 0s;
 	}
 
 	.shadow:hover {
+		transition:
+			background-color 0.24s ease 0s,
+			box-shadow 0.24s ease 0s;
 		box-shadow:
 			var(--shadow-1) 0px 0px 0px 0px,
 			var(--shadow-1) 0px 0px 0px 0px,

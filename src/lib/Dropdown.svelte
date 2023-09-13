@@ -187,4 +187,8 @@
 			var(--shadow-4) 0px 2px 5px 0px,
 			var(--shadow-4) 0px 2px 5px 0px;
 	}
+
+	select:hover {
+		outline: 1px solid var(--gray);
+	}
 </style>
