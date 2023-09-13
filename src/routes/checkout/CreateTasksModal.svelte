@@ -596,11 +596,13 @@
 		display: flex;
 		align-items: center;
 		height: 30px;
+		cursor: pointer;
 	}
 
 	label {
 		font-size: small;
 		margin: 0 10px;
+		cursor: pointer;
 	}
 
 	.justify-content-center {
