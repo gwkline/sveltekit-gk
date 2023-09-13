@@ -66,6 +66,19 @@
 	<div class="button-row push-to-end"></div>
 	<div class="button-row">
 		<div class="button-group left-button-group">
+			<Dropdown
+				id="accountOps"
+				style="width: 160px; height: 32px; margin-right: 10px;"
+				options={Object.values(valueTitleMap)}
+				bind:value={modeValue}
+				on:change={() => {
+					handleTaskAction('editMode');
+					modeValue = '';
+				}}
+				overlay={true}
+				size="lg"
+				title={`Run ${buttonTextCount} Account Ops`}
+			/>
 			<Button
 				variant="danger"
 				onclick={() => handleTaskAction('delete')}

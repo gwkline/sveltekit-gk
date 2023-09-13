@@ -25,7 +25,7 @@
 	};
 </script>
 
-<div class="container" style={title !== '' ? 'height: 50%;' : ''}>
+<div class="container" style={title !== '' && !overlay ? 'height: 50%;' : ''}>
 	<div class={`wrapper ${overlay ? 'row' : 'column'} ${overlay ? '' : 'left-align'}`}>
 		{#if title !== ''}
 			<label for={id} class={`label ${overlay ? 'overlay' : ''}`}>{title}</label>
