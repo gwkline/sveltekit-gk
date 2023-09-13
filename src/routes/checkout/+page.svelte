@@ -26,6 +26,7 @@
 		SortState,
 		states
 	} from '../../types';
+	import CheckoutNavBottom from './CheckoutNavBottom.svelte';
 
 	let searchValue: string = '';
 	let sortState: SortState = { column: null, direction: 0 };
@@ -141,6 +142,33 @@
 				() => {}
 			);
 		}
+		selectedTags = []; // Clear selection after deleting
+	};
+
+	const deleteSelectedTagsByTasks = () => {
+		verboseTasks.update((tasks) => {
+			let selectedIndices = checkedCheckoutTasks;
+
+			// Get the selected tasks based on indices
+			let selectedTasks = selectedIndices.map((index) => tasks[index]);
+
+			// Generate an array of changes (deltas) to be applied
+			let deltas = removeTags(
+				selectedTasks,
+				selectedTags,
+				'http://127.0.0.1:23432/tasks?type=checkout'
+			);
+
+			// Apply the changes back to the original tasks array
+			deltas.forEach((delta, index) => {
+				let originalIndex = selectedIndices[index];
+				// Apply the delta to modify the original task at this index
+				// (This assumes that 'delta' contains all the information needed to modify 'tasks[originalIndex]')
+				tasks[originalIndex] = { ...tasks[originalIndex], ...delta };
+			});
+
+			return tasks;
+		});
 		selectedTags = []; // Clear selection after deleting
 	};
 
@@ -385,12 +413,18 @@
 			.map((tag) => tag.name)
 			.filter((tag) => tag);
 
+		let filteredTags = filteredTasks
+			.map((task) => task.tags)
+			.flat()
+			.map((tag) => tag.name)
+			.filter((tag) => tag);
+
 		let uniqueTags = [...new Set(allTags)];
 
 		tagsCount = uniqueTags.map((tag) => {
 			return {
 				tag: tag,
-				count: allTags.filter((t) => t === tag).length
+				count: filteredTags.filter((t) => t === tag).length
 			};
 		});
 
@@ -484,11 +518,11 @@
 	<Tags
 		{tagsCount}
 		{selectedTags}
-		totalSelectedItems={totalSelectedTasks}
 		checkedItems={checkedCheckoutTasks}
 		on:selectTag={handleSelectTag}
 		on:deleteSelectedTags={deleteSelectedTags}
 		on:deleteSelectedTasks={deleteSelectedTasksByTags}
+		on:deleteSelectedTasksTags={deleteSelectedTagsByTasks}
 		on:updateTagNames={updateTagNames}
 		on:addAdditionalTag={addAdditionalTag}
 		on:addTagToTasks={addTagToTasks}
@@ -517,6 +551,22 @@
 		/>
 	</Table>
 </div>
+<CheckoutNavBottom
+	{buttonTextCount}
+	{searchValue}
+	maxStartingTasks={`${$settings.max_starting_tasks}`}
+	maxActiveTasks={`${$settings.max_active_tasks}`}
+	on:searchValue={updateSearchValue}
+	on:create={handleTask}
+	on:start={handleTask}
+	on:stop={handleTask}
+	on:edit={handleTask}
+	on:duplicate={handleTask}
+	on:saveSettings={handleSaveSettings}
+	on:showConfirmationModal={() => {
+		showConfirmationModal = true;
+	}}
+/>
 
 {#if showModal}
 	<TaskModalHelper {checkedCheckoutTasks} bind:showModal bind:isEditing bind:isDuplicating />

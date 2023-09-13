@@ -70,18 +70,16 @@
 
 <style>
 	tr {
-		height: 46px;
 		border-bottom: 1px solid var(--light-gray-3);
 		align-items: center;
 	}
 
 	tr.active,
 	tr:hover {
-		background-color: var(--light-gray-2);
+		background-color: var(--light-gray-1);
 	}
 
 	td {
-		padding: 3px 7px 3px 2px;
 		font-size: 13px;
 		overflow: hidden;
 		border: none;

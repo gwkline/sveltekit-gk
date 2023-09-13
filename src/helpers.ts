@@ -323,11 +323,15 @@ export const removeTags = (objects: HasTag[], tags: string[], url: string) => {
 	const objectsToUpdate: HasTag[] = [];
 
 	objects = objects.map((object) => {
-		const initialTagsLength = object.tags.length;
-		object.tags = object.tags.filter((t) => !tags.includes(t.name));
+		try {
+			const initialTagsLength = object.tags.length;
+			object.tags = object.tags.filter((t) => !tags.includes(t.name));
 
-		if (object.tags.length !== initialTagsLength) {
-			objectsToUpdate.push(object);
+			if (object.tags.length !== initialTagsLength) {
+				objectsToUpdate.push(object);
+			}
+		} catch {
+			console.log(object);
 		}
 
 		return object;

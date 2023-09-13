@@ -8,6 +8,7 @@
 	export let headers: string[];
 	export let checkedAll: boolean;
 	export let sortState: SortState;
+	export let tableCount: number;
 
 	const dispatch = createEventDispatcher();
 
@@ -39,10 +40,19 @@
 				</span>
 			</th>
 		{/each}
+		{#if tableCount > 0}
+			<th class="task-count">
+				<p>{tableCount} Tasks</p>
+			</th>
+		{/if}
 	</tr>
 </thead>
 
 <style>
+	.task-count {
+		text-align: end;
+		padding-right: 20px;
+	}
 	thead {
 		position: sticky;
 		top: 0px;

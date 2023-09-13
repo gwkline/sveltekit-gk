@@ -13,13 +13,14 @@
 	export let icon: IconDefinition | null = null;
 	export let type: ButtonTypes = 'button';
 	export let shape: Shape = 'rectangle';
-	export let outline: OutlineType = 'outline';
+	export let outline: OutlineType = 'noOutline';
 	export let onclick: (event: MouseEvent) => void = () => {};
 	export let alternate = false;
 	export let style = '';
 	export let isLoading = false;
 	export let resizable = false;
 	export let disabled = false;
+	export let shadow = true;
 
 	function handleClick(event: MouseEvent) {
 		if (isLoading || disabled) {
@@ -33,6 +34,7 @@
 		let classes: string[] = [variant, size];
 		if (isLoading || (icon && !$$slots.default)) classes.push('iconOnly');
 		if (outline === 'outline') classes.push('outline');
+		if (shadow) classes.push('shadow');
 		classes.push(shape);
 		if (alternate) classes.push('alternate');
 		if (resizable) classes.push('resizable');
@@ -110,7 +112,7 @@
 	}
 
 	button.outline {
-		border-color: var(--light-gray-4);
+		border-color: var(--off-black);
 		border-width: 1px;
 		border-style: solid;
 		box-shadow: 0px 1px 0px 0px rgba(27, 31, 35, 0.04);
@@ -171,7 +173,7 @@
 	}
 
 	button.danger.alternate {
-		color: var(--background);
+		color: var(--white);
 		background: var(--danger-red);
 	}
 
@@ -189,7 +191,7 @@
 	button.secondary:hover,
 	button.success:hover,
 	button.warning:hover {
-		background: var(--light-gray-2);
+		background: var(--light-gray-1);
 	}
 
 	button.primary:hover {
@@ -340,5 +342,26 @@
 
 	button.iconOnly.lg {
 		padding: 15px 15px;
+	}
+
+	.shadow {
+		box-shadow:
+			var(--shadow-1) 0px 0px 0px 0px,
+			var(--shadow-1) 0px 0px 0px 0px,
+			var(--shadow-2) 0px 1px 1px 0px,
+			var(--shadow-3) 0px 0px 0px 1px,
+			var(--shadow-1) 0px 0px 0px 0px,
+			var(--shadow-1) 0px 0px 0px 0px,
+			var(--shadow-4) 0px 2px 5px 0px;
+		transition: all 0.15s ease;
+	}
+
+	.shadow:hover {
+		box-shadow:
+			var(--shadow-1) 0px 0px 0px 0px,
+			var(--shadow-1) 0px 0px 0px 0px,
+			var(--shadow-2) 0px 1px 1px 0px,
+			var(--shadow-4) 0px 2px 5px 0px,
+			var(--shadow-4) 0px 2px 5px 0px;
 	}
 </style>

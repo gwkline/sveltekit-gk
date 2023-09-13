@@ -169,8 +169,8 @@
 	.border-card {
 		background-color: var(--background);
 		border: 1px solid var(--light-gray-3);
-		margin: 10px 10px 20px 10px;
-		padding: 20px 50px;
+		margin: 10px;
+		padding: 10px 50px;
 		position: relative;
 		top: 5px;
 		bottom: 5px;

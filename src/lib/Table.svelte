@@ -6,10 +6,13 @@
 	export let headers: string[] = [];
 	export let sortState: SortState;
 	export let checkedAll: boolean;
+
+	let tableCount = 0;
+	$: tableCount = tableData.length;
 </script>
 
 <table>
-	<TableHead {headers} {sortState} {checkedAll} on:sort on:checkedAll />
+	<TableHead {headers} {sortState} {checkedAll} on:sort on:checkedAll {tableCount} />
 
 	<tbody>
 		{#each tableData as row}
@@ -31,7 +34,6 @@
 		text-align: left;
 		border-collapse: collapse;
 		max-height: 100vh;
-		margin-bottom: 50px;
 		table-layout: auto;
 	}
 
