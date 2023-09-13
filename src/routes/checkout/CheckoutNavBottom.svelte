@@ -63,7 +63,7 @@
 	<div class="button-row">
 		<div class="button-group left-button-group">
 			<Button
-				variant="secondary"
+				variant="primary"
 				onclick={() => handleTaskAction('create')}
 				size="md"
 				icon={faPlus}
@@ -84,6 +84,7 @@
 		<div class="button-group">
 			<Button
 				variant="primary"
+				alternate={true}
 				onclick={() => handleTaskAction('start')}
 				isLoading={$isLoading.start}
 				size="md"

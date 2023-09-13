@@ -36,7 +36,7 @@
 					{:else if column === 'Profile'}
 						<ProfileCell
 							profileName={row.thisItem.profile.name || ''}
-							profileTags={row.thisItem.profile.tags.map((item) => item.name).join(', ') || ''}
+							profileTags={row.thisItem.profile.tags?.map((item) => item.name).join(', ') || ''}
 							sameName={row.thisItem.use_account_name || false}
 						/>
 					{:else if column === 'Date Added'}

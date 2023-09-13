@@ -534,7 +534,7 @@
 	</div>
 {/if}
 <div class="row justify-content-center">
-	<Button variant="secondary" size="lg" onclick={closeModal}>Cancel</Button>
+	<Button variant="primary" size="lg" onclick={closeModal}>Cancel</Button>
 	<Button
 		variant="primary"
 		size="lg"

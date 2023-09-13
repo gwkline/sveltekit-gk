@@ -180,7 +180,7 @@ export type Profile = {
 	payment_id: number;
 	shipping: Shipping;
 	updated_at: string;
-	tags: Tag[];
+	tags: Tag[] | null;
 	creation_method: string;
 	payment: Payment | ShortPayment;
 	previous_wins: PreviousWins;
