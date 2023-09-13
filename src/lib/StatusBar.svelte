@@ -184,6 +184,7 @@
 		flex-wrap: wrap;
 		justify-content: space-evenly;
 		align-items: start;
+		margin-top: 20px;
 	}
 
 	.state-item {

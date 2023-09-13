@@ -10,7 +10,8 @@
 	export let type: Type = '';
 	export let size: Size = 'md';
 	export let variant: Variant = '';
-	export let outline: Outline = 'outline';
+	export let outline: Outline = 'noOutline';
+	export let shadow = true;
 	export let placeholder: string = '';
 	export let style: string = '';
 	export let title: string = '';
@@ -42,7 +43,7 @@
 	{/if}
 	{#if type === 'paragraph'}
 		<textarea
-			class="{size} {outline} {variant}"
+			class="{size} {outline} {variant} {shadow ? 'shadow' : ''}"
 			{placeholder}
 			bind:value
 			on:input={handleChange}
@@ -53,7 +54,7 @@
 		/>
 	{:else}
 		<input
-			class="{size} {outline} {variant}"
+			class="{size} {outline} {variant} {shadow ? 'shadow' : ''}"
 			{placeholder}
 			bind:value
 			on:input={handleChange}
@@ -125,12 +126,12 @@
 	textarea:focus {
 		outline: 1px solid var(--primary);
 		box-shadow: 0px 0px 0px 2px rgba(25, 78, 238, 0.32);
-		background-color: var(--light-gray-2);
+		background-color: var(--light-gray-1);
 	}
 
 	input:hover,
 	textarea:hover {
-		background-color: var(--light-gray-2);
+		background-color: var(--light-gray-1);
 	}
 
 	input:disabled,
@@ -166,5 +167,26 @@
 		width: 220px;
 		height: 176px;
 		vertical-align: top;
+	}
+
+	.shadow {
+		box-shadow:
+			var(--shadow-1) 0px 0px 0px 0px,
+			var(--shadow-1) 0px 0px 0px 0px,
+			var(--shadow-2) 0px 1px 1px 0px,
+			var(--shadow-3) 0px 0px 0px 1px,
+			var(--shadow-1) 0px 0px 0px 0px,
+			var(--shadow-1) 0px 0px 0px 0px,
+			var(--shadow-4) 0px 2px 5px 0px;
+		transition: all 0.15s ease;
+	}
+
+	.shadow:hover {
+		box-shadow:
+			var(--shadow-1) 0px 0px 0px 0px,
+			var(--shadow-1) 0px 0px 0px 0px,
+			var(--shadow-2) 0px 1px 1px 0px,
+			var(--shadow-4) 0px 2px 5px 0px,
+			var(--shadow-4) 0px 2px 5px 0px;
 	}
 </style>
