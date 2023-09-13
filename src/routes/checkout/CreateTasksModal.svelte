@@ -287,7 +287,7 @@
 
 			if (selectedProfileTagsSet.size > 0 && dropdownStatus2) {
 				filteredAccounts = filteredAccounts.filter((account) => {
-					let profileTags = account.profile.tags.map((tag) => tag.name);
+					let profileTags = account.profile.tags?.map((tag) => tag.name) || [];
 
 					// Check if some tag is in selectedProfileTagsSet
 					return profileTags.some((tag) => selectedProfileTagsSet.has(tag));
