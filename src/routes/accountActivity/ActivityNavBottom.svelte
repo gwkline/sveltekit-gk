@@ -84,6 +84,7 @@
 				size="md"
 				icon={faPlay}
 				resizable={false}
+				outline="outline"
 				style="button">Start {buttonTextCount} Tasks</Button
 			>
 
@@ -94,6 +95,7 @@
 				size="md"
 				icon={faStop}
 				resizable={false}
+				outline="outline"
 				alternate={true}
 				style="button">Stop {buttonTextCount} Tasks</Button
 			>

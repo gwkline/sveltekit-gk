@@ -112,7 +112,7 @@
 	}
 
 	button.outline {
-		border-color: var(--off-black);
+		border-color: var(--white);
 		border-width: 1px;
 		border-style: solid;
 		box-shadow: 0px 1px 0px 0px rgba(27, 31, 35, 0.04);

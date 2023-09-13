@@ -26,17 +26,37 @@
 </script>
 
 <div class="container" style={title !== '' ? 'height: 50%;' : ''}>
-	{#if title !== ''}
-		<label for={id} class={`label ${overlay ? 'overlay' : ''}`}>{title}</label>
-	{/if}
-	<select bind:value class={generateClassString()} {style} {id} {disabled} on:click on:change>
-		{#each options as option (option)}
-			<option value={option}>{option}</option>
-		{/each}
-	</select>
+	<div class={`wrapper ${overlay ? 'row' : 'column'} ${overlay ? '' : 'left-align'}`}>
+		{#if title !== ''}
+			<label for={id} class={`label ${overlay ? 'overlay' : ''}`}>{title}</label>
+		{/if}
+		<select bind:value class={generateClassString()} {style} {id} {disabled} on:click on:change>
+			{#each options as option (option)}
+				<option value={option}>{option}</option>
+			{/each}
+		</select>
+	</div>
 </div>
 
 <style>
+	.wrapper.left-align {
+		align-items: flex-start;
+		justify-content: flex-start;
+	}
+	.wrapper.row {
+		flex-direction: row;
+	}
+
+	.wrapper.column {
+		flex-direction: column;
+	}
+	.wrapper {
+		position: relative;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
 	.container {
 		display: flex;
 		align-items: center;
@@ -44,16 +64,15 @@
 		text-align: center;
 		position: relative;
 	}
-
 	.overlay {
 		position: absolute; /* Absolute positioning */
 		top: 50%; /* Center vertically */
-		left: 50%; /* Center horizontally */
+		left: 45%; /* Center horizontally */
 		transform: translate(-50%, -50%); /* Necessary for true centering */
 		pointer-events: none; /* To let click events pass through */
 		z-index: 1; /* Adjust as needed */
 		text-wrap: nowrap;
-		font-size: small;
+		font-size: 14px;
 		margin: 0;
 	}
 
