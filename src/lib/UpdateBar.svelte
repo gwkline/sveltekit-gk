@@ -14,7 +14,7 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		color: var(--white);
+		color: var(--off-black);
 		font-size: 12px;
 		position: absolute;
 		top: 0;
