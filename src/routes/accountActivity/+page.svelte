@@ -37,6 +37,7 @@
 		states
 	} from '../../types';
 	import ActivityTableRow from '$lib/TableRows/ActivityTableRow.svelte';
+	import ActivityNavBottom from './ActivityNavBottom.svelte';
 
 	let searchValue: string = '';
 	let sortState: SortState = { column: null, direction: 0 };
@@ -518,7 +519,6 @@
 />
 
 <ActivityNav
-	{buttonTextCount}
 	{searchValue}
 	schedules={$schedules}
 	maxStartingActivityTasks={`${$settings.max_starting_activity_tasks}`}
@@ -537,9 +537,7 @@
 	<Tags
 		{tagsCount}
 		{selectedTags}
-		totalSelectedItems={totalSelectedTasks}
 		checkedItems={checkedCheckoutTasks}
-		showDeleteTasks={false}
 		on:selectTag={handleSelectTag}
 		on:addTagToTasks={addTagToAccount}
 		on:deleteSelectedTags={deleteSelectedTags}
@@ -569,6 +567,20 @@
 		/>
 	</Table>
 </div>
+
+<ActivityNavBottom
+	{buttonTextCount}
+	schedules={$schedules}
+	on:searchValue={updateSearchValue}
+	on:start={handleTask}
+	on:stop={handleTask}
+	on:editActivity={handleTask}
+	on:editSchedule={handleTask}
+	on:saveSettings={handleSaveSettings}
+	on:delete={() => {
+		showConfirmationModal = true;
+	}}
+/>
 
 {#if showConfirmationModal}
 	<ConfirmationModal
