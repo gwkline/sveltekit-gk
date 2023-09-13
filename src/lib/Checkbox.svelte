@@ -5,6 +5,7 @@
 	export let checked: boolean = false;
 	export let disabled = false;
 	export let mini = false;
+	export let shadow = true;
 
 	const dispatch = createEventDispatcher<{
 		click: { id: number | null };
@@ -19,6 +20,9 @@
 		let classString = '';
 		if (mini) {
 			classString += 'mini';
+		}
+		if (shadow) {
+			classString += ' shadow';
 		}
 		return classString;
 	};
@@ -59,7 +63,7 @@
 			position: relative;
 			margin: 0;
 			cursor: pointer;
-			border: 2px solid var(--bc, var(--border));
+			/* border: 2px solid var(--bc, var(--border)); */
 			background: var(--b, var(--background));
 		}
 
@@ -72,15 +76,17 @@
 			input[type='checkbox'].mini:after {
 				width: 1.5px;
 				height: 3.5px;
-				left: 1.5px;
-				top: 0px;
+				left: 3px;
+				top: 1.5px;
 			}
 		}
 		input[type='checkbox']:after {
 			content: '';
 			display: block;
 			position: absolute;
-			transition: transform var(--d-t, 0.3s) var(--d-t-e, ease), opacity var(--d-o, 0.2s);
+			transition:
+				transform var(--d-t, 0.3s) var(--d-t-e, ease),
+				opacity var(--d-o, 0.2s);
 		}
 		input[type='checkbox']:checked {
 			--b: var(--active);
@@ -139,8 +145,8 @@
 			border: 2px solid var(--active-inner);
 			border-top: 0;
 			border-left: 0;
-			left: 6px;
-			top: 3px;
+			left: 7px;
+			top: 5px;
 			transform: rotate(var(--r, 20deg));
 		}
 		input[type='checkbox']:checked {
@@ -153,5 +159,26 @@
 	}
 	ul li {
 		position: relative;
+	}
+
+	.shadow {
+		box-shadow:
+			var(--shadow-1) 0px 0px 0px 0px,
+			var(--shadow-1) 0px 0px 0px 0px,
+			var(--shadow-2) 0px 1px 1px 0px,
+			var(--shadow-3) 0px 0px 0px 1px,
+			var(--shadow-1) 0px 0px 0px 0px,
+			var(--shadow-1) 0px 0px 0px 0px,
+			var(--shadow-4) 0px 2px 5px 0px;
+		transition: all 0.15s ease;
+	}
+
+	.shadow:hover {
+		box-shadow:
+			var(--shadow-1) 0px 0px 0px 0px,
+			var(--shadow-1) 0px 0px 0px 0px,
+			var(--shadow-2) 0px 1px 1px 0px,
+			var(--shadow-4) 0px 2px 5px 0px,
+			var(--shadow-4) 0px 2px 5px 0px;
 	}
 </style>

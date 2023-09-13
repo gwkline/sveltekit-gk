@@ -433,15 +433,17 @@
 <div class="row-checkbox">
 	<div class="component-wrapper checkboxWrapper">
 		<div class="component-wrapper checkbox">
-			{#if isEditing}
-				<Toggle bind:checked={editRetryNonWinner} style="margin-right: 10px;" />
-			{/if}
-			<Checkbox
-				option="$checkoutSettings.retryNonWinner"
-				bind:checked={$checkoutSettings.retryNonWinner}
-				disabled={isEditing && !editRetryNonWinner ? true : false}
-			/>
-			<label for="$checkoutSettings.retryNonWinner"> Retry Non-Winner </label>
+			<div class="checkbox-wrapper">
+				{#if isEditing}
+					<Toggle bind:checked={editRetryNonWinner} style="margin-right: 10px;" />
+				{/if}
+				<Checkbox
+					option="$checkoutSettings.retryNonWinner"
+					bind:checked={$checkoutSettings.retryNonWinner}
+					disabled={isEditing && !editRetryNonWinner ? true : false}
+				/>
+				<label for="$checkoutSettings.retryNonWinner"> Retry Non-Winner </label>
+			</div>
 		</div>
 		<div class="component-wrapper checkbox">
 			<div class="checkbox-wrapper">
