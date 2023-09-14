@@ -1,7 +1,6 @@
 <script lang="ts">
 	import Tags from '$lib/Tags.svelte';
 	import Table from '$lib/Table.svelte';
-	import TaskTableRow from '$lib/TableRows/CheckoutTableRow.svelte';
 	import StatusBar from '$lib/StatusBar.svelte';
 	import UpdateBar from '$lib/UpdateBar.svelte';
 	import ActivityNav from './ActivityNav.svelte';

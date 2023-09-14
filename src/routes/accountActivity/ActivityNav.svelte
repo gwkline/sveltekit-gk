@@ -4,28 +4,14 @@
 	import Toggle from '$lib/Toggle.svelte';
 	import { showTags } from '../../datastore';
 	import { createEventDispatcher } from 'svelte';
-	import type { ActivityMode, Schedule } from '../../types';
+	import type { Schedule } from '../../types';
 
 	export let searchValue: string = '';
 	export let maxStartingActivityTasks: string;
 	export let schedules: Schedule[] = [];
 
 	let maxStartingActivityTaskCount: string;
-	let modeValue: ActivityMode;
-	let scheduleValue: string;
-
-	const titleValueMap: Record<string, ActivityMode> = {
-		'Login/EA': 'login',
-		'BP Solve': 'bp',
-		Stories: 'stories',
-		Autobrowse: 'browse',
-		'Password Reset': 'passwordreset',
-		'SMS Verify': 'addverifiednumber',
-		Manual: 'manual'
-	};
-
 	type settings = 'max_starting_activity_tasks';
-	type states = 'start' | 'stop' | 'delete' | 'duplicate' | 'editSchedule' | 'editMode' | 'create';
 
 	const dispatch = createEventDispatcher();
 

@@ -55,7 +55,7 @@
 			{/if}
 		{/each}
 
-		<td>
+		<td style="justify-content: end;">
 			<ButtonGroup
 				{page}
 				itemId={row.itemId}

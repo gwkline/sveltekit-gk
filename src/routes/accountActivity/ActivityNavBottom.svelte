@@ -9,7 +9,6 @@
 	export let buttonTextCount: string;
 	export let schedules: Schedule[] = [];
 
-	let maxStartingActivityTaskCount: string;
 	let modeValue: ActivityMode | '';
 	let scheduleValue: string;
 
@@ -33,7 +32,6 @@
 		Manual: 'manual'
 	};
 
-	type settings = 'max_starting_activity_tasks';
 	type states = 'start' | 'stop' | 'delete' | 'duplicate' | 'editSchedule' | 'editMode' | 'create';
 
 	const dispatch = createEventDispatcher();

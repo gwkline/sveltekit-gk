@@ -23,10 +23,10 @@ import {
 	schedules,
 	verboseActivityTasks,
 	accounts,
-	profiles,
 	payments,
 	proxy_lists,
-	wins
+	wins,
+	profiles
 } from './datastore';
 import { get } from 'svelte/store';
 import {
@@ -239,7 +239,14 @@ export const getAccounts = () => {
 
 export const getProfiles = () => {
 	makeRequest('get', 'http://127.0.0.1:23432/profiles', null, (response) => {
-		profiles.set(response.data);
+		const profs = response.data.map((profile: Profile) => {
+			if (profile.tags === undefined) {
+				profile.tags = [];
+			}
+
+			return profile;
+		});
+		profiles.set(profs);
 	});
 };
 

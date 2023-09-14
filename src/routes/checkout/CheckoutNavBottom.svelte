@@ -1,9 +1,6 @@
 <script lang="ts">
-	import Search from '$lib/Search.svelte';
 	import Button from '$lib/Button.svelte';
-	import Input from '$lib/Input.svelte';
-	import Toggle from '$lib/Toggle.svelte';
-	import { settings, isLoading, showTags } from '../../datastore';
+	import { isLoading } from '../../datastore';
 	import {
 		faPlay,
 		faStop,
@@ -16,10 +13,6 @@
 
 	export let buttonTextCount: string;
 
-	let maxActiveTaskCount: string;
-	let maxStartingTaskCount: string;
-
-	type settings = 'max_active_tasks' | 'max_starting_tasks';
 	type states = 'start' | 'stop' | 'delete' | 'duplicate' | 'edit' | 'create';
 
 	const dispatch = createEventDispatcher();
@@ -49,13 +42,6 @@
 				dispatch('create');
 				break;
 		}
-	};
-
-	const saveSettings = (settingKey: settings, value: string) => {
-		dispatch('saveSettings', { name: settingKey, value: value });
-
-		maxActiveTaskCount = '';
-		maxStartingTaskCount = '';
 	};
 </script>
 

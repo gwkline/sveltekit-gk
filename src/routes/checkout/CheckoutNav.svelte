@@ -13,7 +13,6 @@
 	let maxStartingTaskCount: string;
 
 	type settings = 'max_active_tasks' | 'max_starting_tasks';
-	type states = 'start' | 'stop' | 'delete' | 'duplicate' | 'edit' | 'create';
 
 	const dispatch = createEventDispatcher();
 
