@@ -13,10 +13,10 @@
 		addTag,
 		getPayments
 	} from '../../helpers';
-	import { showTags, shiftPressed, isLoading, schedules, payments } from '../../datastore';
+	import { showTags, shiftPressed, isLoading, payments } from '../../datastore';
 	import type {
 		HeaderConfigType,
-		PaymentTableRowType,
+		TableRowType,
 		ActivityState,
 		SortState,
 		Payment,
@@ -40,7 +40,7 @@
 	let totalSelectedTasks: number = 0;
 
 	let filteredPayments: Payment[] = [];
-	let tableData: PaymentTableRowType[] = [];
+	let tableData: TableRowType<Payment>[] = [];
 	let tableIds: number[] = [];
 
 	let selectedTags: string[] = [];
@@ -49,7 +49,7 @@
 
 	let headers: string[] = [];
 	let headerConfig: HeaderConfigType<Payment> = {
-		Name: (payment) => payment.card_name,
+		Name: (payment) => payment.card_name || '',
 		'Card Number': (payment) => maskCardNumber(payment.card_number),
 		CVV: (payment) => payment.ccv,
 		Expiration: (payment) => payment.exp_month + '/' + payment.exp_year
@@ -57,6 +57,7 @@
 
 	const maskCardNumber = (cardNumber: string): string => {
 		const lastFour = cardNumber.slice(-4);
+		if (lastFour.length === 0) return '';
 		const maskedSection = '*'.repeat(cardNumber.length - 4);
 		return maskedSection + lastFour;
 	};
@@ -282,7 +283,7 @@
 		tableIds = [];
 
 		let tableDataShortenedTemp = filtered.map((row, index) => {
-			const rowObject: PaymentTableRowType = {
+			const rowObject: TableRowType<Payment> = {
 				index: index + 1,
 				itemId: row.id,
 				thisItem: row
@@ -324,7 +325,7 @@
 	// Sets the value of allTags and tagsCount
 	$: {
 		allTags = $payments
-			.map((payment) => payment.tags)
+			.map((payment) => payment.tags || [])
 			.flat()
 			.map((tag) => tag.name)
 			.filter((tag) => tag);
@@ -339,7 +340,7 @@
 		});
 
 		// Count the number of payments without any tags
-		let noTagsCount = $payments.filter((payment) => payment.tags.length === 0).length;
+		let noTagsCount = $payments.filter((payment) => payment.tags?.length === 0).length;
 
 		// Add a "No Tags" tag if there are any payments without tags
 		if (noTagsCount > 0) {
@@ -403,7 +404,6 @@
 <PaymentNav
 	{buttonTextCount}
 	{searchValue}
-	schedules={$schedules}
 	on:searchValue={updateSearchValue}
 	on:edit={handleEdit}
 	on:delete={() => {
@@ -415,9 +415,7 @@
 	<Tags
 		{tagsCount}
 		{selectedTags}
-		totalSelectedItems={totalSelectedTasks}
 		checkedItems={checkedCheckoutTasks}
-		showDeleteTasks={false}
 		on:selectTag={handleSelectTag}
 		on:addTagToTasks={addTagToPayment}
 		on:deleteSelectedTags={deleteSelectedTags}

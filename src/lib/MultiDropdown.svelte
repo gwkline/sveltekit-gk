@@ -15,6 +15,8 @@
 	export let disabled = false;
 	export let open = false;
 	export let options: string[];
+	export let outline = false;
+	export let shadow = true;
 
 	const dispatch = createEventDispatcher();
 	let buttonText: string;
@@ -63,7 +65,7 @@
 		<Fa icon={chevronIcon} size="xs" />
 	</div>
 	{#if open}
-		<div class="dropdown-menu">
+		<div class={`dropdown-menu ${outline ? 'outline' : ''} ${shadow ? 'shadow' : ''}`}>
 			<div class="input-container">
 				<Input
 					bind:value={filterText}
@@ -110,7 +112,6 @@
 	.dropdown-menu {
 		position: absolute;
 		width: 200px;
-		border: 1px solid var(--light-gray-4);
 		box-shadow: 0px 1px 0px 0px rgba(27, 31, 35, 0.04);
 		border-radius: 7px;
 		background: var(--background);
@@ -118,6 +119,10 @@
 		max-height: 300px;
 		overflow: scroll;
 		scroll-behavior: smooth;
+	}
+
+	.ouline {
+		border: 1px solid var(--light-gray-4);
 	}
 
 	.dropdown-item {
@@ -136,10 +141,31 @@
 	}
 
 	.dropdown-item:hover {
-		background: var(--light-gray-4);
+		background: var(--light-gray-2);
 	}
 
 	.input-container {
 		margin-bottom: 5px;
+	}
+
+	.shadow {
+		box-shadow:
+			var(--shadow-1) 0px 0px 0px 0px,
+			var(--shadow-1) 0px 0px 0px 0px,
+			var(--shadow-2) 0px 1px 1px 0px,
+			var(--shadow-3) 0px 0px 0px 1px,
+			var(--shadow-1) 0px 0px 0px 0px,
+			var(--shadow-1) 0px 0px 0px 0px,
+			var(--shadow-4) 0px 2px 5px 0px;
+		transition: all 0.15s ease;
+	}
+
+	.shadow:hover {
+		box-shadow:
+			var(--shadow-1) 0px 0px 0px 0px,
+			var(--shadow-1) 0px 0px 0px 0px,
+			var(--shadow-2) 0px 1px 1px 0px,
+			var(--shadow-4) 0px 2px 5px 0px,
+			var(--shadow-4) 0px 2px 5px 0px;
 	}
 </style>

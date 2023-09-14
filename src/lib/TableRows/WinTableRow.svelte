@@ -58,7 +58,6 @@
 	}
 
 	td {
-		padding: 3px 7px 3px 2px;
 		font-size: 13px;
 		overflow: hidden;
 		border: none;

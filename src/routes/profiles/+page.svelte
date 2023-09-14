@@ -13,15 +13,16 @@
 		addTag,
 		getProfiles
 	} from '../../helpers';
-	import { showTags, shiftPressed, isLoading, schedules, profiles } from '../../datastore';
+	import { showTags, shiftPressed, isLoading, profiles } from '../../datastore';
 	import type {
 		HeaderConfigType,
-		ProfileTableRowType,
+		TableRowType,
 		ActivityState,
 		SortState,
 		Account,
 		Profile,
-		states
+		states,
+		ShortProfile
 	} from '../../types';
 	import ProfileTableRow from '$lib/TableRows/ProfileTableRow.svelte';
 
@@ -41,7 +42,7 @@
 	let totalSelectedTasks: number = 0;
 
 	let filteredProfiles: Profile[] = [];
-	let tableData: ProfileTableRowType[] = [];
+	let tableData: TableRowType<Profile | ShortProfile>[] = [];
 	let tableIds: number[] = [];
 
 	let selectedTags: string[] = [];
@@ -128,10 +129,13 @@
 		let updatedProfiles: (Account | Profile)[] = [];
 		profiles.update((profiles) => {
 			return profiles.map((profile) => {
-				let taskHasSelectedTag = profile.tags.some((t) => selectedTags.includes(t.name));
+				if (profile.tags === undefined) {
+					profile.tags = [];
+				}
+				let taskHasSelectedTag = profile.tags?.some((t) => selectedTags.includes(t.name));
 
 				// If the "No Tags" tag is selected and the task has no tags
-				if (selectedTags.includes('No Tags') && profile.tags.length === 0) {
+				if (selectedTags.includes('No Tags') && profile.tags?.length === 0) {
 					profile.tags.push({ name: newTagText });
 					updatedProfiles.push(profile);
 				}
@@ -280,7 +284,7 @@
 		tableIds = [];
 
 		let tableDataShortenedTemp = filtered.map((row, index) => {
-			const rowObject: ProfileTableRowType = {
+			const rowObject: TableRowType<Profile | ShortProfile> = {
 				index: index + 1,
 				itemId: row.id,
 				thisItem: row
@@ -401,7 +405,6 @@
 <ProfileNav
 	{buttonTextCount}
 	{searchValue}
-	schedules={$schedules}
 	on:searchValue={updateSearchValue}
 	on:edit={handleEdit}
 	on:delete={() => {
@@ -413,9 +416,7 @@
 	<Tags
 		{tagsCount}
 		{selectedTags}
-		totalSelectedItems={totalSelectedTasks}
 		checkedItems={checkedCheckoutTasks}
-		showDeleteTasks={false}
 		on:selectTag={handleSelectTag}
 		on:addTagToTasks={addTagToAccount}
 		on:deleteSelectedTags={deleteSelectedTags}

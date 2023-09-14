@@ -417,9 +417,7 @@
 	<Tags
 		{tagsCount}
 		{selectedTags}
-		totalSelectedItems={totalSelectedTasks}
 		checkedItems={checkedCheckoutTasks}
-		showDeleteTasks={false}
 		on:selectTag={handleSelectTag}
 		on:addTagToTasks={addTagToAccount}
 		on:deleteSelectedTags={deleteSelectedTags}

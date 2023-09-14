@@ -17,11 +17,10 @@
 	export let tagsCount: { tag: string; count: number }[] = [];
 	export let selectedTags: string[] = [];
 	export let checkedItems: number[] = [];
-	export let totalSelectedItems: number = 0;
-	export let showDeleteTasks: boolean = true;
 
 	type AddOrEdit = 'add' | 'edit';
 	type AddOrEditState = AddOrEdit | null;
+	let showDeleteTasks: boolean = true;
 	let addOrEdit: AddOrEditState = null;
 	let isEditing = false;
 	let isAddingTag = false;
@@ -78,6 +77,10 @@
 
 	const deleteSelectedTasks = () => {
 		dispatch('deleteSelectedTasks');
+	};
+
+	const deleteSelectedTasksTags = () => {
+		dispatch('deleteSelectedTasksTags');
 	};
 
 	const saveEditedTags = () => {
@@ -152,11 +155,6 @@
 	class="container-wrapper"
 >
 	<div class="selection-info">
-		<p class="count-info">
-			{selectedTags.length}
-			{selectedTags.length === 1 ? 'tag' : 'tags'} selected ({totalSelectedItems}
-			total items)
-		</p>
 		<button class="clear-all" on:click={selectAllTags}>
 			<Fa icon={faCheck} size="sm" />
 			Select all tags
@@ -203,6 +201,15 @@
 						Add tags to selected items
 					</button>
 				{/if}
+				<button
+					class="clear-all"
+					on:click={() => {
+						deleteSelectedTasksTags();
+					}}
+				>
+					<Fa icon={faTrash} size="sm" />
+					Remove tags from selected items
+				</button>
 			</div>
 		{/if}
 
@@ -297,10 +304,6 @@
 </div>
 
 <style>
-	.count-info {
-		font-size: 12px;
-		margin: 0 1rem 0 0;
-	}
 	.input-wrapper {
 		display: flex;
 		align-items: center;
@@ -327,7 +330,6 @@
 	.clear-all {
 		cursor: pointer;
 		border: none;
-		margin: 0.5rem 1rem 0.5rem 0rem;
 		font-size: 11px;
 		display: inline;
 		background-color: inherit;
@@ -409,7 +411,7 @@
 	.tag-count {
 		margin-left: 0.5rem;
 		font-size: 10px;
-		color: var(--light-gray-4);
+		color: var(--gray);
 	}
 
 	.tag:hover {

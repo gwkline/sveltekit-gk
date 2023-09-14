@@ -287,7 +287,7 @@
 
 			if (selectedProfileTagsSet.size > 0 && dropdownStatus2) {
 				filteredAccounts = filteredAccounts.filter((account) => {
-					let profileTags = account.profile.tags.map((tag) => tag.name);
+					let profileTags = account.profile.tags?.map((tag) => tag.name) || [];
 
 					// Check if some tag is in selectedProfileTagsSet
 					return profileTags.some((tag) => selectedProfileTagsSet.has(tag));
@@ -433,15 +433,17 @@
 <div class="row-checkbox">
 	<div class="component-wrapper checkboxWrapper">
 		<div class="component-wrapper checkbox">
-			{#if isEditing}
-				<Toggle bind:checked={editRetryNonWinner} style="margin-right: 10px;" />
-			{/if}
-			<Checkbox
-				option="$checkoutSettings.retryNonWinner"
-				bind:checked={$checkoutSettings.retryNonWinner}
-				disabled={isEditing && !editRetryNonWinner ? true : false}
-			/>
-			<label for="$checkoutSettings.retryNonWinner"> Retry Non-Winner </label>
+			<div class="checkbox-wrapper">
+				{#if isEditing}
+					<Toggle bind:checked={editRetryNonWinner} style="margin-right: 10px;" />
+				{/if}
+				<Checkbox
+					option="$checkoutSettings.retryNonWinner"
+					bind:checked={$checkoutSettings.retryNonWinner}
+					disabled={isEditing && !editRetryNonWinner ? true : false}
+				/>
+				<label for="$checkoutSettings.retryNonWinner"> Retry Non-Winner </label>
+			</div>
 		</div>
 		<div class="component-wrapper checkbox">
 			<div class="checkbox-wrapper">
@@ -532,9 +534,10 @@
 	</div>
 {/if}
 <div class="row justify-content-center">
-	<Button variant="secondary" size="lg" onclick={closeModal}>Cancel</Button>
+	<Button variant="primary" size="lg" onclick={closeModal}>Cancel</Button>
 	<Button
 		variant="primary"
+		alternate={true}
 		size="lg"
 		icon={faSave}
 		onclick={handleSaveClicked}
@@ -594,11 +597,13 @@
 		display: flex;
 		align-items: center;
 		height: 30px;
+		cursor: pointer;
 	}
 
 	label {
 		font-size: small;
 		margin: 0 10px;
+		cursor: pointer;
 	}
 
 	.justify-content-center {

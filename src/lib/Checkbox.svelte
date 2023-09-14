@@ -5,6 +5,7 @@
 	export let checked: boolean = false;
 	export let disabled = false;
 	export let mini = false;
+	export let shadow = true;
 
 	const dispatch = createEventDispatcher<{
 		click: { id: number | null };
@@ -19,6 +20,9 @@
 		let classString = '';
 		if (mini) {
 			classString += 'mini';
+		}
+		if (shadow) {
+			classString += ' shadow';
 		}
 		return classString;
 	};
@@ -41,14 +45,7 @@
 
 <style>
 	@supports (-webkit-appearance: none) or (-moz-appearance: none) {
-		input[type='checkbox'] {
-			--active: var(--primary);
-			--active-inner: var(--white);
-			--border: var(--light-gray-3);
-			--border-hover: var(--gray);
-			--background: var(--background);
-			--disabled: var(--light-gray-3);
-			--disabled-inner: var(--gray);
+		input {
 			-webkit-appearance: none;
 			-moz-appearance: none;
 			appearance: none;
@@ -59,65 +56,67 @@
 			position: relative;
 			margin: 0;
 			cursor: pointer;
-			border: 2px solid var(--bc, var(--border));
+			outline: 1px solid var(--bc, var(--light-gray-3));
 			background: var(--b, var(--background));
 		}
 
-		@supports (-webkit-appearance: none) or (-moz-appearance: none) {
-			input[type='checkbox'].mini {
-				height: 10px;
-				width: 10px;
-				border-radius: 2px;
-			}
-			input[type='checkbox'].mini:after {
-				width: 1.5px;
-				height: 3.5px;
-				left: 1.5px;
-				top: 0px;
-			}
-		}
-		input[type='checkbox']:after {
+		input:after {
 			content: '';
 			display: block;
 			position: absolute;
-			transition: transform var(--d-t, 0.3s) var(--d-t-e, ease), opacity var(--d-o, 0.2s);
+			transition:
+				transform var(--d-t, 0.3s) var(--d-t-e, ease),
+				opacity var(--d-o, 0.2s);
 		}
-		input[type='checkbox']:checked {
-			--b: var(--active);
-			--bc: var(--active);
+
+		input.mini {
+			height: 10px;
+			width: 10px;
+			border-radius: 2px;
+		}
+		input.mini:after {
+			width: 1.5px;
+			height: 3.5px;
+			left: 3px;
+			top: 1.5px;
+		}
+
+		input:checked {
+			--b: var(--primary);
+			--bc: var(--primary);
 			--d-o: 0.3s;
 			--d-t: 0.6s;
 			--d-t-e: cubic-bezier(0.2, 0.85, 0.32, 1.2);
 		}
-		input[type='checkbox']:checked:hover {
-			--bc: var(--primary-hover);
+		input:checked:hover {
+			--bc: var(--off-black);
 		}
-		input[type='checkbox']:disabled {
-			--b: var(--disabled);
+		input:disabled {
+			--b: var(--light-gray-3);
 			cursor: not-allowed;
 			opacity: 0.4;
 		}
-		input[type='checkbox']:disabled:checked {
-			--b: var(--disabled-inner);
-			--bc: var(--border);
+		input:disabled:checked {
+			--b: var(--gray);
+			--bc: var(--light-gray-3);
 		}
-		input[type='checkbox']:disabled + label {
+		input:disabled + label {
 			cursor: not-allowed;
 		}
-		input[type='checkbox']:hover:not(:checked):not(:disabled) {
-			--bc: var(--border-hover);
+		input:hover:not(:checked):not(:disabled) {
+			--bc: var(--gray);
 		}
 
-		input[type='checkbox'] {
+		input {
 			width: 20px;
 		}
-		input[type='checkbox']:after {
+		input:after {
 			opacity: var(--o, 0);
 		}
-		input[type='checkbox']:checked {
+		input:checked {
 			--o: 1;
 		}
-		input[type='checkbox'] + label {
+		input + label {
 			font-size: 14px;
 			line-height: 21px;
 			font-family: inherit;
@@ -129,21 +128,21 @@
 			margin-left: 4px;
 		}
 
-		input[type='checkbox'] {
+		input {
 			border-radius: 4px;
 		}
 
-		input[type='checkbox']:after {
+		input:after {
 			width: 3px;
 			height: 7px;
-			border: 2px solid var(--active-inner);
+			border: 2px solid var(--white);
 			border-top: 0;
 			border-left: 0;
-			left: 6px;
-			top: 3px;
+			left: 7px;
+			top: 5px;
 			transform: rotate(var(--r, 20deg));
 		}
-		input[type='checkbox']:checked {
+		input:checked {
 			--r: 40deg;
 		}
 	}
@@ -153,5 +152,26 @@
 	}
 	ul li {
 		position: relative;
+	}
+
+	.shadow {
+		box-shadow:
+			var(--shadow-1) 0px 0px 0px 0px,
+			var(--shadow-1) 0px 0px 0px 0px,
+			var(--shadow-2) 0px 1px 1px 0px,
+			var(--shadow-3) 0px 0px 0px 1px,
+			var(--shadow-1) 0px 0px 0px 0px,
+			var(--shadow-1) 0px 0px 0px 0px,
+			var(--shadow-4) 0px 2px 5px 0px;
+		transition: all 0.15s ease;
+	}
+
+	.shadow:hover {
+		box-shadow:
+			var(--shadow-1) 0px 0px 0px 0px,
+			var(--shadow-1) 0px 0px 0px 0px,
+			var(--shadow-2) 0px 1px 1px 0px,
+			var(--shadow-4) 0px 2px 5px 0px,
+			var(--shadow-4) 0px 2px 5px 0px;
 	}
 </style>

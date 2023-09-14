@@ -19,7 +19,7 @@
 </script>
 
 <button
-	class="default fill {image_src == '' ? 'active' : ''} noOutline {style} {collapsed
+	class="default {image_src == '' ? 'active' : ''} noOutline {style} {collapsed
 		? 'iconOnly'
 		: ''} {disabled == true ? 'disabled' : ''}"
 	on:click={page ? redirect : onclick}

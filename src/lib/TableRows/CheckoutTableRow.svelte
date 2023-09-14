@@ -43,8 +43,9 @@
 					{:else if column === 'Profile'}
 						<ProfileCell
 							profileName={row.thisItem.account?.profile.name || ''}
-							profileTags={row.thisItem.account?.profile.tags.map((item) => item.name).join(', ') ||
-								''}
+							profileTags={row.thisItem.account?.profile.tags
+								?.map((item) => item.name)
+								.join(', ') || ''}
 							sameName={row.thisItem.account?.use_account_name || false}
 						/>
 					{:else}
@@ -54,7 +55,7 @@
 			{/if}
 		{/each}
 
-		<td>
+		<td style="justify-content: end;">
 			<ButtonGroup
 				{page}
 				itemId={row.itemId}
@@ -70,7 +71,6 @@
 
 <style>
 	tr {
-		height: 46px;
 		border-bottom: 1px solid var(--light-gray-3);
 		align-items: center;
 	}
@@ -81,7 +81,6 @@
 	}
 
 	td {
-		padding: 3px 7px 3px 2px;
 		font-size: 13px;
 		overflow: hidden;
 		border: none;

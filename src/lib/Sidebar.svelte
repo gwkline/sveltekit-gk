@@ -106,7 +106,7 @@
 					icon={null}
 					collapsed={$sidebarCollapsed}
 					page={''}
-					image_src="../bluelogo.png"
+					image_src="../purplelogo.png"
 					disabled={false}
 				/>
 			</li>
@@ -172,7 +172,7 @@
 		left: 0;
 		width: 200px;
 		height: 100vh;
-		border-right: 1px solid var(--light-gray-1);
+		border-right: 1px solid var(--light-gray-2);
 		background-color: var(--sidebar-background);
 	}
 
@@ -182,7 +182,7 @@
 		left: 0;
 		width: 50px;
 		height: 100vh;
-		border-right: 1px solid var(--light-gray-1);
+		border-right: 1px solid var(--light-gray-2);
 	}
 
 	.active::after,
