@@ -537,6 +537,7 @@
 	<Button variant="primary" size="lg" onclick={closeModal}>Cancel</Button>
 	<Button
 		variant="primary"
+		alternate={true}
 		size="lg"
 		icon={faSave}
 		onclick={handleSaveClicked}
