@@ -43,8 +43,9 @@
 					{:else if column === 'Profile'}
 						<ProfileCell
 							profileName={row.thisItem.account?.profile.name || ''}
-							profileTags={row.thisItem.account?.profile.tags.map((item) => item.name).join(', ') ||
-								''}
+							profileTags={row.thisItem.account?.profile.tags
+								?.map((item) => item.name)
+								.join(', ') || ''}
 							sameName={row.thisItem.account?.use_account_name || false}
 						/>
 					{:else}
@@ -76,7 +77,7 @@
 
 	tr.active,
 	tr:hover {
-		background-color: var(--light-gray-1);
+		background-color: var(--light-gray-2);
 	}
 
 	td {

@@ -62,9 +62,10 @@
 <style>
 	button {
 		width: auto;
-		font-family: inherit;
+		font-family: Roboto;
+		font-style: normal;
 		border: 1px solid transparent;
-		border-radius: 7px;
+		border-radius: 6px;
 		cursor: pointer;
 		justify-content: center;
 		align-items: center;
@@ -75,7 +76,7 @@
 	}
 
 	.outline {
-		outline: 1px solid var(--light-gray-3);
+		border: 1px solid var(--light-gray-4, #e0e0e0);
 	}
 
 	.noOutline {
@@ -113,6 +114,10 @@
 		color: var(--warning-yellow);
 	}
 
+	.alternate {
+		border: 1px solid rgba(0, 0, 0, 0.14);
+	}
+
 	button.primary.alternate,
 	button.danger.alternate,
 	button.success.alternate,
@@ -145,7 +150,7 @@
 	button.primary:hover,
 	button.success:hover,
 	button.warning:hover {
-		background: var(--light-gray-1);
+		background: var(--light-gray-2, #f2f2f2);
 	}
 
 	button.danger:hover {
@@ -158,7 +163,7 @@
 	}
 
 	button.primary.alternate:hover {
-		background: var(--primary-hover);
+		background: var(--primary-hover, #4842c4);
 	}
 
 	button.danger.alternate:hover {
@@ -177,6 +182,7 @@
 	}
 	/* Click Indication */
 	button.default:active,
+	button.primary:active,
 	button.success:active,
 	button.warning:active {
 		-webkit-box-shadow: inset 0px 0px 5px #b6b6b6;
@@ -185,7 +191,6 @@
 		outline: none;
 	}
 
-	button.primary:active,
 	button.danger:active {
 		-webkit-box-shadow: inset 0px 0px 7px #000e30;
 		-moz-box-shadow: inset 0px 0px 7px #000e30;
@@ -216,8 +221,8 @@
 	}
 
 	button.sm {
-		font-weight: 500;
-		font-size: 13px;
+		font-weight: 600;
+		line-height: 15px;
 		padding: 3px 15px;
 		gap: 9px;
 	}

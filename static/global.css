@@ -8,19 +8,20 @@
 	/* --primary: #045996;
 --primary-hover: #00355a; */
 	color-scheme: dark;
-	--primary: #0072bd;
-	--primary-hover: #005791;
+	--primary: #625bf6;
+	--primary-hover: #4842c4;
 	--danger-red: #cf222e;
 	--danger-red-hover: #a40e26;
 	--success-green: #2da44e;
-	--success-green-hover: #1c6932;
+	--success-green-hover: #23803d;
 	--warning-yellow: #bf8700;
-	--warning-yellow-hover: #7e5801;
+	--warning-yellow-hover: #a67400;
+
 	--white: #ffffff;
-	--shadow-1: rgba(255, 255, 255, 0);
-	--shadow-2: rgba(255, 255, 255, 0.12);
-	--shadow-3: rgba(194, 187, 173, 0.16);
-	--shadow-4: rgba(217, 217, 217, 0.08);
+	--shadow-1: rgba(141, 141, 141, 0);
+	--shadow-2: rgba(0, 0, 0, 0.12);
+	--shadow-3: rgba(156, 165, 197, 0.16);
+	--shadow-4: rgba(150, 158, 190, 0.08);
 
 	--black: #ffffff;
 	--off-black: #fafafa;
@@ -29,8 +30,8 @@
 	--light-gray-3: #4b4b58;
 	--light-gray-2: #3b3b49;
 	--light-gray-1: #323241;
-	--background: #1b1b1f;
-	--background-alt: #18181a;
+	--background: #2e2e3d;
+	--background-alt: #323241;
 	color: var(--off-black);
 	background-color: var(--background-alt);
 	--sidebar-background: var(--background-alt);
@@ -38,15 +39,15 @@
 
 :root[color-theme='light'] {
 	color-scheme: light;
-	--black: #000000;
-	--off-black: #545969;
-	--gray: #757575;
-	--light-gray-4: #6b6b6b;
-	--light-gray-3: #ebeef1;
-	--light-gray-2: #ced3d7;
-	--light-gray-1: #f5f6f8;
 	--background: #ffffff;
 	--background-alt: #ffffff;
+	--black: #000000;
+	--off-black: #333333;
+	--gray: #757575;
+	--light-gray-4: #e0e0e0;
+	--light-gray-3: #e8e8e8;
+	--light-gray-2: #f2f2f2;
+	--light-gray-1: #fafafa;
 	--shadow-1: rgba(0, 0, 0, 0);
 	--shadow-2: rgba(0, 0, 0, 0.12);
 	--shadow-3: rgba(64, 68, 82, 0.16);

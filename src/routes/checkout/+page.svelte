@@ -498,7 +498,6 @@
 />
 
 <CheckoutNav
-	{buttonTextCount}
 	{searchValue}
 	maxStartingTasks={`${$settings.max_starting_tasks}`}
 	maxActiveTasks={`${$settings.max_active_tasks}`}
@@ -553,9 +552,6 @@
 </div>
 <CheckoutNavBottom
 	{buttonTextCount}
-	{searchValue}
-	maxStartingTasks={`${$settings.max_starting_tasks}`}
-	maxActiveTasks={`${$settings.max_active_tasks}`}
 	on:searchValue={updateSearchValue}
 	on:create={handleTask}
 	on:start={handleTask}

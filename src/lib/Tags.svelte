@@ -411,7 +411,7 @@
 	.tag-count {
 		margin-left: 0.5rem;
 		font-size: 10px;
-		color: var(--light-gray-4);
+		color: var(--gray);
 	}
 
 	.tag:hover {

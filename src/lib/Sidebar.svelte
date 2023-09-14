@@ -106,7 +106,7 @@
 					icon={null}
 					collapsed={$sidebarCollapsed}
 					page={''}
-					image_src="../bluelogo.png"
+					image_src="../purplelogo.png"
 					disabled={false}
 				/>
 			</li>
