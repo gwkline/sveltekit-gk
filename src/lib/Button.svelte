@@ -11,7 +11,7 @@
 	export let size: ButtonSizes = 'md';
 	export let icon: IconDefinition | null = null;
 	export let shape: Shape = 'rectangle';
-	export let outline: OutlineType = 'noOutline';
+	export let outline: OutlineType = 'outline';
 	export let onclick: (event: MouseEvent) => void = () => {};
 	export let alternate = false;
 	export let isLoading = false;
@@ -30,7 +30,6 @@
 	let classString: string = '';
 	$: {
 		let classes: string[] = [variant, size];
-		if (isLoading || (icon && !$$slots.default)) classes.push('iconOnly');
 		if (outline === 'outline') classes.push('outline');
 		if (shadow) classes.push('shadow');
 		classes.push(shape);
@@ -213,64 +212,52 @@
 	}
 
 	/* SIZING CLASSES */
-	button.xs {
+	.xs {
 		font-weight: 400;
 		font-size: 12px;
 		padding: 3px 15px;
 		gap: 7px;
 	}
 
-	button.sm {
+	.sm {
 		font-weight: 600;
 		line-height: 15px;
 		padding: 3px 15px;
 		gap: 9px;
 	}
 
-	button.md {
+	.md {
 		font-weight: 500;
 		font-size: 14px;
 		padding: 6px 20px;
 		gap: 11px;
 	}
 
-	button.lg {
+	.lg {
 		font-weight: 700;
 		font-size: 15px;
 		padding: 10px 25px;
 		gap: 13px;
 	}
 
-	.iconOnly.sm {
-		padding: 7px;
-	}
-
-	.iconOnly.md {
-		padding: 10px;
-	}
-
-	.iconOnly.lg {
-		padding: 15px;
-	}
-
 	.circle.xs,
 	.square.xs {
-		padding: 5px;
+		padding: 5px !important;
 	}
 
 	.circle.sm,
 	.square.sm {
-		padding: 10px;
+		padding: 10px !important;
 	}
 
 	.circle.md,
 	.square.md {
-		padding: 15px;
+		padding: 15px !important;
 	}
 
 	.circle.lg,
 	.square.lg {
-		padding: 20px;
+		padding: 20px !important;
 	}
 
 	.shadow {

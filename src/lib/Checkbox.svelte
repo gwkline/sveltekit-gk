@@ -29,7 +29,7 @@
 </script>
 
 <ul>
-	<li>
+	<li style="display: flex;">
 		<input
 			{style}
 			id={option}
@@ -148,6 +148,7 @@
 	}
 	ul {
 		padding: 0;
+		margin: 0;
 		list-style: none;
 	}
 	ul li {

@@ -84,6 +84,7 @@
 		font-size: 13px;
 		overflow: hidden;
 		border: none;
+		padding: 5px 5px;
 	}
 
 	.checkbox {

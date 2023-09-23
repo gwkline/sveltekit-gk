@@ -13,6 +13,7 @@
 	import { onMount, onDestroy, createEventDispatcher } from 'svelte';
 	import { slide } from 'svelte/transition';
 	import { cubicInOut } from 'svelte/easing';
+	import Checkbox from './Checkbox.svelte';
 
 	export let tagsCount: { tag: string; count: number }[] = [];
 	export let selectedTags: string[] = [];
@@ -58,17 +59,6 @@
 	const selectTag = (tag: string) => {
 		isAddingTag = false;
 		dispatch('selectTag', tag);
-	};
-
-	const selectAllTags = () => {
-		dispatch(
-			'selectTag',
-			tagsCount.map((t) => t.tag)
-		);
-	};
-
-	const clearAll = () => {
-		dispatch('selectTag', []);
 	};
 
 	const deleteSelectedTags = () => {
@@ -148,6 +138,23 @@
 		const target = event.target as HTMLInputElement; // `target` is an HTMLInputElement
 		newTagText = target.value;
 	};
+
+	let checkedAll = false;
+
+	const toggleCheckAll = (origin: string) => {
+		// Toggle and dispatch based on origin
+		if (origin === 'tag') {
+			checkedAll = !checkedAll;
+		}
+		if (checkedAll) {
+			dispatch(
+				'selectTag',
+				tagsCount.map((t) => t.tag)
+			);
+		} else {
+			dispatch('selectTag', []);
+		}
+	};
 </script>
 
 <div
@@ -155,10 +162,101 @@
 	class="container-wrapper"
 >
 	<div class="selection-info">
-		<button class="clear-all" on:click={selectAllTags}>
-			<Fa icon={faCheck} size="sm" />
-			Select all tags
+		{#if selectedTags.length > 0}
+			<button class="clear-all" on:click={editTags}>
+				<Fa icon={faPenToSquare} size="sm" />
+				Edit selected
+			</button>
+			<button class="clear-all" on:click={deleteSelectedTags}>
+				<Fa icon={faTrash} size="sm" />
+				Delete selected tags
+			</button>
+			{#if showDeleteTasks}
+				<button class="clear-all" on:click={deleteSelectedTasks}>
+					<Fa icon={faTrash} size="sm" />
+					Delete associated tasks
+				</button>
+			{/if}
+			<div class="input-wrapper">
+				{#if isAddingTag && addOrEdit === 'edit'}
+					<div class={isAddingTag ? 'input-container' : 'input-container hidden'}>
+						<input
+							type="text"
+							class="tag-add-input"
+							value={newTagText}
+							on:input={saveInput}
+							on:keydown={(e) => e.key === 'Enter' && addAdditionalTag()}
+							on:blur={addAdditionalTag}
+						/>
+						<Button
+							icon={faSave}
+							size="xs"
+							shape="square"
+							variant="primary"
+							onclick={() => {
+								addAdditionalTag();
+							}}
+						/>
+						<Button
+							icon={faTimes}
+							size="xs"
+							variant="danger"
+							onclick={() => {
+								isAddingTag = false;
+							}}
+						/>
+					</div>
+				{:else}
+					<button
+						class="clear-all"
+						on:click={() => {
+							startAddingTag('edit');
+						}}
+					>
+						<Fa icon={faPlus} size="sm" />
+						Add tags to selected tags
+					</button>
+				{/if}
+			</div>
+		{/if}
+	</div>
+
+	<div class="tag-container">
+		<button
+			class="tag"
+			class:selected={checkedAll}
+			on:click|stopPropagation={() => toggleCheckAll('tag')}
+		>
+			<Checkbox mini={true} bind:checked={checkedAll} on:change={() => toggleCheckAll('checkbox')}
+			></Checkbox>
 		</button>
+		{#each tagsCount as { tag, count }}
+			<button
+				class="tag"
+				class:selected={selectedTags.includes(tag)}
+				on:click|stopPropagation={() => selectTag(tag)}
+			>
+				{#if selectedTags.includes(tag) && isEditing}
+					<input
+						type="text"
+						class="tag-edit-input"
+						value={editedText}
+						on:keydown|preventDefault={(e) => {
+							e.key === 'Enter' && saveEditedTags();
+						}}
+						on:blur={saveEditedTags}
+					/>
+				{:else}
+					<div class="tag-text">
+						{tag}
+						<span class="tag-count">({count})</span>
+					</div>
+				{/if}
+			</button>
+		{/each}
+	</div>
+
+	<div class="selection-info">
 		{#if checkedItems.length > 0}
 			<div class="input-wrapper">
 				{#if isAddingTag && addOrEdit === 'add'}
@@ -166,7 +264,9 @@
 						<input
 							type="text"
 							class="tag-add-input"
+							placeholder="e.g. 'fresh', '1/9 Handmade''"
 							value={newTagText}
+							autofocus={true}
 							on:input={(e) => {
 								saveInput(e);
 							}}
@@ -176,6 +276,7 @@
 						<Button
 							icon={faSave}
 							size="xs"
+							shape="square"
 							variant="primary"
 							onclick={() => {
 								addTagToTasks();
@@ -184,6 +285,7 @@
 						<Button
 							icon={faTimes}
 							size="xs"
+							shape="square"
 							variant="danger"
 							onclick={() => {
 								isAddingTag = false;
@@ -212,94 +314,6 @@
 				</button>
 			</div>
 		{/if}
-
-		{#if selectedTags.length > 0}
-			<button class="clear-all" on:click={clearAll}>
-				<Fa icon={faTimes} size="sm" />
-				Clear selections
-			</button>
-			<button class="clear-all" on:click={editTags}>
-				<Fa icon={faPenToSquare} size="sm" />
-				Edit selected
-			</button>
-			<button class="clear-all" on:click={deleteSelectedTags}>
-				<Fa icon={faTrash} size="sm" />
-				Delete selected tags
-			</button>
-			{#if showDeleteTasks}
-				<button class="clear-all" on:click={deleteSelectedTasks}>
-					<Fa icon={faTrash} size="sm" />
-					Delete selected tasks
-				</button>
-			{/if}
-			<div class="input-wrapper">
-				{#if isAddingTag && addOrEdit === 'edit'}
-					<div class={isAddingTag ? 'input-container' : 'input-container hidden'}>
-						<input
-							type="text"
-							class="tag-add-input"
-							value={newTagText}
-							on:input={saveInput}
-							on:keydown={(e) => e.key === 'Enter' && addAdditionalTag()}
-							on:blur={addAdditionalTag}
-						/>
-						<Button
-							icon={faSave}
-							size="xs"
-							variant="primary"
-							onclick={() => {
-								addAdditionalTag();
-							}}
-						/>
-						<Button
-							icon={faTimes}
-							size="xs"
-							variant="danger"
-							onclick={() => {
-								isAddingTag = false;
-							}}
-						/>
-					</div>
-				{:else}
-					<button
-						class="clear-all"
-						on:click={() => {
-							startAddingTag('edit');
-						}}
-					>
-						<Fa icon={faPlus} size="sm" />
-						Add additional tags
-					</button>
-				{/if}
-			</div>
-		{/if}
-	</div>
-
-	<div class="tag-container">
-		{#each tagsCount as { tag, count }}
-			<button
-				class="tag"
-				class:selected={selectedTags.includes(tag)}
-				on:click|stopPropagation={() => selectTag(tag)}
-			>
-				{#if selectedTags.includes(tag) && isEditing}
-					<input
-						type="text"
-						class="tag-edit-input"
-						value={editedText}
-						on:keydown|preventDefault={(e) => {
-							e.key === 'Enter' && saveEditedTags();
-						}}
-						on:blur={saveEditedTags}
-					/>
-				{:else}
-					<div class="tag-text">
-						{tag}
-						<span class="tag-count">({count})</span>
-					</div>
-				{/if}
-			</button>
-		{/each}
 	</div>
 </div>
 
@@ -314,6 +328,7 @@
 	.input-container {
 		display: flex;
 		align-items: center;
+		gap: 5px;
 	}
 	.tag-add-input {
 		border: 1px solid var(--light-gray-4);
@@ -323,7 +338,6 @@
 		width: auto;
 		outline: none;
 		height: 10px;
-		margin: 0px 10px;
 		border-radius: 10px;
 		padding: 5px 10px;
 	}

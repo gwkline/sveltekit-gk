@@ -356,23 +356,17 @@ export const addTag = (objects: HasTag[], selectedTags: string[], newTag: string
 
 	objects = objects.map((object) => {
 		const objectHasSelectedTag = object.tags.some((t) => selectedTags.includes(t.name));
+		const objectAlreadyHasNewTag = object.tags.some((t) => t.name === newTag);
 
-		// If the "No Tags" tag is being edited and the object has no tags
 		if (selectedTags.includes('No Tags') && object.tags.length === 0) {
-			// Add the new tag
-			object.tags.push({ name: newTag });
-
-			// Add the object to the objectsToUpdate array
-			objectsToUpdate.push(object);
-		}
-		// If the object has a selected tag
-		else if (objectHasSelectedTag) {
-			// Update the name of the tag
+			if (!objectAlreadyHasNewTag) {
+				object.tags.push({ name: newTag });
+				objectsToUpdate.push(object);
+			}
+		} else if (objectHasSelectedTag && !objectAlreadyHasNewTag) {
 			object.tags = object.tags.map((t) =>
 				selectedTags.includes(t.name) ? { ...t, name: newTag } : t
 			);
-
-			// Add the object to the objectsToUpdate array
 			objectsToUpdate.push(object);
 		}
 

@@ -40,7 +40,7 @@ export const sidebarCollapsed = persistentStore('sidebarCollapsed', true);
 export const showTags = persistentStore('showTags', false);
 
 export const isLoading = writable<Record<string, boolean>>({});
-export const shiftPressed = writable(false);
+export const shiftPressed = persistentStore('shiftPressed', false);
 export const accessDenied = writable(false);
 export const networkError = writable(false);
 

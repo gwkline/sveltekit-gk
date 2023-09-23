@@ -209,7 +209,10 @@
 		let updatedTasks: Task[] = [];
 		verboseTasks.update((tasks) => {
 			return tasks.map((task) => {
-				if (checkedCheckoutTasks.includes(task.id)) {
+				if (
+					checkedCheckoutTasks.includes(task.id) &&
+					!task.tags.some((t) => t.name === newTagText)
+				) {
 					task.tags.push({ name: newTagText });
 					updatedTasks.push(task);
 				}
@@ -269,7 +272,10 @@
 			taskIds = [taskId];
 		} else {
 			let all = $shiftPressed || checkedCheckoutTasks.filter((item) => item != -1).length === 0;
-			taskIds = all ? filteredTasks.map((task) => task.id) : checkedCheckoutTasks;
+			let visibleItems = filteredTasks.map((task) => task.id);
+			let overlap = checkedCheckoutTasks.filter((item) => visibleItems.includes(item));
+
+			taskIds = all ? filteredTasks.map((task) => task.id) : overlap;
 		}
 
 		switch (state) {
@@ -403,6 +409,7 @@
 		}
 
 		tableData = tableDataShortenedTemp;
+		checkedCheckoutTasks = checkedCheckoutTasks.filter((item) => tableIds.includes(item));
 	}
 
 	// Sets the value of allTags and tagsCount
@@ -414,7 +421,16 @@
 			.filter((tag) => tag);
 
 		let filteredTags = filteredTasks
-			.map((task) => task.tags)
+			.map((task) => {
+				let tagSet = new Set();
+				return task.tags.filter((tag) => {
+					if (!tagSet.has(tag.name)) {
+						tagSet.add(tag.name);
+						return true;
+					}
+					return false;
+				});
+			})
 			.flat()
 			.map((tag) => tag.name)
 			.filter((tag) => tag);
@@ -460,12 +476,15 @@
 	// Sets the value of buttonTextCount
 	$: {
 		let items = checkedCheckoutTasks;
-		if ($shiftPressed || items.length == 0) {
-			buttonTextCount = 'All';
-		} else if (items.length == $verboseTasks.length) {
-			buttonTextCount = `All (${items.length})`;
+		let visibleItems = filteredTasks.map((task) => task.id);
+		let overlap = items.filter((item) => visibleItems.includes(item));
+
+		if ($shiftPressed || overlap.length == 0) {
+			buttonTextCount = `All (${visibleItems.length})`;
+		} else if (overlap.length == visibleItems.length) {
+			buttonTextCount = `All (${visibleItems.length})`;
 		} else {
-			buttonTextCount = `${items.length}`;
+			buttonTextCount = `${overlap.length}`;
 		}
 	}
 
@@ -550,6 +569,7 @@
 		/>
 	</Table>
 </div>
+
 <CheckoutNavBottom
 	{buttonTextCount}
 	on:searchValue={updateSearchValue}
