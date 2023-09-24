@@ -5,7 +5,7 @@
 	import Dropdown from '$lib/Dropdown.svelte';
 	import MultiDropdown from '$lib/MultiDropdown.svelte';
 	import Toggle from '$lib/Toggle.svelte';
-	import { faSave, faSearch, faStar } from '@fortawesome/free-solid-svg-icons';
+	import { faSave, faSearch, faStar, faX } from '@fortawesome/free-solid-svg-icons';
 	import { cleanAccount, getAccounts, getSchedules, makeRequest } from '../../helpers';
 	import { schedules, accounts, isLoading, checkoutSettings, verboseTasks } from '../../datastore';
 	import type { Account, OutboundTask, Tag, Task } from '../../types';
@@ -307,7 +307,18 @@
 	};
 </script>
 
-<h5 style="margin-bottom: 20px;">{isEditing ? 'Edit Tasks' : 'Create Tasks'}</h5>
+<div style="display: flex; justify-content: space-between; height: 20px; background: inherit">
+	<h5 style="margin-bottom: 20px;">{isEditing ? 'Edit Tasks' : 'Create Tasks'}</h5>
+	<Button
+		variant="default"
+		icon={faX}
+		size="sm"
+		shape="square"
+		shadow={false}
+		style="width: 20px;"
+		onclick={closeModal}
+	/>
+</div>
 <div class="row">
 	<div class="component-wrapper sku">
 		{#if isEditing}
@@ -388,6 +399,7 @@
 			placeholder="Enter Size Input"
 			bind:value={preferredSizeInput}
 			style="height: 36px; width: 100%;"
+			fullWidth={true}
 			variant="transparent"
 			disabled={isEditing && !editPreferredSizeInput ? true : false}
 		/>
@@ -415,6 +427,7 @@
 				placeholder="Enter Size Input"
 				bind:value={randomSizeInput}
 				style="height: 36px; width: 100%;"
+				fullWidth={true}
 				variant="transparent"
 				disabled={isEditing && !editRandomSizeInput ? true : false}
 			/>
@@ -534,11 +547,11 @@
 	</div>
 {/if}
 <div class="row justify-content-center">
-	<Button variant="primary" size="lg" onclick={closeModal}>Cancel</Button>
+	<Button variant="primary" size="md" onclick={closeModal}>Cancel</Button>
 	<Button
 		variant="primary"
 		alternate={true}
-		size="lg"
+		size="md"
 		icon={faSave}
 		onclick={handleSaveClicked}
 		isLoading={$isLoading['saveTasks']}>{saveButtonText()} {predictedTaskCount} tasks</Button
@@ -608,7 +621,9 @@
 
 	.justify-content-center {
 		margin-top: 30px;
-		justify-content: center;
+		justify-content: end;
+		margin-bottom: 0px;
+		gap: 20px;
 	}
 
 	.sizeRow {

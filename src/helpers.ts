@@ -9,7 +9,8 @@ import type {
 	SettingsKeys,
 	Profile,
 	Payment,
-	Win
+	Win,
+	NacTask
 } from './types';
 import { goto } from '$app/navigation';
 import { browser } from '$app/environment';
@@ -26,7 +27,8 @@ import {
 	payments,
 	proxy_lists,
 	wins,
-	profiles
+	profiles,
+	verboseNacTasks
 } from './datastore';
 import { get } from 'svelte/store';
 import {
@@ -216,14 +218,34 @@ export const getActivityTasks = () => {
 	makeRequest('get', 'http://127.0.0.1:23432/accounts/activity', null, (response) => {
 		const data = response.data;
 		const cleanedData = data.map((task: Task) => {
-			if (task.account.username === 'geek.mousers-01@icloud.com') {
-				console.log(task);
-			}
 			task['account'] = cleanAccount(task.account as Account);
 			return task;
 		});
 		verboseActivityTasks.set(cleanedData);
 	});
+};
+
+export const getNACTasks = () => {
+	makeRequest(
+		'get',
+		'http://127.0.0.1:23432/tasks?type=nike_account_creation',
+		null,
+		(response) => {
+			const data = response.data;
+			const cleanedData = data.map((task: NacTask) => {
+				task.proxy_list = {
+					id: task.proxy_list.id,
+					name: task.proxy_list.name,
+					previous_wins: task.proxy_list.previous_wins,
+					archived: task.proxy_list.archived
+				};
+
+				task['account'] = {};
+				return task;
+			});
+			verboseNacTasks.set(cleanedData);
+		}
+	);
 };
 
 export const getAccounts = () => {
@@ -325,7 +347,7 @@ export const cleanAccount = (account: Account): ShortAccount => {
 	};
 };
 
-type HasTag = Account | ShortAccount | Task | Profile | Payment | Win;
+type HasTag = Account | ShortAccount | Task | Profile | Payment | Win | NacTask;
 export const removeTags = (objects: HasTag[], tags: string[], url: string) => {
 	const objectsToUpdate: HasTag[] = [];
 

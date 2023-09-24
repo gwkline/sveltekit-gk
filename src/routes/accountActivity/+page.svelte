@@ -583,7 +583,7 @@
 
 {#if showConfirmationModal}
 	<ConfirmationModal
-		message={`You're about to clear sessions for ${buttonTextCount} of your tasks. This cannot be undone. Are you sure you want to continue?`}
+		message={`You're about to clear sessions for ${buttonTextCount.toLowerCase()} of your tasks. This cannot be undone. Are you sure you want to continue?`}
 		on:confirm={() => {
 			showConfirmationModal = false;
 			handleTask(new CustomEvent('delete'));

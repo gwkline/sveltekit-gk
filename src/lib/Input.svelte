@@ -17,6 +17,7 @@
 	export let title: string = '';
 	export let value: string = '';
 	export let disabled: boolean = false;
+	export let fullWidth: boolean = false;
 
 	function handleChange(event: Event) {
 		dispatch('input', (event.target as HTMLInputElement).value);
@@ -26,7 +27,7 @@
 	}
 
 	function handleKeyDown(event: KeyboardEvent) {
-		if (event.key === 'Enter') {
+		if (event.key === 'Enter' && type !== 'paragraph') {
 			(event.target as HTMLInputElement).blur();
 		}
 	}
@@ -37,7 +38,7 @@
 	href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css"
 />
 
-<div class="container">
+<div class="container" style={fullWidth ? 'width: 100%;' : ''}>
 	{#if title !== ''}
 		<label for={type} class="label">{title}</label>
 	{/if}
@@ -71,7 +72,6 @@
 	.container {
 		display: flex;
 		flex-direction: column;
-		width: 100%;
 		justify-content: start;
 	}
 	label {

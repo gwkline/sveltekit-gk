@@ -4,7 +4,7 @@
 	import Fa from 'svelte-fa';
 
 	export let value: string = '';
-	export let loggedIn: boolean;
+	export let loggedIn: boolean | null;
 </script>
 
 <div class="container">
@@ -12,7 +12,7 @@
 		<Tooltip text="Account has a valid session">
 			<Fa icon={faUser} color="var(--primary)" />
 		</Tooltip>
-	{:else}
+	{:else if loggedIn === false}
 		<Tooltip text="Account has a valid session">
 			<Fa icon={faUserSlash} color="var(--danger-red)" />
 		</Tooltip>
@@ -28,7 +28,7 @@
 	.container {
 		display: flex;
 		flex-direction: row;
-		align-items: center;
+		align-items: left;
 	}
 	.username {
 		display: flex;

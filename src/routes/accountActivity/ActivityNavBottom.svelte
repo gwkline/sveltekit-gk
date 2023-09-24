@@ -163,6 +163,7 @@
 		justify-content: space-evenly;
 		align-items: center;
 		padding: 5px 0px;
+		gap: 10px;
 	}
 
 	.button-group.left-button-group {

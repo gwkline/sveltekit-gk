@@ -45,7 +45,7 @@
 			page: 'accountCreation',
 			text: 'Account Creation',
 			icon: faFlask,
-			disabled: true
+			disabled: false
 		},
 		{
 			page: 'accounts',

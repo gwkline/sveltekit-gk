@@ -1,18 +1,25 @@
 <script lang="ts">
 	import Fa from 'svelte-fa';
 	import { stateColors, stateIconMapping } from '../helpers';
-	import type { ActivityState, ActivityTask, CheckoutState, Task } from '../types';
+	import type {
+		ActivityState,
+		ActivityTask,
+		CheckoutState,
+		NacState,
+		NacTask,
+		Task
+	} from '../types';
 	import { createEventDispatcher } from 'svelte';
 
-	export let tasks: Task[] | ActivityTask[] = [];
-	export let selectedState: CheckoutState | ActivityState | '' = '';
-	export let page: 'activity' | 'checkout' = 'checkout';
+	export let tasks: Task[] | ActivityTask[] | NacTask[] = [];
+	export let selectedState: CheckoutState | ActivityState | NacState | '' = '';
+	export let page: 'activity' | 'checkout' | 'nac' = 'checkout';
 
 	const dispatch = createEventDispatcher();
 	// Array of states in the desired order
 	const stateIsRelevant = (
-		state: CheckoutState | ActivityState,
-		page: 'checkout' | 'activity'
+		state: CheckoutState | ActivityState | NacState,
+		page: 'checkout' | 'activity' | 'nac'
 	): boolean => {
 		const checkoutStates: CheckoutState[] = [
 			'Ready',
@@ -33,11 +40,14 @@
 			'Error',
 			'Complete'
 		];
+		const nacStates: NacState[] = ['Ready', 'Queued', 'Starting', 'Running', 'Error', 'Complete'];
 
 		if (page === 'checkout') {
 			return checkoutStates.includes(state as CheckoutState);
-		} else {
+		} else if (page === 'activity') {
 			return activityStates.includes(state as ActivityState);
+		} else {
+			return nacStates.includes(state as NacState);
 		}
 	};
 
@@ -51,9 +61,10 @@
 		'AwaitingResults',
 		'Complete',
 		'Winning'
-	].filter((state) => stateIsRelevant(state as CheckoutState | ActivityState, page)) as (
+	].filter((state) => stateIsRelevant(state as CheckoutState | ActivityState | NacState, page)) as (
 		| CheckoutState
 		| ActivityState
+		| NacState
 	)[];
 
 	const capitalizeFirstLetter = (str: string) => {
@@ -66,14 +77,15 @@
 
 	type ActivityCounts = Record<ActivityState, number>;
 	type CheckoutCounts = Record<CheckoutState, number>;
+	type NacCounts = Record<NacState, number>;
 
 	function isActivityCounts(counts: ActivityCounts | CheckoutCounts): counts is ActivityCounts {
 		return (counts as ActivityCounts).Complete !== undefined;
 	}
 
 	const countTasksByState = (
-		tasks: Task[] | ActivityTask[]
-	): [CheckoutState | ActivityState, number][] => {
+		tasks: Task[] | ActivityTask[] | NacTask[]
+	): [CheckoutState | ActivityState | NacState, number][] => {
 		let counts: ActivityCounts | CheckoutCounts;
 
 		if (page === 'activity') {
@@ -85,7 +97,7 @@
 				Error: 0,
 				Complete: 0
 			} as ActivityCounts;
-		} else {
+		} else if (page === 'checkout') {
 			counts = {
 				Ready: 0,
 				Queued: 0,
@@ -97,6 +109,15 @@
 				Complete: 0,
 				Winning: 0
 			} as CheckoutCounts;
+		} else {
+			counts = {
+				Ready: 0,
+				Queued: 0,
+				Starting: 0,
+				Running: 0,
+				Error: 0,
+				Complete: 0
+			} as NacCounts;
 		}
 
 		tasks.forEach((task) => {
@@ -113,14 +134,14 @@
 	};
 
 	const getColor = (state: CheckoutState | ActivityState) => {
-		if (page === 'activity' && state === 'Complete') {
+		if ((page === 'activity' || page === 'nac') && state === 'Complete') {
 			return 'var(--success-green)';
 		} else {
 			return stateColors[state];
 		}
 	};
 
-	const selectState = (state: CheckoutState | ActivityState) => {
+	const selectState = (state: CheckoutState | ActivityState | NacState) => {
 		dispatch('selectedState', state);
 	};
 	$: orderedTasks = tasks

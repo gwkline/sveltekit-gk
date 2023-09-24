@@ -14,6 +14,7 @@
 		sidebarCollapsed,
 		validAccessToken,
 		verboseActivityTasks,
+		verboseNacTasks,
 		verboseTasks
 	} from '../datastore';
 	import type { Writable } from 'svelte/store';
@@ -74,6 +75,8 @@
 				store = verboseTasks;
 			} else if (newTaskData['type'] === 'AccountActivity') {
 				store = verboseActivityTasks;
+			} else if (newTaskData['type'] === 'AccountCreation') {
+				store = verboseNacTasks;
 			}
 
 			if (store) {

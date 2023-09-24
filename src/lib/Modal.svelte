@@ -67,7 +67,7 @@
 	.modal {
 		position: absolute;
 		left: 50%;
-		top: 400px;
+		top: 50%;
 		transform: translate(-50%, -50%);
 		z-index: 6;
 		display: flex;
@@ -88,8 +88,6 @@
 		display: flex;
 		flex-direction: column;
 		align-items: flex-start;
-		padding: 10px;
-		gap: 16px;
 		width: 100%;
 		flex: none;
 		order: 1;

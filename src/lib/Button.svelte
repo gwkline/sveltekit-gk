@@ -11,7 +11,7 @@
 	export let size: ButtonSizes = 'md';
 	export let icon: IconDefinition | null = null;
 	export let shape: Shape = 'rectangle';
-	export let outline: OutlineType = 'outline';
+	export let outline: OutlineType = 'noOutline';
 	export let onclick: (event: MouseEvent) => void = () => {};
 	export let alternate = false;
 	export let isLoading = false;
@@ -43,27 +43,25 @@
 	}
 </script>
 
-<div class="container">
-	<button {style} {disabled} class={classString} on:click|preventDefault={handleClick}>
-		{#if isLoading}
-			<Fa icon={faCog} {size} spin />
-		{:else}
-			{#if icon && !(size === 'xs' && resizable)}
-				<Fa {icon} {size} />
-			{/if}
-			{#if $$slots.default && !resizable && !(shape == 'circle' || shape == 'square')}
-				<slot />
-			{/if}
+<button {style} {disabled} class={classString} on:click|preventDefault={handleClick}>
+	{#if isLoading}
+		<Fa icon={faCog} {size} spin />
+	{:else}
+		{#if icon && !(size === 'xs' && resizable)}
+			<Fa {icon} {size} />
 		{/if}
-	</button>
-</div>
+		{#if $$slots.default && !resizable && !(shape == 'circle' || shape == 'square')}
+			<slot />
+		{/if}
+	{/if}
+</button>
 
 <style>
 	button {
 		width: auto;
 		font-family: Roboto;
 		font-style: normal;
-		border: 1px solid transparent;
+		border: 1px solid var(--light-gray-1);
 		border-radius: 6px;
 		cursor: pointer;
 		justify-content: center;
@@ -71,7 +69,9 @@
 		text-align: center;
 		display: flex;
 		text-wrap: nowrap;
-		background: var(--background);
+		background: var(--light-gray-1);
+		will-change: background-color, border-color, box-shadow;
+		transition: all 0.15s ease;
 	}
 
 	.outline {
@@ -79,7 +79,7 @@
 	}
 
 	.noOutline {
-		outline: none;
+		border: 1px solid var(--light-gray-1);
 	}
 
 	.circle {
@@ -146,10 +146,11 @@
 	}
 
 	button.default:hover,
+	button.danger:hover,
 	button.primary:hover,
 	button.success:hover,
 	button.warning:hover {
-		background: var(--light-gray-2, #f2f2f2);
+		border: 1px solid var(--gray, #f2f2f2);
 	}
 
 	button.danger:hover {
@@ -187,14 +188,14 @@
 		-webkit-box-shadow: inset 0px 0px 5px #b6b6b6;
 		-moz-box-shadow: inset 0px 0px 5px #b6b6b6;
 		box-shadow: inset 0px 0px 5px #b6b6b6;
-		outline: none;
+		border: solid 1px var(--light-gray-1);
 	}
 
 	button.danger:active {
 		-webkit-box-shadow: inset 0px 0px 7px #000e30;
 		-moz-box-shadow: inset 0px 0px 7px #000e30;
 		box-shadow: inset 0px 0px 7px #000e30;
-		outline: none;
+		border: solid 1px var(--light-gray-1);
 	}
 
 	@media (max-width: 1280px) {

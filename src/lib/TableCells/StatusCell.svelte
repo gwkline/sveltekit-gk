@@ -1,14 +1,14 @@
 <script lang="ts">
 	import Fa from 'svelte-fa';
 	import { stateColors, stateIconMapping } from '../../helpers';
-	import type { ActivityState, CheckoutState } from '../../types';
+	import type { ActivityState, CheckoutState, NacState } from '../../types';
 
 	export let value: string;
-	export let state: CheckoutState | ActivityState;
+	export let state: CheckoutState | ActivityState | NacState;
 	export let page: string;
 
-	const getColor = (state: CheckoutState | ActivityState) => {
-		if (page === 'activity' && state === 'Complete') {
+	const getColor = (state: CheckoutState | ActivityState | NacState) => {
+		if ((page === 'activity' || page === 'nac') && state === 'Complete') {
 			return 'var(--success-green)';
 		} else {
 			return stateColors[state];
