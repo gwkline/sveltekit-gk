@@ -8,7 +8,7 @@
 	import Fa from 'svelte-fa';
 	import { accounts, isLoading, proxy_lists, verboseNacTasks } from '../../datastore';
 	import { faCheck, faPlug, faSave, faX } from '@fortawesome/free-solid-svg-icons';
-	import { getProxies, makeRequest } from '../../helpers';
+	import { makeRequest } from '../../helpers';
 	import type { AxiosResponse } from 'axios';
 	import type { Tag } from '../../types';
 
@@ -21,8 +21,6 @@
 	};
 	export let isEditing = false;
 	export let isDuplicating = false;
-
-	getProxies();
 
 	let proxyListNames = $proxy_lists.map((list) => list.name);
 	let browsers = ['Default', 'Chrome', 'Chrome Beta', 'Edge', 'Brave'];

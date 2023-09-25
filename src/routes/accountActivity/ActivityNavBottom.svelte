@@ -75,7 +75,7 @@
 				}}
 				overlay={true}
 				size="lg"
-				title={`Run ${buttonTextCount} Account Ops`}
+				title={`Run Account Ops ${buttonTextCount}`}
 			/>
 			<Button
 				variant="danger"
@@ -84,8 +84,9 @@
 				size="md"
 				icon={faTrash}
 				resizable={false}
-				style="button">Clear {buttonTextCount} Sessions</Button
-			>
+				style="button"
+				>Clear Sessions {buttonTextCount}
+			</Button>
 		</div>
 		<div class="button-group">
 			<Button
@@ -97,7 +98,7 @@
 				resizable={false}
 				alternate={true}
 				outline="outline"
-				style="button">Start {buttonTextCount} Tasks</Button
+				style="button">Start {buttonTextCount}</Button
 			>
 
 			<Button
@@ -109,7 +110,7 @@
 				resizable={false}
 				alternate={true}
 				outline="outline"
-				style="button">Stop {buttonTextCount} Tasks</Button
+				style="button">Stop {buttonTextCount}</Button
 			>
 		</div>
 		<div class="button-group right-button-group">
@@ -124,7 +125,7 @@
 				}}
 				overlay={true}
 				size="lg"
-				title={`Set ${buttonTextCount} Modes`}
+				title={`Set Modes ${buttonTextCount}`}
 			/>
 
 			<Dropdown
@@ -137,7 +138,7 @@
 					scheduleValue = '';
 				}}
 				overlay={true}
-				title={`Set ${buttonTextCount} Schedules`}
+				title={`Set Schedules ${buttonTextCount}`}
 				size="lg"
 			/>
 		</div>

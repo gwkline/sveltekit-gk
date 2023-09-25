@@ -12,8 +12,6 @@
 		updateSortState,
 		updateSelectedTags,
 		saveSettings,
-		getSettings,
-		getCheckoutTasks,
 		removeTags,
 		addTag
 	} from '../../helpers';
@@ -262,7 +260,7 @@
 	const handleTask = (e: CustomEvent) => {
 		let state = e.type as states;
 		let taskId: number | null = e.detail?.id || null;
-		isLoading.set({ [`${state}${taskId}`]: true });
+		isLoading.set({ [`${state}${taskId}`]: true, confirmation: true });
 
 		let taskIds: number[];
 		if (taskId) {
@@ -280,6 +278,16 @@
 				makeRequest('post', `http://127.0.0.1:23432/tasks/start?type=undefined`, taskIds, () => {
 					isLoading.set({ [`${state}${taskId}`]: false });
 				});
+				break;
+			case 'focus':
+				makeRequest(
+					'get',
+					`http://127.0.0.1:23432/task/${taskId}/focus?type=undefined`,
+					taskIds,
+					() => {
+						isLoading.set({ [`${state}${taskId}`]: false });
+					}
+				);
 				break;
 			case 'stop':
 				taskIds = taskIds.filter((id) => {
@@ -304,7 +312,8 @@
 
 					// Reset checkedCheckoutTasks
 					checkedCheckoutTasks = [];
-					isLoading.set({ [`${state}${taskId}`]: false });
+					isLoading.set({ [`${state}${taskId}`]: false, confirmation: false });
+					showConfirmationModal = false;
 				});
 				break;
 			case 'edit':
@@ -476,12 +485,10 @@
 		let visibleItems = filteredTasks.map((task) => task.id);
 		let overlap = items.filter((item) => visibleItems.includes(item));
 
-		if ($shiftPressed || overlap.length == 0) {
-			buttonTextCount = `All (${visibleItems.length})`;
-		} else if (overlap.length == visibleItems.length) {
-			buttonTextCount = `All (${visibleItems.length})`;
+		if ($shiftPressed || overlap.length == 0 || overlap.length == visibleItems.length) {
+			buttonTextCount = `All`;
 		} else {
-			buttonTextCount = `${overlap.length}`;
+			buttonTextCount = `(${overlap.length})`;
 		}
 	}
 
@@ -551,6 +558,7 @@
 		{headers}
 		{checkedAll}
 		{sortState}
+		checkedCount={checkedCheckoutTasks.length}
 		on:sort={handleSort}
 		on:checkedAll={handleCheckedAll}
 	>
@@ -563,6 +571,7 @@
 			on:start={handleTask}
 			on:edit={handleTask}
 			on:stop={handleTask}
+			on:focus={handleTask}
 		/>
 	</Table>
 </div>
@@ -587,9 +596,8 @@
 
 {#if showConfirmationModal}
 	<ConfirmationModal
-		message={`You're about to delete ${buttonTextCount} of your tasks. This cannot be undone. Are you sure you want to continue?`}
+		message={`You're about to delete ${buttonTextCount.toLowerCase()} of your tasks. This cannot be undone. Are you sure you want to continue?`}
 		on:confirm={() => {
-			showConfirmationModal = false;
 			handleTask(new CustomEvent('delete'));
 		}}
 		on:cancel={() => {
@@ -600,6 +608,8 @@
 
 <style>
 	.table-container {
+		margin-top: 10px;
+
 		flex-grow: 1;
 		overflow-y: auto;
 		scroll-behavior: smooth;

@@ -206,7 +206,7 @@
 		min-height: 20px;
 		flex-shrink: 0;
 		margin: 10px 0px;
-		outline: 1px solid var(--light-gray-3);
+		outline: 1px solid var(--light-gray-4);
 		overflow: hidden;
 	}
 

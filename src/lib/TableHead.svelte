@@ -9,6 +9,7 @@
 	export let checkedAll: boolean;
 	export let sortState: SortState;
 	export let tableCount: number;
+	export let checkedCount: number = 0;
 
 	const dispatch = createEventDispatcher();
 
@@ -24,7 +25,14 @@
 <thead>
 	<tr>
 		<th class="checkbox">
-			<Checkbox checked={checkedAll} on:change={updateCheckedAll} />
+			<div class="checkbox-wrap">
+				<Checkbox checked={checkedAll} on:change={updateCheckedAll} />
+			</div>
+			{#if checkedCount > 0}
+				<div style="width: 10px; text-align: center; font-size:12px;">
+					({checkedCount})
+				</div>
+			{/if}
 		</th>
 		{#each headers as columnHeading}
 			<th class="column-heading" on:click={() => updateSortState(columnHeading)}>
@@ -52,6 +60,9 @@
 	.task-count {
 		text-align: end;
 		padding-right: 20px;
+	}
+	.checkbox-wrap {
+		padding-right: 23.5px;
 	}
 	thead {
 		position: sticky;
@@ -84,7 +95,9 @@
 		white-space: nowrap;
 	}
 	.checkbox {
-		padding-left: 50px;
+		padding-left: 15px;
+		display: flex;
+		align-items: center;
 	}
 
 	.column-heading {

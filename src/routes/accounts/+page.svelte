@@ -8,10 +8,8 @@
 		makeRequest,
 		updateSortState,
 		updateSelectedTags,
-		getSettings,
 		removeTags,
 		addTag,
-		getAccounts,
 		cleanDate
 	} from '../../helpers';
 	import { accounts, showTags, shiftPressed, isLoading } from '../../datastore';
@@ -370,12 +368,10 @@
 	// Sets the value of buttonTextCount
 	$: {
 		let items = checkedCheckoutTasks;
-		if ($shiftPressed || items.length == 0) {
+		if ($shiftPressed || items.length == 0 || items.length == filteredAccounts.length) {
 			buttonTextCount = 'All';
-		} else if (items.length == filteredAccounts.length) {
-			buttonTextCount = `All (${items.length})`;
 		} else {
-			buttonTextCount = `${items.length}`;
+			buttonTextCount = `(${items.length})`;
 		}
 	}
 

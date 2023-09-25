@@ -3,7 +3,7 @@
 	import UpdateBar from '$lib/UpdateBar.svelte';
 	import ProxyNav from './ScheduleNav.svelte';
 	import ConfirmationModal from '$lib/ConfirmationModal.svelte';
-	import { makeRequest, updateSortState, getSettings, getSchedules } from '../../helpers';
+	import { makeRequest, updateSortState } from '../../helpers';
 	import { shiftPressed, isLoading, schedules } from '../../datastore';
 	import type {
 		HeaderConfigType,
@@ -188,12 +188,10 @@
 	// Sets the value of buttonTextCount
 	$: {
 		let items = checkedCheckoutTasks;
-		if ($shiftPressed || items.length == 0) {
+		if ($shiftPressed || items.length == 0 || items.length == filteredSchedules.length) {
 			buttonTextCount = 'All';
-		} else if (items.length == filteredSchedules.length) {
-			buttonTextCount = `All (${items.length})`;
 		} else {
-			buttonTextCount = `${items.length}`;
+			buttonTextCount = `(${items.length})`;
 		}
 	}
 

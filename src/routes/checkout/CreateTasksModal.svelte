@@ -6,7 +6,7 @@
 	import MultiDropdown from '$lib/MultiDropdown.svelte';
 	import Toggle from '$lib/Toggle.svelte';
 	import { faSave, faSearch, faStar, faX } from '@fortawesome/free-solid-svg-icons';
-	import { cleanAccount, getAccounts, getSchedules, makeRequest } from '../../helpers';
+	import { cleanAccount, makeRequest } from '../../helpers';
 	import { schedules, accounts, isLoading, checkoutSettings, verboseTasks } from '../../datastore';
 	import type { Account, OutboundTask, Tag, Task } from '../../types';
 
@@ -240,10 +240,6 @@
 		isEditing = false;
 		isDuplicating = false;
 	};
-
-	getSchedules();
-
-	getAccounts();
 
 	$: {
 		allAccountTags = Array.from(

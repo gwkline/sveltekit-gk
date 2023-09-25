@@ -10,9 +10,6 @@
 		updateSortState,
 		updateSelectedTags,
 		saveSettings,
-		getSchedules,
-		getSettings,
-		getActivityTasks,
 		removeTags,
 		addTag
 	} from '../../helpers';
@@ -261,6 +258,16 @@
 					isLoading.set({ [`${state}${taskId}`]: false });
 				});
 				break;
+			case 'focus':
+				makeRequest(
+					'get',
+					`http://127.0.0.1:23432/task/${taskId}/focus?type=activity`,
+					taskIds,
+					() => {
+						isLoading.set({ [`${state}${taskId}`]: false });
+					}
+				);
+				break;
 			case 'stop':
 				taskIds = taskIds.filter((id) => {
 					const task = $verboseActivityTasks.find((task: ActivityTask) => task.id === id);
@@ -476,12 +483,10 @@
 	// Sets the value of buttonTextCount
 	$: {
 		let items = checkedCheckoutTasks;
-		if ($shiftPressed || items.length == 0) {
-			buttonTextCount = 'All';
-		} else if (items.length == filteredTasks.length) {
-			buttonTextCount = `All (${items.length})`;
+		if ($shiftPressed || items.length == 0 || items.length == filteredTasks.length) {
+			buttonTextCount = `All`;
 		} else {
-			buttonTextCount = `${items.length}`;
+			buttonTextCount = `(${items.length})`;
 		}
 	}
 
@@ -557,6 +562,7 @@
 			on:checked={handleChecked}
 			on:start={handleTask}
 			on:stop={handleTask}
+			on:focus={handleTask}
 			on:editActivity={handleTask}
 			page="activity"
 		/>
@@ -595,5 +601,6 @@
 		flex-grow: 1;
 		overflow-y: auto;
 		scroll-behavior: smooth;
+		margin-top: 10px;
 	}
 </style>

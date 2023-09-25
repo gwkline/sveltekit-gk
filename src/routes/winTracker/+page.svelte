@@ -8,10 +8,8 @@
 		makeRequest,
 		updateSortState,
 		updateSelectedTags,
-		getSettings,
 		removeTags,
-		addTag,
-		getWins
+		addTag
 	} from '../../helpers';
 	import { showTags, shiftPressed, isLoading, wins } from '../../datastore';
 	import type {
@@ -362,12 +360,10 @@
 	// Sets the value of buttonTextCount
 	$: {
 		let items = checkedCheckoutTasks;
-		if ($shiftPressed || items.length == 0) {
+		if ($shiftPressed || items.length == 0 || items.length == filteredWins.length) {
 			buttonTextCount = 'All';
-		} else if (items.length == filteredWins.length) {
-			buttonTextCount = `All (${items.length})`;
 		} else {
-			buttonTextCount = `${items.length}`;
+			buttonTextCount = `(${items.length})`;
 		}
 	}
 

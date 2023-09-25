@@ -11,8 +11,6 @@
 		updateSortState,
 		updateSelectedTags,
 		saveSettings,
-		getSettings,
-		getNACTasks,
 		removeTags,
 		addTag
 	} from '../../helpers';
@@ -284,6 +282,16 @@
 					}
 				);
 				break;
+			case 'focus':
+				makeRequest(
+					'get',
+					`http://127.0.0.1:23432/task/${taskId}/focus?type=nike_account_creation`,
+					taskIds,
+					() => {
+						isLoading.set({ [`${state}${taskId}`]: false });
+					}
+				);
+				break;
 			case 'stop':
 				taskIds = taskIds.filter((id) => {
 					const task = $verboseNacTasks.find((task: NacTask) => task.id === id);
@@ -490,12 +498,10 @@
 		let visibleItems = filteredTasks.map((task) => task.id);
 		let overlap = items.filter((item) => visibleItems.includes(item));
 
-		if ($shiftPressed || overlap.length == 0) {
-			buttonTextCount = `All (${visibleItems.length})`;
-		} else if (overlap.length == visibleItems.length) {
-			buttonTextCount = `All (${visibleItems.length})`;
+		if ($shiftPressed || overlap.length == 0 || overlap.length == visibleItems.length) {
+			buttonTextCount = `All`;
 		} else {
-			buttonTextCount = `${overlap.length}`;
+			buttonTextCount = `(${overlap.length})`;
 		}
 	}
 
@@ -576,6 +582,7 @@
 			on:start={handleTask}
 			on:edit={handleTask}
 			on:stop={handleTask}
+			on:focus={handleTask}
 		/>
 	</Table>
 </div>

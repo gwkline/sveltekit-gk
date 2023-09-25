@@ -90,7 +90,7 @@
 		flex-direction: column;
 		justify-content: center;
 		margin-left: 20px;
-		width: calc(100% - 100px);
+		width: 90%;
 	}
 
 	.products-container {

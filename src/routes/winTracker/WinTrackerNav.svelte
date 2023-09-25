@@ -66,7 +66,7 @@
 					isLoading={$isLoading.changeActivityMode}
 					onclick={() => handleTaskAction('editMode')}
 					resizable={false}
-					style="button">Edit {buttonTextCount} Payments</Button
+					style="button">Edit {buttonTextCount}</Button
 				>
 			</div>
 		</div>

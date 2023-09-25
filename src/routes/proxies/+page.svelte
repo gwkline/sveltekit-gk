@@ -3,7 +3,7 @@
 	import UpdateBar from '$lib/UpdateBar.svelte';
 	import ProxyNav from './ProxyNav.svelte';
 	import ConfirmationModal from '$lib/ConfirmationModal.svelte';
-	import { makeRequest, updateSortState, getSettings, getProxies } from '../../helpers';
+	import { makeRequest, updateSortState } from '../../helpers';
 	import { shiftPressed, isLoading, proxy_lists } from '../../datastore';
 	import type {
 		HeaderConfigType,
@@ -190,12 +190,10 @@
 	// Sets the value of buttonTextCount
 	$: {
 		let items = checkedCheckoutTasks;
-		if ($shiftPressed || items.length == 0) {
+		if ($shiftPressed || items.length == 0 || items.length == filteredProxyLists.length) {
 			buttonTextCount = 'All';
-		} else if (items.length == filteredProxyLists.length) {
-			buttonTextCount = `All (${items.length})`;
 		} else {
-			buttonTextCount = `${items.length}`;
+			buttonTextCount = `(${items.length})`;
 		}
 	}
 

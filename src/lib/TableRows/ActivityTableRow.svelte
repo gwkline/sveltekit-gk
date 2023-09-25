@@ -68,6 +68,7 @@
 				on:start
 				on:stop
 				on:edit
+				on:focus
 			/>
 		</td>
 	{/if}

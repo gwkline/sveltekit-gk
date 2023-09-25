@@ -54,7 +54,7 @@
 				size="md"
 				icon={faPlus}
 				resizable={false}
-				style="button">Create Tasks</Button
+				style="button">Create</Button
 			>
 
 			<Button
@@ -64,7 +64,7 @@
 				size="md"
 				icon={faTrash}
 				resizable={false}
-				style="button">Delete {buttonTextCount} Tasks</Button
+				style="button">Delete {buttonTextCount}</Button
 			>
 		</div>
 		<div class="button-group">
@@ -76,7 +76,7 @@
 				size="md"
 				icon={faPlay}
 				resizable={false}
-				style="button">Start {buttonTextCount} Tasks</Button
+				style="button">Start {buttonTextCount}</Button
 			>
 
 			<Button
@@ -87,7 +87,7 @@
 				size="md"
 				icon={faStop}
 				resizable={false}
-				style="button">Stop {buttonTextCount} Tasks</Button
+				style="button">Stop {buttonTextCount}</Button
 			>
 		</div>
 		<div class="button-group right-button-group">
@@ -97,7 +97,7 @@
 				icon={faPen}
 				onclick={() => handleTaskAction('edit')}
 				resizable={false}
-				style="button">Edit {buttonTextCount} Tasks</Button
+				style="button">Edit {buttonTextCount}</Button
 			>
 
 			<Button
@@ -106,7 +106,7 @@
 				icon={faCopy}
 				onclick={() => handleTaskAction('duplicate')}
 				resizable={false}
-				style="button">Duplicate {buttonTextCount} Tasks</Button
+				style="button">Duplicate {buttonTextCount}</Button
 			>
 		</div>
 	</div>

@@ -193,16 +193,15 @@
 	.master-container {
 		position: relative;
 		right: 0;
-		margin-left: 200px;
+		margin-left: 170px;
 		height: 100%;
-		width: calc(100% - 230px);
 		display: flex;
 		flex-direction: column;
+		margin-right: 10px;
 	}
 
 	.master-container.collapsed {
 		margin-left: 50px;
-		width: calc(100% - 60px);
 	}
 
 	.border-card {

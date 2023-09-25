@@ -509,6 +509,7 @@ export type states =
 	| 'duplicate'
 	| 'edit'
 	| 'create'
+	| 'focus'
 	| 'startIndiv'
 	| 'stopIndiv'
 	| 'deleteIndiv'
