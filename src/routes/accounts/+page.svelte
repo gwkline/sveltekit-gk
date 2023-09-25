@@ -60,9 +60,6 @@
 		Wins: (account) => account.previous_wins.number_of_wins.toString()
 	};
 
-	getSettings();
-	getAccounts();
-
 	const handleSort = (e: CustomEvent) => {
 		sortState = updateSortState(e, sortState);
 	};

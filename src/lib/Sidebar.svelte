@@ -99,7 +99,7 @@
 </script>
 
 <div class="sidebar-container">
-	<div class={$sidebarCollapsed ? 'collapsed' : 'sidebar'}>
+	<div class={$sidebarCollapsed ? 'collapsed' : 'sidebar'} style="view-transition-name: nav ;">
 		<ul>
 			<li style="margin-top: 20px; margin-bottom: 20px;">
 				<SidebarElement

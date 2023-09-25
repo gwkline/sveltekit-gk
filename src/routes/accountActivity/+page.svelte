@@ -73,10 +73,6 @@
 		Status: (task: ActivityTask) => task?.status ?? ''
 	};
 
-	getSettings();
-	getActivityTasks();
-	getSchedules();
-
 	const handleSort = (e: CustomEvent) => {
 		sortState = updateSortState(e, sortState);
 	};

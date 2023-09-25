@@ -62,9 +62,6 @@
 		return maskedSection + lastFour;
 	};
 
-	getSettings();
-	getPayments();
-
 	const handleSort = (e: CustomEvent) => {
 		sortState = updateSortState(e, sortState);
 	};

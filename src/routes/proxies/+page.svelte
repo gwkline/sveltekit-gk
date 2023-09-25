@@ -42,9 +42,6 @@
 		Wins: (proxy_list) => proxy_list.previous_wins.number_of_wins.toString()
 	};
 
-	getSettings();
-	getProxies();
-
 	const handleSort = (e: CustomEvent) => {
 		sortState = updateSortState(e, sortState);
 	};

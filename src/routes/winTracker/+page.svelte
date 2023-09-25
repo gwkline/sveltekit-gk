@@ -60,9 +60,6 @@
 		Tracking: (win) => win.tracking_number
 	};
 
-	getSettings();
-	getWins();
-
 	const handleSort = (e: CustomEvent) => {
 		sortState = updateSortState(e, sortState);
 	};

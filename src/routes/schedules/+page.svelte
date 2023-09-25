@@ -42,9 +42,6 @@
 		Interval: (schedule) => schedule.interval_seconds.toString()
 	};
 
-	getSettings();
-	getSchedules();
-
 	const handleSort = (e: CustomEvent) => {
 		sortState = updateSortState(e, sortState);
 	};

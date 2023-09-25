@@ -63,9 +63,6 @@
 		Status: (task: NacTask) => task?.status ?? ''
 	};
 
-	getSettings();
-	getNACTasks();
-
 	const handleSort = (e: CustomEvent) => {
 		sortState = updateSortState(e, sortState);
 	};

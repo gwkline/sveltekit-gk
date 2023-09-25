@@ -65,9 +65,6 @@
 		Status: (task: Task) => task?.status ?? ''
 	};
 
-	getSettings();
-	getCheckoutTasks();
-
 	const handleSort = (e: CustomEvent) => {
 		sortState = updateSortState(e, sortState);
 	};
