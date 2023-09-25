@@ -45,7 +45,7 @@
 			page: 'accountCreation',
 			text: 'Account Creation',
 			icon: faFlask,
-			disabled: true
+			disabled: false
 		},
 		{
 			page: 'accounts',
@@ -98,34 +98,37 @@
 	];
 </script>
 
-<div class="sidebar-container">
-	<div class={$sidebarCollapsed ? 'collapsed' : 'sidebar'}>
-		<ul>
-			<li style="margin-top: 20px; margin-bottom: 20px;">
+<div
+	style="view-transition-name: nav ;"
+	class={$sidebarCollapsed ? 'sidebar collapsed' : 'sidebar full'}
+>
+	<ul>
+		<li style="margin-top: 20px; margin-bottom: 20px;">
+			<SidebarElement
+				icon={null}
+				collapsed={$sidebarCollapsed}
+				page={''}
+				image_src="../purplelogo.png"
+				style="justify-content: center; !important"
+				disabled={false}
+			/>
+		</li>
+		{#each sidebar as item}
+			<li
+				aria-current={url.includes(item.page) ? 'page' : undefined}
+				class={url.includes(item.page) ? 'active' : ''}
+			>
 				<SidebarElement
-					icon={null}
+					text={item.text}
+					page={item.page}
+					icon={item.icon}
 					collapsed={$sidebarCollapsed}
-					page={''}
-					image_src="../purplelogo.png"
-					disabled={false}
+					disabled={item.disabled}
 				/>
 			</li>
-			{#each sidebar as item}
-				<li>
-					<div class={url.includes(item.page) ? 'active' : ''}>
-						<SidebarElement
-							text={item.text}
-							page={item.page}
-							icon={item.icon}
-							collapsed={$sidebarCollapsed}
-							disabled={item.disabled}
-						/>
-					</div>
-				</li>
-			{/each}
-		</ul>
-	</div>
-	<div class={$sidebarCollapsed ? 'collapse-collapsed' : 'collapse'}>
+		{/each}
+	</ul>
+	<div>
 		<SidebarElement
 			text={'Collapse'}
 			icon={$sidebarCollapsed ? faArrowRight : faArrowLeft}
@@ -135,9 +138,6 @@
 			onclick={toggle}
 			disabled={false}
 		/>
-	</div>
-
-	<div class={$sidebarCollapsed ? 'settings-collapsed' : 'settings'}>
 		<div class={url.includes('settings') ? 'active' : ''}>
 			<SidebarElement
 				text={'Settings'}
@@ -152,13 +152,26 @@
 </div>
 
 <style>
-	* {
-		list-style: none;
+	.sidebar {
 		text-decoration: none;
-		margin: 0;
-		padding: 0;
-		z-index: 4;
 		background-color: var(--sidebar-background);
+		display: flex;
+		flex-direction: column;
+		justify-content: space-between;
+		height: 100vh;
+		top: 0;
+		left: 0;
+		position: fixed;
+		border-right: 1px solid var(--light-gray-2);
+		background-color: var(--sidebar-background);
+		z-index: 6;
+	}
+	.full {
+		width: 170px;
+	}
+
+	.collapsed {
+		width: 50px;
 	}
 
 	::-webkit-scrollbar {
@@ -166,69 +179,36 @@
 		background: transparent; /* make scrollbar transparent */
 	}
 
-	.sidebar {
-		position: fixed;
-		top: 0;
-		left: 0;
-		width: 200px;
-		height: 100vh;
-		border-right: 1px solid var(--light-gray-2);
-		background-color: var(--sidebar-background);
+	ul {
+		position: relative;
+		padding: 0;
+		margin: 0;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		list-style: none;
+		background-size: contain;
+		flex-direction: column;
 	}
 
-	.collapsed {
-		position: fixed;
-		top: 0;
-		left: 0;
-		width: 50px;
-		height: 100vh;
-		border-right: 1px solid var(--light-gray-2);
-	}
-
-	.active::after,
-	.active::before {
+	li {
+		position: relative;
 		height: 100%;
-		content: ' ';
+		width: 100%;
+		margin: 2px 0;
+	}
+
+	li[aria-current='page']::before {
+		content: '';
+		width: 100%;
+		height: 100%;
 		position: absolute;
 		top: 0;
-		width: 4px;
-		border-radius: 0px 6px 6px 0px;
-		height: 100%;
-	}
-
-	.active::before {
-		left: 0;
-		background-color: var(--primary);
-	}
-
-	ul li div {
-		display: block;
-		position: relative;
-	}
-
-	ul {
-		height: 80%;
-	}
-
-	.settings {
-		bottom: 0;
-		position: fixed;
-		width: 200px;
-	}
-	.settings-collapsed {
-		bottom: 0;
-		position: fixed;
-		width: 50px;
-	}
-
-	.collapse {
-		bottom: 45px;
-		position: fixed;
-		width: 200px;
-	}
-	.collapse-collapsed {
-		bottom: 45px;
-		position: fixed;
-		width: 50px;
+		left: 0px;
+		outline: 2px solid var(--primary);
+		view-transition-name: active-page;
+		border-radius: 0 6px 6px 0;
+		z-index: -1;
+		pointer-events: none;
 	}
 </style>

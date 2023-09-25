@@ -8,10 +8,8 @@
 		makeRequest,
 		updateSortState,
 		updateSelectedTags,
-		getSettings,
 		removeTags,
-		addTag,
-		getPayments
+		addTag
 	} from '../../helpers';
 	import { showTags, shiftPressed, isLoading, payments } from '../../datastore';
 	import type {
@@ -23,6 +21,7 @@
 		states
 	} from '../../types';
 	import PaymentTableRow from '$lib/TableRows/PaymentTableRow.svelte';
+	import BaseTableRow from '$lib/TableRows/BaseTableRow.svelte';
 
 	let searchValue: string = '';
 	let sortState: SortState = { column: null, direction: 0 };
@@ -36,7 +35,7 @@
 	let lastChecked: number | null = null;
 	let secondLastChecked: number | null = null;
 	let checkedAll: boolean = false;
-	let checkedCheckoutTasks: number[] = [];
+	let checkedItemIds: number[] = [];
 	let totalSelectedTasks: number = 0;
 
 	let filteredPayments: Payment[] = [];
@@ -61,9 +60,6 @@
 		const maskedSection = '*'.repeat(cardNumber.length - 4);
 		return maskedSection + lastFour;
 	};
-
-	getSettings();
-	getPayments();
 
 	const handleSort = (e: CustomEvent) => {
 		sortState = updateSortState(e, sortState);
@@ -163,7 +159,7 @@
 		let updatedPayments: Payment[] = [];
 		payments.update((payments) => {
 			return payments.map((payment) => {
-				if (checkedCheckoutTasks.includes(payment.id)) {
+				if (checkedItemIds.includes(payment.id)) {
 					payment.tags.push({ name: newTagText });
 					updatedPayments.push(payment);
 				}
@@ -181,13 +177,13 @@
 		secondLastChecked = lastChecked;
 		lastChecked = itemId;
 
-		let arrayOfTaskIndexes = checkedCheckoutTasks;
-		if (checkedCheckoutTasks.includes(itemId)) {
+		let arrayOfTaskIndexes = checkedItemIds;
+		if (checkedItemIds.includes(itemId)) {
 			arrayOfTaskIndexes.splice(arrayOfTaskIndexes.indexOf(itemId), 1);
 		} else {
 			arrayOfTaskIndexes.push(itemId);
 		}
-		checkedCheckoutTasks = arrayOfTaskIndexes;
+		checkedItemIds = arrayOfTaskIndexes;
 
 		if ($shiftPressed && lastChecked === itemId && secondLastChecked !== null) {
 			let start = Math.min(lastChecked, secondLastChecked);
@@ -195,8 +191,8 @@
 
 			for (let i = start + 1; i < end; i++) {
 				let taskWithThisId = $payments.find((payment) => payment.id === i);
-				if (taskWithThisId && !checkedCheckoutTasks.includes(taskWithThisId.id)) {
-					checkedCheckoutTasks.push(i);
+				if (taskWithThisId && !checkedItemIds.includes(taskWithThisId.id)) {
+					checkedItemIds.push(i);
 				}
 			}
 		}
@@ -207,9 +203,9 @@
 
 		if (e.detail.checked) {
 			let allIds = filteredPayments.map((payment) => payment.id);
-			checkedCheckoutTasks = allIds;
+			checkedItemIds = allIds;
 		} else {
-			checkedCheckoutTasks = [];
+			checkedItemIds = [];
 		}
 	};
 
@@ -222,8 +218,8 @@
 		if (paymentId) {
 			paymentIds = [paymentId];
 		} else {
-			let all = $shiftPressed || checkedCheckoutTasks.filter((item) => item != -1).length === 0;
-			paymentIds = all ? filteredPayments.map((payment) => payment.id) : checkedCheckoutTasks;
+			let all = $shiftPressed || checkedItemIds.filter((item) => item != -1).length === 0;
+			paymentIds = all ? filteredPayments.map((payment) => payment.id) : checkedItemIds;
 		}
 
 		switch (state) {
@@ -370,13 +366,11 @@
 
 	// Sets the value of buttonTextCount
 	$: {
-		let items = checkedCheckoutTasks;
-		if ($shiftPressed || items.length == 0) {
+		let items = checkedItemIds;
+		if ($shiftPressed || items.length == 0 || items.length == filteredPayments.length) {
 			buttonTextCount = 'All';
-		} else if (items.length == filteredPayments.length) {
-			buttonTextCount = `All (${items.length})`;
 		} else {
-			buttonTextCount = `${items.length}`;
+			buttonTextCount = `(${items.length})`;
 		}
 	}
 
@@ -415,7 +409,7 @@
 	<Tags
 		{tagsCount}
 		{selectedTags}
-		checkedItems={checkedCheckoutTasks}
+		checkedItems={checkedItemIds}
 		on:selectTag={handleSelectTag}
 		on:addTagToTasks={addTagToPayment}
 		on:deleteSelectedTags={deleteSelectedTags}
@@ -434,14 +428,21 @@
 		on:sort={handleSort}
 		on:checkedAll={handleCheckedAll}
 	>
-		<PaymentTableRow
+		<BaseTableRow
 			{row}
-			checked={checkedCheckoutTasks.includes(row.itemId)}
+			let:column
+			let:value
+			page="payments"
+			checked={checkedItemIds.includes(row.itemId)}
 			on:checked={handleChecked}
+			on:delete={handleTask}
 			on:start={handleTask}
+			on:edit={handleTask}
 			on:stop={handleTask}
-			on:editActivity={handleTask}
-		/>
+			on:focus={handleTask}
+		>
+			<PaymentTableRow {value} {column} />
+		</BaseTableRow>
 	</Table>
 </div>
 

@@ -10,10 +10,10 @@
 </script>
 
 <div class="count-content">
-	<div style="width: 10px; text-align: right; font-size:12px;">{index}</div>
 	<div class="checkbox">
 		<Checkbox bind:checked on:change />
 	</div>
+	<div style="width: 10px; text-align: right; font-size:12px; ">#{index}</div>
 	<div class="icons">
 		{#if schedule && schedule !== 0}
 			<Tooltip text="testing">
@@ -31,12 +31,13 @@
 		gap: 10px;
 	}
 	.checkbox {
-		padding-left: 23.5px;
+		padding-right: 23.5px;
 	}
 
 	.count-content {
 		display: flex;
 		align-items: center;
 		justify-content: start;
+		padding-left: 10px;
 	}
 </style>

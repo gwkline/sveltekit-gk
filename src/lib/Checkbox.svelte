@@ -50,7 +50,6 @@
 			-moz-appearance: none;
 			appearance: none;
 			height: 20px;
-			outline: none;
 			display: inline-block;
 			vertical-align: top;
 			position: relative;
@@ -158,11 +157,8 @@
 	.shadow {
 		box-shadow:
 			var(--shadow-1) 0px 0px 0px 0px,
-			var(--shadow-1) 0px 0px 0px 0px,
 			var(--shadow-2) 0px 1px 1px 0px,
 			var(--shadow-3) 0px 0px 0px 1px,
-			var(--shadow-1) 0px 0px 0px 0px,
-			var(--shadow-1) 0px 0px 0px 0px,
 			var(--shadow-4) 0px 2px 5px 0px;
 		transition: all 0.15s ease;
 	}
@@ -170,9 +166,7 @@
 	.shadow:hover {
 		box-shadow:
 			var(--shadow-1) 0px 0px 0px 0px,
-			var(--shadow-1) 0px 0px 0px 0px,
 			var(--shadow-2) 0px 1px 1px 0px,
-			var(--shadow-4) 0px 2px 5px 0px,
 			var(--shadow-4) 0px 2px 5px 0px;
 	}
 </style>

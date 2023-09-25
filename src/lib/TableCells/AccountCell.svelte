@@ -4,36 +4,43 @@
 	import Fa from 'svelte-fa';
 
 	export let value: string = '';
-	export let loggedIn: boolean;
+	export let loggedIn: boolean | null;
 </script>
 
 <div class="container">
-	{#if loggedIn}
-		<Tooltip text="Account has a valid session">
-			<Fa icon={faUser} color="var(--primary)" />
-		</Tooltip>
-	{:else}
-		<Tooltip text="Account has a valid session">
-			<Fa icon={faUserSlash} color="var(--danger-red)" />
-		</Tooltip>
-	{/if}
-
 	<div class="username">
 		<span>{value.split('@')[0]}</span>
 		<span class="bottom-text">{'@' + value.split('@')[1]}</span>
 	</div>
+	{#if loggedIn}
+		<div class="icon">
+			<Tooltip text="Account has a valid session">
+				<Fa icon={faUser} color="var(--primary)" />
+			</Tooltip>
+		</div>
+	{:else if loggedIn === false}
+		<Tooltip text="Account has a valid session">
+			<Fa icon={faUserSlash} color="var(--danger-red)" />
+		</Tooltip>
+	{/if}
 </div>
 
 <style>
 	.container {
 		display: flex;
 		flex-direction: row;
+		align-items: left;
+		justify-content: left;
+	}
+	.icon {
+		display: flex;
+		flex-direction: row;
+		padding-left: 10px;
 		align-items: center;
 	}
 	.username {
 		display: flex;
 		flex-direction: column;
-		margin-left: 10px;
 	}
 	.bottom-text {
 		display: block;

@@ -82,7 +82,37 @@ export type OutboundTask = {
 	retry_on_decline: boolean;
 };
 
-export type VerboseTask = Task | ActivityTask | OutboundTask;
+export type NacTask = {
+	id: number;
+	account_id: number;
+	created_at: null;
+	updated_at: null;
+	username: string;
+	password: string;
+	email: string;
+	email_password: string;
+	email_provider: string;
+	email_folder: string | undefined;
+	proxy: string;
+	proxy_list_id: number;
+	proxy_list: ProxyList;
+	state: NacState;
+	status: string;
+	headless: boolean;
+	enable_images: boolean;
+	browser_type: string;
+	account: Account;
+	metadata: null;
+	retry_mode: string;
+	experimental_mode: boolean;
+	profile_name_prefix: string;
+	profile_tags: null;
+	account_tags: Tag[];
+	tags: Tag[];
+	cache_enabled: boolean;
+};
+
+export type VerboseTask = Task | ActivityTask | OutboundTask | NacTask;
 
 export type Product = {
 	product_uri: string;
@@ -339,6 +369,15 @@ export type ActivityState =
 	| 'Error'
 	| 'Complete';
 
+export type NacState =
+	| 'Ready'
+	| 'Queued'
+	| 'Starting'
+	| 'Running'
+	| 'Waiting'
+	| 'Error'
+	| 'Complete';
+
 export type WhopMembershipStatusType =
 	| 'trialing'
 	| 'active'
@@ -470,6 +509,7 @@ export type states =
 	| 'duplicate'
 	| 'edit'
 	| 'create'
+	| 'focus'
 	| 'startIndiv'
 	| 'stopIndiv'
 	| 'deleteIndiv'

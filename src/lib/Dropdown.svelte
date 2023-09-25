@@ -148,7 +148,7 @@
 	}
 
 	select.default {
-		background-color: var(--background);
+		background-color: var(--light-gray-1);
 		color: var(--off-black);
 	}
 

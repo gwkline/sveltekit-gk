@@ -19,40 +19,47 @@
 </script>
 
 <button
-	class="default {image_src == '' ? 'active' : ''} noOutline {style} {collapsed
-		? 'iconOnly'
-		: ''} {disabled == true ? 'disabled' : ''}"
+	class="{style} {disabled == true ? 'disabled' : ''} {collapsed ? 'collapsed' : ''}"
 	on:click={page ? redirect : onclick}
 >
 	{#if image_src == ''}
-		<div class="tooltip">
-			<row>
-				<Fa {icon} style={collapsed ? '' : 'margin-right: 1.5rem'} />
-				{collapsed ? '' : text}
-			</row>
-			{#if collapsed == true}
-				<span class="tooltip-text">{text}</span>
-			{/if}
+		<div class="icon-wrapper">
+			<Fa {icon} />
 		</div>
+		<span style="z-index: 2; text-wrap: nowrap; align-text: center;">
+			{collapsed ? '' : text}
+		</span>
+		{#if collapsed == true}
+			<span class="tooltip-text">{text}</span>
+		{/if}
 	{:else}
-		<img src={image_src} style="width: 30px;" alt="secret" />
+		<img src={image_src} style={collapsed ? '' : 'margin-right: 10px'} alt="secret" />
 	{/if}
 </button>
 
 <style>
 	button {
+		background: transparent;
+		color: var(--off-black);
+		border-radius: 6px;
 		width: 100%;
 		height: 45px;
 		font-family: inherit;
-		display: inline-flex;
+		display: flex;
 		border: 1px solid transparent;
 		flex-direction: row;
-		justify-content: left;
+		justify-content: start;
 		align-items: center;
-		gap: 8px;
-		border-radius: 7px;
-		padding-left: 30px;
 		cursor: pointer;
+		position: inherit;
+		z-index: 5;
+		transition: all 0.3s ease-in-out;
+		padding-left: 20px;
+	}
+
+	button.collapsed {
+		padding-left: 5px;
+		justify-content: center;
 	}
 
 	button.disabled {
@@ -72,7 +79,7 @@
 	}
 
 	/* Tooltip text */
-	.tooltip .tooltip-text {
+	.tooltip-text {
 		visibility: hidden;
 		width: 120px;
 		background-color: black;
@@ -81,33 +88,36 @@
 		padding: 5px 0;
 		border-radius: 6px;
 		position: absolute;
-		z-index: 1;
+		left: 50px;
+		z-index: 5;
 	}
 
 	button:hover .tooltip-text {
 		visibility: visible;
 	}
 
-	button.default {
-		background: var(--sidebar-background);
-		color: var(--off-black);
+	button:hover {
+		background: var(--light-gray-2);
 	}
 
-	button.default.active:hover {
-		background: var(--light-gray-1);
-	}
-
-	button.default.active:active {
+	button:active {
 		-webkit-box-shadow: inset 0px 0px 5px #b6b6b6;
 		-moz-box-shadow: inset 0px 0px 5px #b6b6b6;
 		box-shadow: inset 0px 0px 5px #b6b6b6;
 		outline: none;
+		background: var(--light-gray-2);
 	}
 
-	button.iconOnly {
-		padding: 15px 15px;
+	img {
+		width: 30px;
+	}
+
+	.icon-wrapper {
+		width: 30px;
+		height: 30px;
+		display: flex;
 		justify-content: center;
 		align-items: center;
-		text-align: center;
+		flex-grow: 0;
 	}
 </style>

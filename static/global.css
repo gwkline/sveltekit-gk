@@ -10,12 +10,16 @@
 	color-scheme: dark;
 	--primary: #625bf6;
 	--primary-hover: #4842c4;
+	--primary-contrast: #d7d4ff;
 	--danger-red: #cf222e;
 	--danger-red-hover: #a40e26;
+	--danger-red-contrast: #ffd9e0;
 	--success-green: #2da44e;
 	--success-green-hover: #23803d;
+	--success-green-contrast: #1d4123;
 	--warning-yellow: #bf8700;
 	--warning-yellow-hover: #a67400;
+	--warning-yellow-contrast: #7a5a00;
 
 	--white: #ffffff;
 	--shadow-1: rgba(141, 141, 141, 0);

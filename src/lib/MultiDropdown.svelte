@@ -17,6 +17,7 @@
 	export let options: string[];
 	export let outline = false;
 	export let shadow = true;
+	export let titlePosition: 'top' | 'center' = 'center';
 
 	const dispatch = createEventDispatcher();
 	let buttonText: string;
@@ -51,62 +52,84 @@
 	$: if (disabled) {
 		open = false;
 	}
+	let id = '';
 </script>
 
 <svelte:window on:click={handleClickOutside} />
-
-<button class="dropdown" bind:this={dropdownEl} on:click|stopPropagation>
-	<Button
-		style="width:200px; height: 40px; margin-right: 0px;"
-		onclick={() => (open = !open)}
-		{disabled}>{buttonText}</Button
-	>
-	<div class="dropdown-caret">
-		<Fa icon={chevronIcon} size="xs" />
-	</div>
-	{#if open}
-		<div class={`dropdown-menu ${outline ? 'outline' : ''} ${shadow ? 'shadow' : ''}`}>
-			<div class="input-container">
-				<Input
-					bind:value={filterText}
-					placeholder="Filter options"
-					style="width: 100%;"
-					variant="transparent"
-					outline="noOutline"
-				/>
-			</div>
-
-			{#each filteredOptions as option}
-				<button
-					class="dropdown-item {style}"
-					tabindex="0"
-					on:click={() => toggleOption(option)}
-					on:keydown={(e) => {
-						if (e.key === 'Enter') toggleOption(option);
-					}}
-				>
-					<Checkbox checked={selectedOptions[option]} mini={true} />
-					{option}
-				</button>
-			{/each}
-		</div>
+<div class="container">
+	{#if title !== '' && titlePosition === 'top'}
+		<label for={id} class={`label`}>{title}</label>
 	{/if}
-</button>
+	<button class="dropdown" bind:this={dropdownEl} on:click|stopPropagation {id}>
+		<Button
+			style="width:200px; height: 40px; margin-right: 0px;"
+			onclick={() => (open = !open)}
+			{disabled}
+		>
+			{#if title !== '' && titlePosition === 'center'}
+				<div class="disabled-overlay">{buttonText}</div>
+			{/if}
+		</Button>
+		<div class="dropdown-caret">
+			<Fa icon={chevronIcon} size="xs" />
+		</div>
+		{#if open}
+			<div class={`dropdown-menu ${outline ? 'outline' : ''} ${shadow ? 'shadow' : ''}`}>
+				<div class="input-container">
+					<Input
+						bind:value={filterText}
+						placeholder="Filter options"
+						style="width: 100%;"
+						outline="noOutline"
+					/>
+				</div>
+
+				{#each filteredOptions as option}
+					<button
+						class="dropdown-item {style}"
+						tabindex="0"
+						on:click={() => toggleOption(option)}
+						on:keydown={(e) => {
+							if (e.key === 'Enter') toggleOption(option);
+						}}
+					>
+						<Checkbox checked={selectedOptions[option]} mini={true} />
+						{option}
+					</button>
+				{/each}
+			</div>
+		{/if}
+	</button>
+</div>
 
 <style>
+	label {
+		font-size: 0.8rem;
+		font-weight: 500;
+		margin-bottom: 0.5rem;
+		display: relative;
+		font-family: Roboto;
+		font-weight: 500;
+		font-size: 12px;
+		line-height: 14px;
+		text-align: start;
+		top: 0;
+		left: 0;
+	}
 	.dropdown {
 		display: inline-block;
 		position: relative;
-		background-color: inherit;
+		background: var(--light-gray-1);
 		color: inherit;
 		border: none;
+		padding: 0;
 	}
 	.dropdown-caret {
 		width: 0;
 		height: 0;
 		position: absolute;
-		top: 10px;
-		right: 30px;
+		top: 12px;
+		right: 13px;
 	}
 
 	.dropdown-menu {
@@ -146,6 +169,12 @@
 
 	.input-container {
 		margin-bottom: 5px;
+	}
+	.container {
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		align-items: left;
 	}
 
 	.shadow {

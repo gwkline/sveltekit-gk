@@ -8,10 +8,8 @@
 		makeRequest,
 		updateSortState,
 		updateSelectedTags,
-		getSettings,
 		removeTags,
 		addTag,
-		getAccounts,
 		cleanDate
 	} from '../../helpers';
 	import { accounts, showTags, shiftPressed, isLoading } from '../../datastore';
@@ -25,6 +23,7 @@
 		states
 	} from '../../types';
 	import AccountTableRow from '$lib/TableRows/AccountTableRow.svelte';
+	import BaseTableRow from '$lib/TableRows/BaseTableRow.svelte';
 
 	let searchValue: string = '';
 	let sortState: SortState = { column: null, direction: 0 };
@@ -38,7 +37,7 @@
 	let lastChecked: number | null = null;
 	let secondLastChecked: number | null = null;
 	let checkedAll: boolean = false;
-	let checkedCheckoutTasks: number[] = [];
+	let checkedItemIds: number[] = [];
 	let totalSelectedTasks: number = 0;
 
 	let filteredAccounts: ShortAccount[] = [];
@@ -59,9 +58,6 @@
 		'Date Added': (account) => cleanDate(account.created_at),
 		Wins: (account) => account.previous_wins.number_of_wins.toString()
 	};
-
-	getSettings();
-	getAccounts();
 
 	const handleSort = (e: CustomEvent) => {
 		sortState = updateSortState(e, sortState);
@@ -161,7 +157,7 @@
 		let updatedAccounts: (Account | ShortAccount)[] = [];
 		accounts.update((accounts) => {
 			return accounts.map((account) => {
-				if (checkedCheckoutTasks.includes(account.id)) {
+				if (checkedItemIds.includes(account.id)) {
 					account.tags.push({ name: newTagText });
 					updatedAccounts.push(account);
 				}
@@ -179,13 +175,13 @@
 		secondLastChecked = lastChecked;
 		lastChecked = itemId;
 
-		let arrayOfTaskIndexes = checkedCheckoutTasks;
-		if (checkedCheckoutTasks.includes(itemId)) {
+		let arrayOfTaskIndexes = checkedItemIds;
+		if (checkedItemIds.includes(itemId)) {
 			arrayOfTaskIndexes.splice(arrayOfTaskIndexes.indexOf(itemId), 1);
 		} else {
 			arrayOfTaskIndexes.push(itemId);
 		}
-		checkedCheckoutTasks = arrayOfTaskIndexes;
+		checkedItemIds = arrayOfTaskIndexes;
 
 		if ($shiftPressed && lastChecked === itemId && secondLastChecked !== null) {
 			let start = Math.min(lastChecked, secondLastChecked);
@@ -193,8 +189,8 @@
 
 			for (let i = start + 1; i < end; i++) {
 				let taskWithThisId = $accounts.find((account) => account.id === i);
-				if (taskWithThisId && !checkedCheckoutTasks.includes(taskWithThisId.id)) {
-					checkedCheckoutTasks.push(i);
+				if (taskWithThisId && !checkedItemIds.includes(taskWithThisId.id)) {
+					checkedItemIds.push(i);
 				}
 			}
 		}
@@ -205,9 +201,9 @@
 
 		if (e.detail.checked) {
 			let allIds = filteredAccounts.map((account) => account.id);
-			checkedCheckoutTasks = allIds;
+			checkedItemIds = allIds;
 		} else {
-			checkedCheckoutTasks = [];
+			checkedItemIds = [];
 		}
 	};
 
@@ -220,8 +216,8 @@
 		if (accountId) {
 			accountIds = [accountId];
 		} else {
-			let all = $shiftPressed || checkedCheckoutTasks.filter((item) => item != -1).length === 0;
-			accountIds = all ? filteredAccounts.map((account) => account.id) : checkedCheckoutTasks;
+			let all = $shiftPressed || checkedItemIds.filter((item) => item != -1).length === 0;
+			accountIds = all ? filteredAccounts.map((account) => account.id) : checkedItemIds;
 		}
 
 		switch (state) {
@@ -372,13 +368,11 @@
 
 	// Sets the value of buttonTextCount
 	$: {
-		let items = checkedCheckoutTasks;
-		if ($shiftPressed || items.length == 0) {
+		let items = checkedItemIds;
+		if ($shiftPressed || items.length == 0 || items.length == filteredAccounts.length) {
 			buttonTextCount = 'All';
-		} else if (items.length == filteredAccounts.length) {
-			buttonTextCount = `All (${items.length})`;
 		} else {
-			buttonTextCount = `${items.length}`;
+			buttonTextCount = `(${items.length})`;
 		}
 	}
 
@@ -417,7 +411,7 @@
 	<Tags
 		{tagsCount}
 		{selectedTags}
-		checkedItems={checkedCheckoutTasks}
+		checkedItems={checkedItemIds}
 		on:selectTag={handleSelectTag}
 		on:addTagToTasks={addTagToAccount}
 		on:deleteSelectedTags={deleteSelectedTags}
@@ -436,14 +430,22 @@
 		on:sort={handleSort}
 		on:checkedAll={handleCheckedAll}
 	>
-		<AccountTableRow
+		<BaseTableRow
 			{row}
-			checked={checkedCheckoutTasks.includes(row.itemId)}
+			let:column
+			let:value
+			let:row
+			page="accounts"
+			checked={checkedItemIds.includes(row.itemId)}
 			on:checked={handleChecked}
+			on:delete={handleTask}
 			on:start={handleTask}
+			on:edit={handleTask}
 			on:stop={handleTask}
-			on:editActivity={handleTask}
-		/>
+			on:focus={handleTask}
+		>
+			<AccountTableRow {value} {column} {row} />
+		</BaseTableRow>
 	</Table>
 </div>
 

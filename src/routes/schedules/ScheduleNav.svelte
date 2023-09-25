@@ -21,7 +21,7 @@
 					icon={faPen}
 					isLoading={$isLoading.changeActivityMode}
 					resizable={false}
-					style="button">Edit {buttonTextCount} Schedules</Button
+					style="button">Edit {buttonTextCount}</Button
 				>
 			</div>
 		</div>

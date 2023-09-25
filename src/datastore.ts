@@ -10,7 +10,8 @@ import type {
 	Profile,
 	Payment,
 	ProxyList,
-	Win
+	Win,
+	NacTask
 } from './types';
 import { seedAccounts, seedSettings, seedTasks } from './seedData';
 
@@ -54,6 +55,7 @@ export const wins = persistentStore<Win[]>('wins', []);
 export const profiles = persistentStore<Profile[]>('profiles', []);
 export const verboseTasks = persistentStore<Task[]>('verboseTasks', seedTasks);
 export const verboseActivityTasks = persistentStore<ActivityTask[]>('verboseActivityTasks', []);
+export const verboseNacTasks = persistentStore<NacTask[]>('verboseNacTasks', []);
 export const schedules = persistentStore<Schedule[]>('schedules', []);
 export const sizePresets = persistentStore<SizePresets>('sizePresets', {
 	mens: {

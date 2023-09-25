@@ -1,18 +1,25 @@
 <script lang="ts">
 	import Fa from 'svelte-fa';
 	import { stateColors, stateIconMapping } from '../helpers';
-	import type { ActivityState, ActivityTask, CheckoutState, Task } from '../types';
+	import type {
+		ActivityState,
+		ActivityTask,
+		CheckoutState,
+		NacState,
+		NacTask,
+		Task
+	} from '../types';
 	import { createEventDispatcher } from 'svelte';
 
-	export let tasks: Task[] | ActivityTask[] = [];
-	export let selectedState: CheckoutState | ActivityState | '' = '';
-	export let page: 'activity' | 'checkout' = 'checkout';
+	export let tasks: Task[] | ActivityTask[] | NacTask[] = [];
+	export let selectedState: CheckoutState | ActivityState | NacState | '' = '';
+	export let page: 'activity' | 'checkout' | 'nac' = 'checkout';
 
 	const dispatch = createEventDispatcher();
 	// Array of states in the desired order
 	const stateIsRelevant = (
-		state: CheckoutState | ActivityState,
-		page: 'checkout' | 'activity'
+		state: CheckoutState | ActivityState | NacState,
+		page: 'checkout' | 'activity' | 'nac'
 	): boolean => {
 		const checkoutStates: CheckoutState[] = [
 			'Ready',
@@ -33,11 +40,14 @@
 			'Error',
 			'Complete'
 		];
+		const nacStates: NacState[] = ['Ready', 'Queued', 'Starting', 'Running', 'Error', 'Complete'];
 
 		if (page === 'checkout') {
 			return checkoutStates.includes(state as CheckoutState);
-		} else {
+		} else if (page === 'activity') {
 			return activityStates.includes(state as ActivityState);
+		} else {
+			return nacStates.includes(state as NacState);
 		}
 	};
 
@@ -51,9 +61,10 @@
 		'AwaitingResults',
 		'Complete',
 		'Winning'
-	].filter((state) => stateIsRelevant(state as CheckoutState | ActivityState, page)) as (
+	].filter((state) => stateIsRelevant(state as CheckoutState | ActivityState | NacState, page)) as (
 		| CheckoutState
 		| ActivityState
+		| NacState
 	)[];
 
 	const capitalizeFirstLetter = (str: string) => {
@@ -66,14 +77,15 @@
 
 	type ActivityCounts = Record<ActivityState, number>;
 	type CheckoutCounts = Record<CheckoutState, number>;
+	type NacCounts = Record<NacState, number>;
 
 	function isActivityCounts(counts: ActivityCounts | CheckoutCounts): counts is ActivityCounts {
 		return (counts as ActivityCounts).Complete !== undefined;
 	}
 
 	const countTasksByState = (
-		tasks: Task[] | ActivityTask[]
-	): [CheckoutState | ActivityState, number][] => {
+		tasks: Task[] | ActivityTask[] | NacTask[]
+	): [CheckoutState | ActivityState | NacState, number][] => {
 		let counts: ActivityCounts | CheckoutCounts;
 
 		if (page === 'activity') {
@@ -85,7 +97,7 @@
 				Error: 0,
 				Complete: 0
 			} as ActivityCounts;
-		} else {
+		} else if (page === 'checkout') {
 			counts = {
 				Ready: 0,
 				Queued: 0,
@@ -97,6 +109,15 @@
 				Complete: 0,
 				Winning: 0
 			} as CheckoutCounts;
+		} else {
+			counts = {
+				Ready: 0,
+				Queued: 0,
+				Starting: 0,
+				Running: 0,
+				Error: 0,
+				Complete: 0
+			} as NacCounts;
 		}
 
 		tasks.forEach((task) => {
@@ -113,31 +134,43 @@
 	};
 
 	const getColor = (state: CheckoutState | ActivityState) => {
-		if (page === 'activity' && state === 'Complete') {
+		if ((page === 'activity' || page === 'nac') && state === 'Complete') {
 			return 'var(--success-green)';
 		} else {
 			return stateColors[state];
 		}
 	};
 
-	const selectState = (state: CheckoutState | ActivityState) => {
+	const selectState = (state: CheckoutState | ActivityState | NacState) => {
 		dispatch('selectedState', state);
 	};
 	$: orderedTasks = tasks
 		.slice()
 		.sort((a, b) => stateOrder.indexOf(a.state) - stateOrder.indexOf(b.state));
+
+	const shadow = (state: CheckoutState | ActivityState | NacState) => {
+		return `box-shadow:
+			${getColor(state)} 0px 0px 0px 0px,
+			${getColor(state)} 0px 1px 1px 0px,
+			${getColor(state)} 0px 2px 5px 0px,
+			${getColor(state)} 0px 2px 5px 0px !important;`;
+	};
 </script>
 
 <div class="state-info">
 	{#each countTasksByState(orderedTasks) as [state, count] (state)}
 		<button
-			class={`state-item ${state === selectedState ? 'selected' : ''}`}
+			class={`state-item shadow ${state === selectedState ? 'selected' : ''}`}
+			style={`outline-color: ${getColor(state)}; ${state === selectedState ? shadow(state) : ''}}`}
 			on:click={() => selectState(state)}
 		>
-			<div class="state-color-icon" style="background-color: {getColor(state)};">
-				<Fa icon={stateIconMapping[state]} color="var(--white)" size="md" />
+			<div style="align-items: center; display: flex; flex-direction: row; gap: 7px;">
+				<div class="state-color-icon" style="background-color: {getColor(state)};">
+					<Fa icon={stateIconMapping[state]} color="var(--white)" size="md" />
+				</div>
+				<span class="state-name">{capitalizeFirstLetter(state)}</span>
 			</div>
-			<span class="state-name">{capitalizeFirstLetter(state) + ':'}</span>
+			<div class="divider"></div>
 			<span class="state-count">{count}</span>
 		</button>
 	{/each}
@@ -159,6 +192,12 @@
 </div>
 
 <style>
+	.divider {
+		width: 1px;
+		background-color: var(--light-gray-4); /* You can change this to a light gray like #ccc */
+		height: 25px; /* Change this line */
+		margin: 0;
+	}
 	.status-bar {
 		display: flex;
 		width: 100%;
@@ -167,7 +206,7 @@
 		min-height: 20px;
 		flex-shrink: 0;
 		margin: 10px 0px;
-		outline: 1px solid var(--light-gray-3);
+		outline: 1px solid var(--light-gray-4);
 		overflow: hidden;
 	}
 
@@ -175,7 +214,7 @@
 		flex-grow: 1;
 		text-align: center;
 		transition: background-color 0.3s ease;
-		border: none;
+		outline: 1px solid var(--light-gray-3);
 		outline: none;
 	}
 
@@ -190,17 +229,16 @@
 	.state-item {
 		display: flex;
 		align-items: center;
+		justify-content: space-evenly;
 		margin: 3px 0px;
 		background-color: inherit;
-		border: none;
 		color: var(--off-black);
-	}
-
-	.state-item.selected {
-		border: 1px solid var(--light-gray-4);
-		border-radius: 5px;
-		padding: 3px;
-		transition: border-color 0.3s ease;
+		outline: 1px solid var(--light-gray-3);
+		border: 1px solid transparent;
+		padding: 5px;
+		border-radius: 6px;
+		cursor: pointer;
+		gap: 10px;
 	}
 
 	.state-color-icon {
@@ -211,17 +249,32 @@
 		height: 30px;
 		border-radius: 5px;
 		box-sizing: border-box;
-		transition: background-color 0.3s ease;
 	}
 
 	.state-name,
 	.state-count {
-		margin-left: 10px;
 		font-size: small;
 	}
 
 	.state-count {
 		font-weight: bold;
 		width: 25px;
+	}
+
+	.shadow {
+		box-shadow:
+			var(--shadow-1) 0px 0px 0px 0px,
+			var(--shadow-2) 0px 1px 1px 0px,
+			var(--shadow-3) 0px 0px 0px 1px,
+			var(--shadow-4) 0px 2px 5px 0px;
+		transition: all 0.15s ease;
+	}
+
+	.shadow:hover {
+		box-shadow:
+			var(--shadow-1) 0px 0px 0px 0px,
+			var(--shadow-2) 0px 1px 1px 0px,
+			var(--shadow-3) 0px 2px 5px 0px,
+			var(--shadow-4) 0px 2px 5px 0px;
 	}
 </style>

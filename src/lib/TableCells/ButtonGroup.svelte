@@ -1,7 +1,7 @@
 <script lang="ts">
 	import {
 		faCog,
-		faPause,
+		faGlobe,
 		faPen,
 		faPlay,
 		faStop,
@@ -34,6 +34,11 @@
 		dispatch('stop', { id: itemId });
 	};
 
+	const handleFocus = (event: MouseEvent) => {
+		event.stopPropagation();
+		dispatch('focus', { id: itemId });
+	};
+
 	const handleStart = (event: MouseEvent) => {
 		event.stopPropagation();
 		dispatch('start', { id: itemId });
@@ -55,6 +60,13 @@
 				<Fa icon={faCog} spin></Fa>
 			{:else}
 				<Fa icon={faStop}></Fa>
+			{/if}</button
+		>
+		<button type="button" class="btn" on:click|stopPropagation={handleFocus}
+			>{#if $isLoading[`focus${itemId}`]}
+				<Fa icon={faCog} spin></Fa>
+			{:else}
+				<Fa icon={faGlobe}></Fa>
 			{/if}</button
 		>
 	{/if}

@@ -3,7 +3,7 @@
 	import UpdateBar from '$lib/UpdateBar.svelte';
 	import ProxyNav from './ScheduleNav.svelte';
 	import ConfirmationModal from '$lib/ConfirmationModal.svelte';
-	import { makeRequest, updateSortState, getSettings, getSchedules } from '../../helpers';
+	import { makeRequest, updateSortState } from '../../helpers';
 	import { shiftPressed, isLoading, schedules } from '../../datastore';
 	import type {
 		HeaderConfigType,
@@ -14,6 +14,7 @@
 		TableRowType
 	} from '../../types';
 	import ScheduleTableRow from '$lib/TableRows/SchedulesTableRow.svelte';
+	import BaseTableRow from '$lib/TableRows/BaseTableRow.svelte';
 
 	let searchValue: string = '';
 	let sortState: SortState = { column: null, direction: 0 };
@@ -27,7 +28,7 @@
 	let lastChecked: number | null = null;
 	let secondLastChecked: number | null = null;
 	let checkedAll: boolean = false;
-	let checkedCheckoutTasks: number[] = [];
+	let checkedItemIds: number[] = [];
 
 	let filteredSchedules: Schedule[] = [];
 	let tableData: TableRowType<Schedule>[] = [];
@@ -41,9 +42,6 @@
 		Time: (schedule) => schedule.start_time,
 		Interval: (schedule) => schedule.interval_seconds.toString()
 	};
-
-	getSettings();
-	getSchedules();
 
 	const handleSort = (e: CustomEvent) => {
 		sortState = updateSortState(e, sortState);
@@ -59,13 +57,13 @@
 		secondLastChecked = lastChecked;
 		lastChecked = itemId;
 
-		let arrayOfTaskIndexes = checkedCheckoutTasks;
-		if (checkedCheckoutTasks.includes(itemId)) {
+		let arrayOfTaskIndexes = checkedItemIds;
+		if (checkedItemIds.includes(itemId)) {
 			arrayOfTaskIndexes.splice(arrayOfTaskIndexes.indexOf(itemId), 1);
 		} else {
 			arrayOfTaskIndexes.push(itemId);
 		}
-		checkedCheckoutTasks = arrayOfTaskIndexes;
+		checkedItemIds = arrayOfTaskIndexes;
 
 		if ($shiftPressed && lastChecked === itemId && secondLastChecked !== null) {
 			let start = Math.min(lastChecked, secondLastChecked);
@@ -73,8 +71,8 @@
 
 			for (let i = start + 1; i < end; i++) {
 				let taskWithThisId = $schedules.find((schedule) => schedule.id === i);
-				if (taskWithThisId && !checkedCheckoutTasks.includes(taskWithThisId.id)) {
-					checkedCheckoutTasks.push(i);
+				if (taskWithThisId && !checkedItemIds.includes(taskWithThisId.id)) {
+					checkedItemIds.push(i);
 				}
 			}
 		}
@@ -85,9 +83,9 @@
 
 		if (e.detail.checked) {
 			let allIds = filteredSchedules.map((schedule) => schedule.id);
-			checkedCheckoutTasks = allIds;
+			checkedItemIds = allIds;
 		} else {
-			checkedCheckoutTasks = [];
+			checkedItemIds = [];
 		}
 	};
 
@@ -100,8 +98,8 @@
 		if (scheduleId) {
 			scheduleIds = [scheduleId];
 		} else {
-			let all = $shiftPressed || checkedCheckoutTasks.filter((item) => item != -1).length === 0;
-			scheduleIds = all ? filteredSchedules.map((schedule) => schedule.id) : checkedCheckoutTasks;
+			let all = $shiftPressed || checkedItemIds.filter((item) => item != -1).length === 0;
+			scheduleIds = all ? filteredSchedules.map((schedule) => schedule.id) : checkedItemIds;
 		}
 
 		switch (state) {
@@ -190,13 +188,11 @@
 
 	// Sets the value of buttonTextCount
 	$: {
-		let items = checkedCheckoutTasks;
-		if ($shiftPressed || items.length == 0) {
+		let items = checkedItemIds;
+		if ($shiftPressed || items.length == 0 || items.length == filteredSchedules.length) {
 			buttonTextCount = 'All';
-		} else if (items.length == filteredSchedules.length) {
-			buttonTextCount = `All (${items.length})`;
 		} else {
-			buttonTextCount = `${items.length}`;
+			buttonTextCount = `(${items.length})`;
 		}
 	}
 
@@ -241,14 +237,21 @@
 		on:sort={handleSort}
 		on:checkedAll={handleCheckedAll}
 	>
-		<ScheduleTableRow
+		<BaseTableRow
 			{row}
-			checked={checkedCheckoutTasks.includes(row.itemId)}
+			let:column
+			let:value
+			page="activity"
+			checked={checkedItemIds.includes(row.itemId)}
 			on:checked={handleChecked}
+			on:delete={handleTask}
 			on:start={handleTask}
+			on:edit={handleTask}
 			on:stop={handleTask}
-			on:editActivity={handleTask}
-		/>
+			on:focus={handleTask}
+		>
+			<ScheduleTableRow {value} {column} />
+		</BaseTableRow>
 	</Table>
 </div>
 

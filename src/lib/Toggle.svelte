@@ -5,8 +5,8 @@
 </script>
 
 <div class="container" {style}>
-	<label class="switch">
-		<input type="checkbox" bind:checked {...$$props} />
+	<label class="switch shadow">
+		<input type="checkbox" class="" bind:checked {...$$props} />
 		<span class="slider round {variant}" />
 	</label>
 </div>
@@ -36,6 +36,22 @@
 		right: 0;
 		bottom: 0;
 		background-color: var(--light-gray-3);
+		outline: 1px solid var(--light-gray-3);
+		box-shadow:
+			var(--shadow-1) 0px 0px 0px 0px,
+			var(--shadow-2) 0px 1px 1px 0px,
+			var(--shadow-3) 0px 0px 0px 1px,
+			var(--shadow-4) 0px 2px 5px 0px;
+		transition: all 0.15s ease;
+	}
+
+	.slider:hover {
+		outline: 1px solid var(--off-black);
+		box-shadow:
+			var(--shadow-1) 0px 0px 0px 0px,
+			var(--shadow-2) 0px 1px 1px 0px,
+			var(--shadow-3) 0px 2px 5px 0px,
+			var(--shadow-4) 0px 2px 5px 0px;
 	}
 
 	.slider:before {
@@ -48,6 +64,11 @@
 		background-color: white;
 		-webkit-transition: 0.4s;
 		transition: 0.4s;
+		outline: 1px solid var(--white);
+	}
+
+	.slider:before:hover {
+		outline: 1px solid var(--off-black);
 	}
 
 	input:checked + .slider {

@@ -10,9 +10,6 @@
 		updateSortState,
 		updateSelectedTags,
 		saveSettings,
-		getSchedules,
-		getSettings,
-		getActivityTasks,
 		removeTags,
 		addTag
 	} from '../../helpers';
@@ -37,6 +34,8 @@
 	} from '../../types';
 	import ActivityTableRow from '$lib/TableRows/ActivityTableRow.svelte';
 	import ActivityNavBottom from './ActivityNavBottom.svelte';
+	import ActivityModeCell from '$lib/TableCells/ActivityModeCell.svelte';
+	import BaseTableRow from '$lib/TableRows/BaseTableRow.svelte';
 
 	let searchValue: string = '';
 	let sortState: SortState = { column: null, direction: 0 };
@@ -52,7 +51,7 @@
 	let lastChecked: number | null = null;
 	let secondLastChecked: number | null = null;
 	let checkedAll: boolean = false;
-	let checkedCheckoutTasks: number[] = [];
+	let checkedItemIds: number[] = [];
 	let totalSelectedTasks: number = 0;
 
 	let filteredTasks: ActivityTask[] = [];
@@ -72,10 +71,6 @@
 		Mode: (task: ActivityTask) => task?.mode || 'BP Solve',
 		Status: (task: ActivityTask) => task?.status ?? ''
 	};
-
-	getSettings();
-	getActivityTasks();
-	getSchedules();
 
 	const handleSort = (e: CustomEvent) => {
 		sortState = updateSortState(e, sortState);
@@ -183,7 +178,7 @@
 		let updatedAccounts: (Account | ShortAccount)[] = [];
 		verboseActivityTasks.update((tasks) => {
 			return tasks.map((task) => {
-				if (checkedCheckoutTasks.includes(task.id)) {
+				if (checkedItemIds.includes(task.id)) {
 					task.account.tags.push({ name: newTagText });
 					updatedAccounts.push(task.account);
 				}
@@ -201,13 +196,13 @@
 		secondLastChecked = lastChecked;
 		lastChecked = itemId;
 
-		let arrayOfTaskIndexes = checkedCheckoutTasks;
-		if (checkedCheckoutTasks.includes(itemId)) {
+		let arrayOfTaskIndexes = checkedItemIds;
+		if (checkedItemIds.includes(itemId)) {
 			arrayOfTaskIndexes.splice(arrayOfTaskIndexes.indexOf(itemId), 1);
 		} else {
 			arrayOfTaskIndexes.push(itemId);
 		}
-		checkedCheckoutTasks = arrayOfTaskIndexes;
+		checkedItemIds = arrayOfTaskIndexes;
 
 		if ($shiftPressed && lastChecked === itemId && secondLastChecked !== null) {
 			let start = Math.min(lastChecked, secondLastChecked);
@@ -215,8 +210,8 @@
 
 			for (let i = start + 1; i < end; i++) {
 				let taskWithThisId = $verboseActivityTasks.find((task) => task.id === i);
-				if (taskWithThisId && !checkedCheckoutTasks.includes(taskWithThisId.id)) {
-					checkedCheckoutTasks.push(i);
+				if (taskWithThisId && !checkedItemIds.includes(taskWithThisId.id)) {
+					checkedItemIds.push(i);
 				}
 			}
 		}
@@ -227,9 +222,9 @@
 
 		if (e.detail.checked) {
 			let allIds = filteredTasks.map((task) => task.id);
-			checkedCheckoutTasks = allIds;
+			checkedItemIds = allIds;
 		} else {
-			checkedCheckoutTasks = [];
+			checkedItemIds = [];
 		}
 	};
 
@@ -242,8 +237,8 @@
 		if (taskId) {
 			taskIds = [taskId];
 		} else {
-			let all = $shiftPressed || checkedCheckoutTasks.filter((item) => item != -1).length === 0;
-			taskIds = all ? filteredTasks.map((task) => task.id) : checkedCheckoutTasks;
+			let all = $shiftPressed || checkedItemIds.filter((item) => item != -1).length === 0;
+			taskIds = all ? filteredTasks.map((task) => task.id) : checkedItemIds;
 		}
 
 		switch (state) {
@@ -264,6 +259,16 @@
 				makeRequest('post', 'http://127.0.0.1:23432/accounts/activity/start', taskIds, () => {
 					isLoading.set({ [`${state}${taskId}`]: false });
 				});
+				break;
+			case 'focus':
+				makeRequest(
+					'get',
+					`http://127.0.0.1:23432/task/${taskId}/focus?type=activity`,
+					taskIds,
+					() => {
+						isLoading.set({ [`${state}${taskId}`]: false });
+					}
+				);
 				break;
 			case 'stop':
 				taskIds = taskIds.filter((id) => {
@@ -479,13 +484,11 @@
 
 	// Sets the value of buttonTextCount
 	$: {
-		let items = checkedCheckoutTasks;
-		if ($shiftPressed || items.length == 0) {
-			buttonTextCount = 'All';
-		} else if (items.length == filteredTasks.length) {
-			buttonTextCount = `All (${items.length})`;
+		let items = checkedItemIds;
+		if ($shiftPressed || items.length == 0 || items.length == filteredTasks.length) {
+			buttonTextCount = `All`;
 		} else {
-			buttonTextCount = `${items.length}`;
+			buttonTextCount = `(${items.length})`;
 		}
 	}
 
@@ -536,7 +539,7 @@
 	<Tags
 		{tagsCount}
 		{selectedTags}
-		checkedItems={checkedCheckoutTasks}
+		checkedItems={checkedItemIds}
 		on:selectTag={handleSelectTag}
 		on:addTagToTasks={addTagToAccount}
 		on:deleteSelectedTags={deleteSelectedTags}
@@ -555,15 +558,23 @@
 		on:sort={handleSort}
 		on:checkedAll={handleCheckedAll}
 	>
-		<ActivityTableRow
+		<BaseTableRow
 			{row}
-			checked={checkedCheckoutTasks.includes(row.itemId)}
-			on:checked={handleChecked}
-			on:start={handleTask}
-			on:stop={handleTask}
-			on:editActivity={handleTask}
+			let:column
+			let:value
+			let:row
+			let:page
 			page="activity"
-		/>
+			checked={checkedItemIds.includes(row.itemId)}
+			on:checked={handleChecked}
+			on:delete={handleTask}
+			on:start={handleTask}
+			on:edit={handleTask}
+			on:stop={handleTask}
+			on:focus={handleTask}
+		>
+			<ActivityTableRow {value} {column} {row} {page} />
+		</BaseTableRow>
 	</Table>
 </div>
 
@@ -583,7 +594,7 @@
 
 {#if showConfirmationModal}
 	<ConfirmationModal
-		message={`You're about to clear sessions for ${buttonTextCount} of your tasks. This cannot be undone. Are you sure you want to continue?`}
+		message={`You're about to clear sessions for ${buttonTextCount.toLowerCase()} of your tasks. This cannot be undone. Are you sure you want to continue?`}
 		on:confirm={() => {
 			showConfirmationModal = false;
 			handleTask(new CustomEvent('delete'));
@@ -599,5 +610,6 @@
 		flex-grow: 1;
 		overflow-y: auto;
 		scroll-behavior: smooth;
+		margin-top: 10px;
 	}
 </style>

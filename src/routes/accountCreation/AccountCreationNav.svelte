@@ -6,7 +6,6 @@
 	import { createEventDispatcher } from 'svelte';
 
 	export let searchValue: string = '';
-	export let maxActiveTasks: string;
 	export let maxStartingTasks: string;
 
 	let maxActiveTaskCount: string;
@@ -34,22 +33,13 @@
 			</div>
 		</div>
 		<div class="button-group right-button-group">
-			<div class="input-group">
+			<div>
 				<Input
 					placeholder="Max Starting Tasks: {maxStartingTasks}"
 					style="width: 175px;"
 					variant="transparent"
 					bind:value={maxStartingTaskCount}
 					on:blur={() => saveSettings('max_starting_tasks', maxStartingTaskCount)}
-				/>
-			</div>
-			<div class="input-group">
-				<Input
-					placeholder="Max Active Tasks: {maxActiveTasks}"
-					style="width: 175px;"
-					variant="transparent"
-					bind:value={maxActiveTaskCount}
-					on:blur={() => saveSettings('max_active_tasks', maxActiveTaskCount)}
 				/>
 			</div>
 		</div>

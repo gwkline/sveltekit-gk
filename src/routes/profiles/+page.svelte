@@ -8,10 +8,8 @@
 		makeRequest,
 		updateSortState,
 		updateSelectedTags,
-		getSettings,
 		removeTags,
-		addTag,
-		getProfiles
+		addTag
 	} from '../../helpers';
 	import { showTags, shiftPressed, isLoading, profiles } from '../../datastore';
 	import type {
@@ -25,6 +23,7 @@
 		ShortProfile
 	} from '../../types';
 	import ProfileTableRow from '$lib/TableRows/ProfileTableRow.svelte';
+	import BaseTableRow from '$lib/TableRows/BaseTableRow.svelte';
 
 	let searchValue: string = '';
 	let sortState: SortState = { column: null, direction: 0 };
@@ -38,7 +37,7 @@
 	let lastChecked: number | null = null;
 	let secondLastChecked: number | null = null;
 	let checkedAll: boolean = false;
-	let checkedCheckoutTasks: number[] = [];
+	let checkedItemIds: number[] = [];
 	let totalSelectedTasks: number = 0;
 
 	let filteredProfiles: Profile[] = [];
@@ -59,9 +58,6 @@
 		Payment: (profile) => profile.payment.card_name,
 		Wins: (profile) => profile.previous_wins.number_of_wins.toString()
 	};
-
-	getSettings();
-	getProfiles();
 
 	const handleSort = (e: CustomEvent) => {
 		sortState = updateSortState(e, sortState);
@@ -164,7 +160,7 @@
 		let updatedProfiles: (Account | Profile)[] = [];
 		profiles.update((profiles) => {
 			return profiles.map((profile) => {
-				if (checkedCheckoutTasks.includes(profile.id)) {
+				if (checkedItemIds.includes(profile.id)) {
 					profile.tags.push({ name: newTagText });
 					updatedProfiles.push(profile);
 				}
@@ -182,13 +178,13 @@
 		secondLastChecked = lastChecked;
 		lastChecked = itemId;
 
-		let arrayOfTaskIndexes = checkedCheckoutTasks;
-		if (checkedCheckoutTasks.includes(itemId)) {
+		let arrayOfTaskIndexes = checkedItemIds;
+		if (checkedItemIds.includes(itemId)) {
 			arrayOfTaskIndexes.splice(arrayOfTaskIndexes.indexOf(itemId), 1);
 		} else {
 			arrayOfTaskIndexes.push(itemId);
 		}
-		checkedCheckoutTasks = arrayOfTaskIndexes;
+		checkedItemIds = arrayOfTaskIndexes;
 
 		if ($shiftPressed && lastChecked === itemId && secondLastChecked !== null) {
 			let start = Math.min(lastChecked, secondLastChecked);
@@ -196,8 +192,8 @@
 
 			for (let i = start + 1; i < end; i++) {
 				let taskWithThisId = $profiles.find((profile) => profile.id === i);
-				if (taskWithThisId && !checkedCheckoutTasks.includes(taskWithThisId.id)) {
-					checkedCheckoutTasks.push(i);
+				if (taskWithThisId && !checkedItemIds.includes(taskWithThisId.id)) {
+					checkedItemIds.push(i);
 				}
 			}
 		}
@@ -208,9 +204,9 @@
 
 		if (e.detail.checked) {
 			let allIds = filteredProfiles.map((profile) => profile.id);
-			checkedCheckoutTasks = allIds;
+			checkedItemIds = allIds;
 		} else {
-			checkedCheckoutTasks = [];
+			checkedItemIds = [];
 		}
 	};
 
@@ -223,8 +219,8 @@
 		if (profileId) {
 			profileIds = [profileId];
 		} else {
-			let all = $shiftPressed || checkedCheckoutTasks.filter((item) => item != -1).length === 0;
-			profileIds = all ? filteredProfiles.map((profile) => profile.id) : checkedCheckoutTasks;
+			let all = $shiftPressed || checkedItemIds.filter((item) => item != -1).length === 0;
+			profileIds = all ? filteredProfiles.map((profile) => profile.id) : checkedItemIds;
 		}
 
 		switch (state) {
@@ -371,13 +367,11 @@
 
 	// Sets the value of buttonTextCount
 	$: {
-		let items = checkedCheckoutTasks;
-		if ($shiftPressed || items.length == 0) {
+		let items = checkedItemIds;
+		if ($shiftPressed || items.length == 0 || items.length == filteredProfiles.length) {
 			buttonTextCount = 'All';
-		} else if (items.length == filteredProfiles.length) {
-			buttonTextCount = `All (${items.length})`;
 		} else {
-			buttonTextCount = `${items.length}`;
+			buttonTextCount = `(${items.length})`;
 		}
 	}
 
@@ -416,7 +410,7 @@
 	<Tags
 		{tagsCount}
 		{selectedTags}
-		checkedItems={checkedCheckoutTasks}
+		checkedItems={checkedItemIds}
 		on:selectTag={handleSelectTag}
 		on:addTagToTasks={addTagToAccount}
 		on:deleteSelectedTags={deleteSelectedTags}
@@ -435,14 +429,21 @@
 		on:sort={handleSort}
 		on:checkedAll={handleCheckedAll}
 	>
-		<ProfileTableRow
+		<BaseTableRow
 			{row}
-			checked={checkedCheckoutTasks.includes(row.itemId)}
+			let:column
+			let:value
+			page="activity"
+			checked={checkedItemIds.includes(row.itemId)}
 			on:checked={handleChecked}
+			on:delete={handleTask}
 			on:start={handleTask}
+			on:edit={handleTask}
 			on:stop={handleTask}
-			on:editActivity={handleTask}
-		/>
+			on:focus={handleTask}
+		>
+			<ProfileTableRow {value} {column} />
+		</BaseTableRow>
 	</Table>
 </div>
 
