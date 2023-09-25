@@ -33,7 +33,7 @@
 			</div>
 		</div>
 		<div class="button-group right-button-group">
-			<div class="input-group">
+			<div>
 				<Input
 					placeholder="Max Starting Tasks: {maxStartingTasks}"
 					style="width: 175px;"

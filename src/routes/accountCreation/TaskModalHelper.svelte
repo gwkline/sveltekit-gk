@@ -1,15 +1,16 @@
 <script lang="ts">
-	import Button from '$lib/Button.svelte';
-	import Dropdown from '$lib/Dropdown.svelte';
-	import Input from '$lib/Input.svelte';
-	import Modal from '$lib/Modal.svelte';
 	import MultiDropdown from '$lib/MultiDropdown.svelte';
-	import { faCheck, faPlug, faSave, faX } from '@fortawesome/free-solid-svg-icons';
-	import { isLoading, proxy_lists, verboseNacTasks } from '../../datastore';
-	import { getProxies, makeRequest } from '../../helpers';
-	import type { Tag } from '../../types';
-	import type { Axios, AxiosResponse } from 'axios';
+	import Dropdown from '$lib/Dropdown.svelte';
+	import Button from '$lib/Button.svelte';
+	import Input from '$lib/Input.svelte';
+	import Toggle from '$lib/Toggle.svelte';
+	import Modal from '$lib/Modal.svelte';
 	import Fa from 'svelte-fa';
+	import { accounts, isLoading, proxy_lists, verboseNacTasks } from '../../datastore';
+	import { faCheck, faPlug, faSave, faX } from '@fortawesome/free-solid-svg-icons';
+	import { getProxies, makeRequest } from '../../helpers';
+	import type { AxiosResponse } from 'axios';
+	import type { Tag } from '../../types';
 
 	export let showModal: boolean = false;
 	export let checkedCheckoutTasks: number[] = [];
@@ -25,8 +26,26 @@
 
 	let proxyListNames = $proxy_lists.map((list) => list.name);
 	let browsers = ['Default', 'Chrome', 'Chrome Beta', 'Edge', 'Brave'];
-	let nacTags = $verboseNacTasks.map((task) => task.email); //todo;
-	let accountTags = $verboseNacTasks.map((task) => task.email); //todo
+	let nacTags = $verboseNacTasks.reduce((acc: string[], task) => {
+		if (task.tags.length > 0) {
+			task.tags.forEach((tag) => {
+				if (!acc.includes(tag.name)) {
+					acc.push(tag.name);
+				}
+			});
+		}
+		return acc;
+	}, []);
+	let accountTags = $accounts.reduce((acc: string[], account) => {
+		if (account.tags.length > 0) {
+			account.tags.forEach((tag) => {
+				if (!acc.includes(tag.name)) {
+					acc.push(tag.name);
+				}
+			});
+		}
+		return acc;
+	}, []);
 	let emailTypes = ['Gmail', 'Yahoo', 'Outlook', 'FastMail', 'iCloud', 'XYZ', 'Other'];
 
 	let predictedTaskCount: string | number = 0;
@@ -42,6 +61,15 @@
 	let emailPassword = '';
 	let emailFolder = '';
 	let statusText = '';
+
+	let editProxyList = false;
+	let editBrowser = false;
+	let editNacTags = false;
+	let editAccountTags = false;
+	let editEmailUsername = false;
+	let editEmailPassword = false;
+	let editInboxFolder = false;
+	let editEmailType = false;
 
 	let rawEmails = '';
 	$: accountEmails = rawEmails == '' ? [] : rawEmails.split('\n').filter((email) => email !== '');
@@ -131,7 +159,36 @@
 		$isLoading['testConn'] = false;
 	};
 
-	const editTasks = () => {};
+	const editTasks = () => {
+		let tasks = $verboseNacTasks.filter((task) => checkedCheckoutTasks.includes(task.id));
+
+		tasks.map((task) => {
+			if (editProxyList) {
+				task.proxy_list_id = selectedProxyList;
+			}
+			if (editBrowser) {
+				task.browser_type = selectedBrowser;
+			}
+			if (editNacTags) {
+				task.tags = selectedNacTags;
+			}
+			if (editAccountTags) {
+				task.account_tags = selectedAccountTags;
+			}
+			if (editEmailUsername) {
+				task.email = emailUsername;
+			}
+			if (editEmailPassword) {
+				task.email_password = emailPassword;
+			}
+			if (editInboxFolder) {
+				task.email_folder = emailFolder;
+			}
+			if (editEmailType) {
+				task.email_provider = selectedEmailType;
+			}
+		});
+	};
 	const duplicateTasks = () => {};
 
 	const saveButtonText = () => {
@@ -168,73 +225,140 @@
 			/>
 		</div>
 		<div>
+			{#if !isEditing}
+				<div class="row">
+					<Input
+						style="width: 100%;"
+						title="Email List"
+						type="paragraph"
+						fullWidth={true}
+						placeholder="email1@gmail.com"
+						bind:value={rawEmails}
+					/>
+				</div>
+			{/if}
+
 			<div class="row">
-				<Input
-					style="width: 100%;"
-					title="Email List"
-					type="paragraph"
-					fullWidth={true}
-					placeholder="email1@gmail.com"
-					bind:value={rawEmails}
-				/>
+				<div class="edit-wrap">
+					{#if isEditing}
+						<Toggle bind:checked={editProxyList} style="margin-right: 10px; margin-bottom: 8px;" />
+					{/if}
+					<Dropdown
+						bind:value={selectedProxyListName}
+						options={proxyListNames}
+						size={'lg'}
+						style={'width: 200px;'}
+						title="Proxy List"
+						disabled={(isEditing || isDuplicating) && !editProxyList}
+					/>
+				</div>
+				<div class="edit-wrap">
+					{#if isEditing}
+						<Toggle bind:checked={editBrowser} style="margin-right: 10px; margin-bottom: 8px;" />
+					{/if}
+					<Dropdown
+						bind:value={selectedBrowser}
+						options={browsers}
+						size={'lg'}
+						style={'width: 200px;'}
+						title="Browser"
+						disabled={(isEditing || isDuplicating) && !editBrowser}
+					/>
+				</div>
 			</div>
 			<div class="row">
-				<Dropdown
-					bind:value={selectedProxyListName}
-					options={proxyListNames}
-					size={'lg'}
-					style={'width: 200px;'}
-					title="Proxy List"
-				/>
-				<Dropdown
-					bind:value={selectedBrowser}
-					options={browsers}
-					size={'lg'}
-					style={'width: 200px;'}
-					title="Browser"
-				/>
-			</div>
-			<div class="row">
-				<MultiDropdown
-					options={nacTags}
-					title="NAC Task Tags"
-					titlePosition="top"
-					on:update={(e) => handleNacTagSelection(e)}
-				/>
-				<MultiDropdown
-					options={accountTags}
-					title="Account Tags"
-					titlePosition="top"
-					on:update={(e) => handleAccountTagSelection(e)}
-				/>
+				<div class="edit-wrap">
+					{#if isEditing}
+						<Toggle bind:checked={editNacTags} style="margin-right: 10px; margin-bottom: 8px;" />
+					{/if}
+					<MultiDropdown
+						options={nacTags}
+						title="NAC Task Tags"
+						titlePosition="top"
+						disabled={(isEditing || isDuplicating) && !editNacTags}
+						on:update={(e) => handleNacTagSelection(e)}
+					/>
+				</div>
+				<div class="edit-wrap">
+					{#if isEditing}
+						<Toggle
+							bind:checked={editAccountTags}
+							style="margin-right: 10px; margin-bottom: 8px;"
+						/>
+					{/if}
+					<MultiDropdown
+						options={accountTags}
+						title="Account Tags"
+						titlePosition="top"
+						disabled={(isEditing || isDuplicating) && !editAccountTags}
+						on:update={(e) => handleAccountTagSelection(e)}
+					/>
+				</div>
 			</div>
 		</div>
 
 		<div>
 			<h6 style="margin-top: 20px; margin-bottom: 10px;">IMAP Configuration</h6>
 			<div class="row">
-				<Input
-					style="width: 200px;"
-					title="Email Username"
-					bind:value={emailUsername}
-					placeholder="enigma@gmail.com"
-				/>
-				<Input
-					style="width: 200px;"
-					title="Email Password"
-					bind:value={emailPassword}
-					placeholder="p4ssw0rd69!"
-				/>
+				<div class="edit-wrap">
+					{#if isEditing}
+						<Toggle
+							bind:checked={editEmailUsername}
+							style="margin-right: 10px; margin-bottom: 8px;"
+						/>
+					{/if}
+					<Input
+						style="width: 200px;"
+						title="Email Username"
+						disabled={(isEditing || isDuplicating) && !editEmailUsername}
+						bind:value={emailUsername}
+						placeholder="enigma@gmail.com"
+					/>
+				</div>
+				<div class="edit-wrap">
+					{#if isEditing}
+						<Toggle
+							bind:checked={editEmailPassword}
+							style="margin-right: 10px; margin-bottom: 8px;"
+						/>
+					{/if}
+					<Input
+						style="width: 200px;"
+						title="Email Password"
+						bind:value={emailPassword}
+						disabled={(isEditing || isDuplicating) && !editEmailPassword}
+						placeholder="p4ssw0rd69!"
+					/>
+				</div>
 			</div>
 			<div class="row bottom">
-				<Input style="width: 200px;" title="Inbox Folder" bind:value={emailFolder} />
-				<Dropdown
-					options={emailTypes}
-					bind:value={selectedEmailType}
-					size={'lg'}
-					style={'width: 200px; height: 33px;'}
-					title="Email Type"
-				/>
+				<div class="edit-wrap">
+					{#if isEditing}
+						<Toggle
+							bind:checked={editInboxFolder}
+							style="margin-right: 10px; margin-bottom: 8px;"
+						/>
+					{/if}
+					<Input
+						style="width: 200px;"
+						title="Inbox Folder"
+						bind:value={emailFolder}
+						disabled={(isEditing || isDuplicating) && !editInboxFolder}
+					/>
+				</div>
+				<div class="edit-wrap">
+					{#if isEditing}
+						<Toggle bind:checked={editEmailType} style="margin-right: 10px; margin-bottom: 8px;" />
+					{/if}
+					<Dropdown
+						options={emailTypes}
+						bind:value={selectedEmailType}
+						size={'lg'}
+						disabled={(isEditing || isDuplicating) && !editEmailType}
+						style={'width: 200px; height: 33px;'}
+						title="Email Type"
+					/>
+				</div>
 			</div>
 			<div style="margin-top: 20px; justify-content:end; width: 100%; display: flex;">
 				{#if statusText !== ''}
@@ -256,6 +380,11 @@
 					icon={faPlug}
 					style="align-items: center;"
 					isLoading={$isLoading['testConn']}
+					disabled={(isEditing || isDuplicating) &&
+						!editEmailType &&
+						!editEmailUsername &&
+						!editEmailPassword &&
+						!editInboxFolder}
 					onclick={testConnection}>Test Connection</Button
 				>
 			</div>
@@ -268,7 +397,7 @@
 				size="md"
 				icon={faSave}
 				onclick={handleSaveClicked}
-				disabled={accountEmails.length === 0}
+				disabled={accountEmails.length === 0 && !isDuplicating && !isEditing}
 				isLoading={$isLoading['saveTasks']}>{saveButtonText()} {predictedTaskCount} tasks</Button
 			>
 		</div>
@@ -300,5 +429,12 @@
 		margin-top: 30px;
 		margin-bottom: 0;
 		justify-content: end;
+	}
+
+	.edit-wrap {
+		display: flex;
+		flex-direction: row;
+		align-items: end;
+		gap: 10px;
 	}
 </style>

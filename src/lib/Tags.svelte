@@ -261,6 +261,7 @@
 			<div class="input-wrapper">
 				{#if isAddingTag && addOrEdit === 'add'}
 					<div class={isAddingTag ? 'input-container' : 'input-container hidden'}>
+						<!-- svelte-ignore a11y-autofocus -->
 						<input
 							type="text"
 							class="tag-add-input"
@@ -407,7 +408,7 @@
 		display: flex;
 		align-items: center;
 		padding: 0.5rem 0.7rem;
-		margin: 0.5rem;
+		margin: 0.5rem 0.5rem 0.5rem 0;
 		border-radius: 0.75rem;
 		background-color: var(--light-gray-1);
 		outline: 1px solid var(--light-gray-4);

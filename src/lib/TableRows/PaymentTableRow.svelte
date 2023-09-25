@@ -3,6 +3,7 @@
 	import DateAddedCell from '../TableCells/DateAddedCell.svelte';
 	import { createEventDispatcher } from 'svelte';
 	import type { Payment, TableRowType } from '../../types';
+	import CardNumberCell from '$lib/TableCells/CardNumberCell.svelte';
 
 	export let row: TableRowType<Payment>;
 	export let checked = false;
@@ -25,6 +26,8 @@
 				<td class={column}>
 					{#if column === 'Date Added'}
 						<DateAddedCell {value} />
+					{:else if column === 'Card Number'}
+						<CardNumberCell {value} />
 					{:else}
 						{value}
 					{/if}

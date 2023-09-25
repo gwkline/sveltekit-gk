@@ -55,7 +55,7 @@
 			{/if}
 		{/each}
 
-		<td style="justify-content: end;">
+		<td class="action">
 			<ButtonGroup
 				{page}
 				itemId={row.itemId}
@@ -95,5 +95,11 @@
 		display: flex;
 		align-items: center;
 		justify-content: start;
+	}
+
+	.action {
+		display: flex;
+		align-items: center;
+		justify-content: end;
 	}
 </style>

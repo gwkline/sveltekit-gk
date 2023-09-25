@@ -147,18 +147,30 @@
 	$: orderedTasks = tasks
 		.slice()
 		.sort((a, b) => stateOrder.indexOf(a.state) - stateOrder.indexOf(b.state));
+
+	const shadow = (state: CheckoutState | ActivityState | NacState) => {
+		return `box-shadow:
+			${getColor(state)} 0px 0px 0px 0px,
+			${getColor(state)} 0px 1px 1px 0px,
+			${getColor(state)} 0px 2px 5px 0px,
+			${getColor(state)} 0px 2px 5px 0px !important;`;
+	};
 </script>
 
 <div class="state-info">
 	{#each countTasksByState(orderedTasks) as [state, count] (state)}
 		<button
-			class={`state-item ${state === selectedState ? 'selected' : ''}`}
+			class={`state-item shadow ${state === selectedState ? 'selected' : ''}`}
+			style={`outline-color: ${getColor(state)}; ${state === selectedState ? shadow(state) : ''}}`}
 			on:click={() => selectState(state)}
 		>
-			<div class="state-color-icon" style="background-color: {getColor(state)};">
-				<Fa icon={stateIconMapping[state]} color="var(--white)" size="md" />
+			<div style="align-items: center; display: flex; flex-direction: row; gap: 7px;">
+				<div class="state-color-icon" style="background-color: {getColor(state)};">
+					<Fa icon={stateIconMapping[state]} color="var(--white)" size="md" />
+				</div>
+				<span class="state-name">{capitalizeFirstLetter(state)}</span>
 			</div>
-			<span class="state-name">{capitalizeFirstLetter(state) + ':'}</span>
+			<div class="divider"></div>
 			<span class="state-count">{count}</span>
 		</button>
 	{/each}
@@ -180,6 +192,12 @@
 </div>
 
 <style>
+	.divider {
+		width: 1px;
+		background-color: var(--light-gray-4); /* You can change this to a light gray like #ccc */
+		height: 25px; /* Change this line */
+		margin: 0;
+	}
 	.status-bar {
 		display: flex;
 		width: 100%;
@@ -196,7 +214,7 @@
 		flex-grow: 1;
 		text-align: center;
 		transition: background-color 0.3s ease;
-		border: none;
+		outline: 1px solid var(--light-gray-3);
 		outline: none;
 	}
 
@@ -211,17 +229,16 @@
 	.state-item {
 		display: flex;
 		align-items: center;
+		justify-content: space-evenly;
 		margin: 3px 0px;
 		background-color: inherit;
-		border: none;
 		color: var(--off-black);
-	}
-
-	.state-item.selected {
-		border: 1px solid var(--light-gray-4);
-		border-radius: 5px;
-		padding: 3px;
-		transition: border-color 0.3s ease;
+		outline: 1px solid var(--light-gray-3);
+		border: 1px solid transparent;
+		padding: 5px;
+		border-radius: 6px;
+		cursor: pointer;
+		gap: 10px;
 	}
 
 	.state-color-icon {
@@ -232,17 +249,32 @@
 		height: 30px;
 		border-radius: 5px;
 		box-sizing: border-box;
-		transition: background-color 0.3s ease;
 	}
 
 	.state-name,
 	.state-count {
-		margin-left: 10px;
 		font-size: small;
 	}
 
 	.state-count {
 		font-weight: bold;
 		width: 25px;
+	}
+
+	.shadow {
+		box-shadow:
+			var(--shadow-1) 0px 0px 0px 0px,
+			var(--shadow-2) 0px 1px 1px 0px,
+			var(--shadow-3) 0px 0px 0px 1px,
+			var(--shadow-4) 0px 2px 5px 0px;
+		transition: all 0.15s ease;
+	}
+
+	.shadow:hover {
+		box-shadow:
+			var(--shadow-1) 0px 0px 0px 0px,
+			var(--shadow-2) 0px 1px 1px 0px,
+			var(--shadow-3) 0px 2px 5px 0px,
+			var(--shadow-4) 0px 2px 5px 0px;
 	}
 </style>

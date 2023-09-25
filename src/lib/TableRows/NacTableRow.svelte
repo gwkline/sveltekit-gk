@@ -17,10 +17,6 @@
 	const handleClick = () => {
 		dispatch('checked', row.itemId);
 	};
-
-	const editActivity = (e: CustomEvent) => {
-		dispatch('editActivity', { id: row.itemId, mode: e.detail.mode });
-	};
 </script>
 
 <tr on:click|stopPropagation={handleClick} class={checked ? 'active' : ''}>
@@ -47,7 +43,7 @@
 			{/if}
 		{/each}
 
-		<td>
+		<td class="action">
 			<ButtonGroup
 				{page}
 				itemId={row.itemId}
@@ -63,7 +59,6 @@
 
 <style>
 	tr {
-		height: 46px;
 		border-bottom: 1px solid var(--light-gray-3);
 		align-items: center;
 	}
@@ -77,6 +72,7 @@
 		font-size: 13px;
 		overflow: hidden;
 		border: none;
+		padding: 5px 5px;
 	}
 
 	.checkbox {
@@ -87,5 +83,11 @@
 		display: flex;
 		align-items: center;
 		justify-content: start;
+	}
+
+	.action {
+		display: flex;
+		align-items: center;
+		justify-content: end;
 	}
 </style>

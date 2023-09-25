@@ -14,12 +14,28 @@
 			return stateColors[state];
 		}
 	};
+
+	const darkColors = (state: CheckoutState | ActivityState | NacState) => {
+		let x = {
+			Ready: 'var(--off-black)',
+			Queued: 'var(--warning-yellow-contrast)',
+			Starting: 'var(--primary-contrast)',
+			Running: 'var(--primary-contrast)',
+			Waiting: 'var(--primary-contrast)',
+			Error: 'var(--danger-red-contrast)',
+			AwaitingResults: 'var(--primary-contrast)',
+			Complete: 'var(--success-green-contrast)',
+			Winning: 'var(--success-green-contrast)'
+		};
+
+		return x[state];
+	};
 </script>
 
 <div class="status-content">
 	<div class="state-color-icon" style="background-color: {getColor(state)};">
-		<Fa icon={stateIconMapping[state]} color="var(--off-black)" size="md" />
-		<span class="text">{value}</span>
+		<Fa icon={stateIconMapping[state]} color={darkColors(state)} size="md" />
+		<span class="text" style={`color: ${darkColors(state)};`}>{value}</span>
 	</div>
 </div>
 
@@ -27,7 +43,7 @@
 	.text {
 		flex-grow: 1;
 		text-align: left;
-		color: var(--off-black);
+		color: var(--white);
 	}
 	.status-content {
 		display: flex;
@@ -44,15 +60,19 @@
 		width: auto; /* changed from fixed width */
 		padding: 0 10px; /* added padding */
 		height: 25px;
-		gap: 15px;
+		gap: 10px;
 		border-radius: 5px;
 		box-sizing: border-box;
-		outline: 0.15em solid #fafafa8f;
+		outline: 0.15em solid inherit;
 	}
 
 	@media (max-width: 900px) {
 		.status-content > .state-color-icon > .text {
 			display: none;
+		}
+
+		.status-content {
+			min-width: 0px;
 		}
 	}
 </style>

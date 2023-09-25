@@ -19,6 +19,18 @@
 	} from '../datastore';
 	import type { Writable } from 'svelte/store';
 	import type { EventData, VerboseTask } from '../types';
+	import { onNavigate } from '$app/navigation';
+
+	onNavigate((navigation) => {
+		if (!document.startViewTransition) return;
+
+		return new Promise((resolve) => {
+			document.startViewTransition(async () => {
+				resolve();
+				await navigation.complete;
+			});
+		});
+	});
 
 	let eventSource: EventSource;
 

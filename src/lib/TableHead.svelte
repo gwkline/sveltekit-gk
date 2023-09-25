@@ -35,14 +35,14 @@
 					{:else if sortState.column === columnHeading && sortState.direction === -1}
 						<Fa icon={faSortUp} />
 					{:else}
-						<Fa icon={faSort} />
+						<Fa icon={faSort} color="var(--light-gray-2)" />
 					{/if}
 				</span>
 			</th>
 		{/each}
 		{#if tableCount > 0}
 			<th class="task-count">
-				<p>{tableCount} Tasks</p>
+				<p style="margin: 0">{tableCount} Tasks</p>
 			</th>
 		{/if}
 	</tr>
@@ -72,18 +72,19 @@
 	}
 
 	tr {
-		height: 46px;
+		height: 30px;
+		border-bottom: 1px solid var(--success-green);
 	}
 
 	th {
-		border-collapse: collapse;
+		border-collapse: separate;
 		font-size: 15px;
 		border: none;
 		z-index: 2;
 		white-space: nowrap;
 	}
 	.checkbox {
-		padding-left: 35px;
+		padding-left: 50px;
 	}
 
 	.column-heading {

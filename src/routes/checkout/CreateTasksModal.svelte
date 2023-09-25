@@ -329,7 +329,6 @@
 			bind:value={sku}
 			title="SKU"
 			style="height: 36px;"
-			variant="transparent"
 			disabled={isEditing && !editSku ? true : false}
 		/>
 		<Button
@@ -338,6 +337,8 @@
 			onclick={() => {
 				currentModal = ModalType.Launches;
 			}}
+			shape="square"
+			size="sm"
 			disabled={isEditing && !editSku ? true : false}
 		/>
 	</div>
@@ -400,7 +401,6 @@
 			bind:value={preferredSizeInput}
 			style="height: 36px; width: 100%;"
 			fullWidth={true}
-			variant="transparent"
 			disabled={isEditing && !editPreferredSizeInput ? true : false}
 		/>
 		<Button
@@ -409,6 +409,8 @@
 				currentModal = ModalType.Size;
 			}}
 			style="margin: 0 0 0 10px;"
+			shape="square"
+			size="sm"
 			disabled={isEditing && !editPreferredSizeInput ? true : false}
 		/>
 	</div>
@@ -428,7 +430,6 @@
 				bind:value={randomSizeInput}
 				style="height: 36px; width: 100%;"
 				fullWidth={true}
-				variant="transparent"
 				disabled={isEditing && !editRandomSizeInput ? true : false}
 			/>
 			<Button
@@ -437,6 +438,8 @@
 					currentModal = ModalType.Size;
 				}}
 				style="margin: 0 0 0 10px;"
+				shape="square"
+				size="sm"
 				disabled={isEditing && !editRandomSizeInput ? true : false}
 			/>
 		</div>

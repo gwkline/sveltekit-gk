@@ -144,29 +144,29 @@
 	};
 
 	const deleteSelectedTagsByTasks = () => {
-		verboseNacTasks.update((tasks) => {
-			let selectedIndices = checkedCheckoutTasks;
+		// verboseNacTasks.update((tasks) => {
+		// 	let selectedIndices = checkedCheckoutTasks;
 
-			// Get the selected tasks based on indices
-			let selectedTasks = selectedIndices.map((index) => tasks[index]);
+		// 	// Get the selected tasks based on indices
+		// 	let selectedTasks = selectedIndices.map((index) => tasks[index]);
 
-			// Generate an array of changes (deltas) to be applied
-			let deltas = removeTags(
-				selectedTasks,
-				selectedTags,
-				'http://127.0.0.1:23432/tasks?type=checkout'
-			);
+		// 	// Generate an array of changes (deltas) to be applied
+		// 	let deltas = removeTags(
+		// 		selectedTasks,
+		// 		selectedTags,
+		// 		'http://127.0.0.1:23432/tasks?type=checkout'
+		// 	);
 
-			// Apply the changes back to the original tasks array
-			deltas.forEach((delta, index) => {
-				let originalIndex = selectedIndices[index];
-				// Apply the delta to modify the original task at this index
-				// (This assumes that 'delta' contains all the information needed to modify 'tasks[originalIndex]')
-				tasks[originalIndex] = { ...tasks[originalIndex], ...delta };
-			});
+		// 	// Apply the changes back to the original tasks array
+		// 	deltas.forEach((delta, index) => {
+		// 		let originalIndex = selectedIndices[index];
+		// 		// Apply the delta to modify the original task at this index
+		// 		// (This assumes that 'delta' contains all the information needed to modify 'tasks[originalIndex]')
+		// 		tasks[originalIndex] = { ...tasks[originalIndex], ...delta };
+		// 	});
 
-			return tasks;
-		});
+		// 	return tasks;
+		// });
 		selectedTags = []; // Clear selection after deleting
 	};
 
@@ -560,7 +560,7 @@
 	/>
 {/if}
 
-<div class="table-container">
+<div class="table-container shadow">
 	<Table
 		let:row
 		{tableData}
@@ -618,5 +618,8 @@
 		flex-grow: 1;
 		overflow-y: auto;
 		scroll-behavior: smooth;
+		padding: 0px 10px 1px 10px;
+		border-radius: 6px;
+		margin-top: 10px;
 	}
 </style>

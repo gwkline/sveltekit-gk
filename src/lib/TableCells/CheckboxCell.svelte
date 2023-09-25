@@ -10,7 +10,7 @@
 </script>
 
 <div class="count-content">
-	<div style="width: 10px; text-align: right; font-size:12px;">{index}</div>
+	<div style="width: 10px; text-align: right; font-size:12px; ">{index}</div>
 	<div class="checkbox">
 		<Checkbox bind:checked on:change />
 	</div>
@@ -38,5 +38,6 @@
 		display: flex;
 		align-items: center;
 		justify-content: start;
+		padding-left: 10px;
 	}
 </style>

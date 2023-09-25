@@ -92,6 +92,7 @@ export type NacTask = {
 	email: string;
 	email_password: string;
 	email_provider: string;
+	email_folder: string | undefined;
 	proxy: string;
 	proxy_list_id: number;
 	proxy_list: ProxyList;

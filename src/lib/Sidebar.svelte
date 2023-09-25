@@ -191,7 +191,7 @@
 		content: ' ';
 		position: absolute;
 		top: 0;
-		width: 4px;
+		width: 100%;
 		border-radius: 0px 6px 6px 0px;
 		height: 100%;
 	}
