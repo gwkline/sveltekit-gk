@@ -25,6 +25,7 @@
 	} from '../../types';
 	import AccountCreationNavBottom from './AccountCreationNavBottom.svelte';
 	import NacTableRow from '$lib/TableRows/NacTableRow.svelte';
+	import BaseTableRow from '$lib/TableRows/BaseTableRow.svelte';
 
 	let searchValue: string = '';
 	let sortState: SortState = { column: null, direction: 0 };
@@ -573,8 +574,12 @@
 		on:sort={handleSort}
 		on:checkedAll={handleCheckedAll}
 	>
-		<NacTableRow
+		<BaseTableRow
 			{row}
+			let:column
+			let:value
+			let:row
+			let:page
 			page="nac"
 			checked={checkedCheckoutTasks.includes(row.itemId)}
 			on:checked={handleChecked}
@@ -583,7 +588,9 @@
 			on:edit={handleTask}
 			on:stop={handleTask}
 			on:focus={handleTask}
-		/>
+		>
+			<NacTableRow {value} {column} {row} {page} />
+		</BaseTableRow>
 	</Table>
 </div>
 

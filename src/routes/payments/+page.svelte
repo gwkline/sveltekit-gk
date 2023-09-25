@@ -21,6 +21,7 @@
 		states
 	} from '../../types';
 	import PaymentTableRow from '$lib/TableRows/PaymentTableRow.svelte';
+	import BaseTableRow from '$lib/TableRows/BaseTableRow.svelte';
 
 	let searchValue: string = '';
 	let sortState: SortState = { column: null, direction: 0 };
@@ -427,14 +428,21 @@
 		on:sort={handleSort}
 		on:checkedAll={handleCheckedAll}
 	>
-		<PaymentTableRow
+		<BaseTableRow
 			{row}
+			let:column
+			let:value
+			page="payments"
 			checked={checkedCheckoutTasks.includes(row.itemId)}
 			on:checked={handleChecked}
+			on:delete={handleTask}
 			on:start={handleTask}
+			on:edit={handleTask}
 			on:stop={handleTask}
-			on:editActivity={handleTask}
-		/>
+			on:focus={handleTask}
+		>
+			<PaymentTableRow {value} {column} />
+		</BaseTableRow>
 	</Table>
 </div>
 

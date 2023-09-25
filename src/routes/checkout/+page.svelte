@@ -25,6 +25,8 @@
 		states
 	} from '../../types';
 	import CheckoutNavBottom from './CheckoutNavBottom.svelte';
+	import BaseTableRow from '$lib/TableRows/BaseTableRow.svelte';
+	import CheckoutTableRow from '$lib/TableRows/CheckoutTableRow.svelte';
 
 	let searchValue: string = '';
 	let sortState: SortState = { column: null, direction: 0 };
@@ -562,8 +564,12 @@
 		on:sort={handleSort}
 		on:checkedAll={handleCheckedAll}
 	>
-		<TaskTableRow
+		<BaseTableRow
 			{row}
+			let:column
+			let:value
+			let:row
+			let:page
 			page="checkout"
 			checked={checkedCheckoutTasks.includes(row.itemId)}
 			on:checked={handleChecked}
@@ -572,7 +578,9 @@
 			on:edit={handleTask}
 			on:stop={handleTask}
 			on:focus={handleTask}
-		/>
+		>
+			<CheckoutTableRow {value} {column} {row} {page} />
+		</BaseTableRow>
 	</Table>
 </div>
 

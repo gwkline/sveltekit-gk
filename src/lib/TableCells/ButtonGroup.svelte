@@ -2,7 +2,6 @@
 	import {
 		faCog,
 		faGlobe,
-		faPause,
 		faPen,
 		faPlay,
 		faStop,

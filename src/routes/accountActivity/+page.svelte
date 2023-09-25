@@ -34,6 +34,8 @@
 	} from '../../types';
 	import ActivityTableRow from '$lib/TableRows/ActivityTableRow.svelte';
 	import ActivityNavBottom from './ActivityNavBottom.svelte';
+	import ActivityModeCell from '$lib/TableCells/ActivityModeCell.svelte';
+	import BaseTableRow from '$lib/TableRows/BaseTableRow.svelte';
 
 	let searchValue: string = '';
 	let sortState: SortState = { column: null, direction: 0 };
@@ -556,16 +558,23 @@
 		on:sort={handleSort}
 		on:checkedAll={handleCheckedAll}
 	>
-		<ActivityTableRow
+		<BaseTableRow
 			{row}
+			let:column
+			let:value
+			let:row
+			let:page
+			page="activity"
 			checked={checkedCheckoutTasks.includes(row.itemId)}
 			on:checked={handleChecked}
+			on:delete={handleTask}
 			on:start={handleTask}
+			on:edit={handleTask}
 			on:stop={handleTask}
 			on:focus={handleTask}
-			on:editActivity={handleTask}
-			page="activity"
-		/>
+		>
+			<ActivityTableRow {value} {column} {row} {page} />
+		</BaseTableRow>
 	</Table>
 </div>
 

@@ -21,6 +21,7 @@
 		states
 	} from '../../types';
 	import WinTableRow from '$lib/TableRows/WinTableRow.svelte';
+	import BaseTableRow from '$lib/TableRows/BaseTableRow.svelte';
 
 	let searchValue: string = '';
 	let sortState: SortState = { column: null, direction: 0 };
@@ -421,14 +422,22 @@
 		on:sort={handleSort}
 		on:checkedAll={handleCheckedAll}
 	>
-		<WinTableRow
+		<BaseTableRow
 			{row}
+			let:column
+			let:value
+			let:row
+			page="activity"
 			checked={checkedCheckoutTasks.includes(row.itemId)}
 			on:checked={handleChecked}
+			on:delete={handleTask}
 			on:start={handleTask}
+			on:edit={handleTask}
 			on:stop={handleTask}
-			on:editActivity={handleTask}
-		/>
+			on:focus={handleTask}
+		>
+			<WinTableRow {value} {column} {row} />
+		</BaseTableRow>
 	</Table>
 </div>
 
