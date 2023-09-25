@@ -28,7 +28,7 @@
 	let lastChecked: number | null = null;
 	let secondLastChecked: number | null = null;
 	let checkedAll: boolean = false;
-	let checkedCheckoutTasks: number[] = [];
+	let checkedItemIds: number[] = [];
 
 	let filteredProxyLists: ProxyList[] = [];
 	let tableData: TableRowType<ProxyList>[] = [];
@@ -57,13 +57,13 @@
 		secondLastChecked = lastChecked;
 		lastChecked = itemId;
 
-		let arrayOfTaskIndexes = checkedCheckoutTasks;
-		if (checkedCheckoutTasks.includes(itemId)) {
+		let arrayOfTaskIndexes = checkedItemIds;
+		if (checkedItemIds.includes(itemId)) {
 			arrayOfTaskIndexes.splice(arrayOfTaskIndexes.indexOf(itemId), 1);
 		} else {
 			arrayOfTaskIndexes.push(itemId);
 		}
-		checkedCheckoutTasks = arrayOfTaskIndexes;
+		checkedItemIds = arrayOfTaskIndexes;
 
 		if ($shiftPressed && lastChecked === itemId && secondLastChecked !== null) {
 			let start = Math.min(lastChecked, secondLastChecked);
@@ -71,8 +71,8 @@
 
 			for (let i = start + 1; i < end; i++) {
 				let taskWithThisId = $proxy_lists.find((proxy_list) => proxy_list.id === i);
-				if (taskWithThisId && !checkedCheckoutTasks.includes(taskWithThisId.id)) {
-					checkedCheckoutTasks.push(i);
+				if (taskWithThisId && !checkedItemIds.includes(taskWithThisId.id)) {
+					checkedItemIds.push(i);
 				}
 			}
 		}
@@ -83,9 +83,9 @@
 
 		if (e.detail.checked) {
 			let allIds = filteredProxyLists.map((proxy_list) => proxy_list.id);
-			checkedCheckoutTasks = allIds;
+			checkedItemIds = allIds;
 		} else {
-			checkedCheckoutTasks = [];
+			checkedItemIds = [];
 		}
 	};
 
@@ -98,10 +98,8 @@
 		if (proxy_listId) {
 			proxy_listIds = [proxy_listId];
 		} else {
-			let all = $shiftPressed || checkedCheckoutTasks.filter((item) => item != -1).length === 0;
-			proxy_listIds = all
-				? filteredProxyLists.map((proxy_list) => proxy_list.id)
-				: checkedCheckoutTasks;
+			let all = $shiftPressed || checkedItemIds.filter((item) => item != -1).length === 0;
+			proxy_listIds = all ? filteredProxyLists.map((proxy_list) => proxy_list.id) : checkedItemIds;
 		}
 
 		switch (state) {
@@ -190,7 +188,7 @@
 
 	// Sets the value of buttonTextCount
 	$: {
-		let items = checkedCheckoutTasks;
+		let items = checkedItemIds;
 		if ($shiftPressed || items.length == 0 || items.length == filteredProxyLists.length) {
 			buttonTextCount = 'All';
 		} else {
@@ -244,7 +242,7 @@
 			let:column
 			let:value
 			page="activity"
-			checked={checkedCheckoutTasks.includes(row.itemId)}
+			checked={checkedItemIds.includes(row.itemId)}
 			on:checked={handleChecked}
 			on:delete={handleTask}
 			on:start={handleTask}

@@ -37,7 +37,7 @@
 	let lastChecked: number | null = null;
 	let secondLastChecked: number | null = null;
 	let checkedAll: boolean = false;
-	let checkedCheckoutTasks: number[] = [];
+	let checkedItemIds: number[] = [];
 	let totalSelectedTasks: number = 0;
 
 	let filteredAccounts: ShortAccount[] = [];
@@ -157,7 +157,7 @@
 		let updatedAccounts: (Account | ShortAccount)[] = [];
 		accounts.update((accounts) => {
 			return accounts.map((account) => {
-				if (checkedCheckoutTasks.includes(account.id)) {
+				if (checkedItemIds.includes(account.id)) {
 					account.tags.push({ name: newTagText });
 					updatedAccounts.push(account);
 				}
@@ -175,13 +175,13 @@
 		secondLastChecked = lastChecked;
 		lastChecked = itemId;
 
-		let arrayOfTaskIndexes = checkedCheckoutTasks;
-		if (checkedCheckoutTasks.includes(itemId)) {
+		let arrayOfTaskIndexes = checkedItemIds;
+		if (checkedItemIds.includes(itemId)) {
 			arrayOfTaskIndexes.splice(arrayOfTaskIndexes.indexOf(itemId), 1);
 		} else {
 			arrayOfTaskIndexes.push(itemId);
 		}
-		checkedCheckoutTasks = arrayOfTaskIndexes;
+		checkedItemIds = arrayOfTaskIndexes;
 
 		if ($shiftPressed && lastChecked === itemId && secondLastChecked !== null) {
 			let start = Math.min(lastChecked, secondLastChecked);
@@ -189,8 +189,8 @@
 
 			for (let i = start + 1; i < end; i++) {
 				let taskWithThisId = $accounts.find((account) => account.id === i);
-				if (taskWithThisId && !checkedCheckoutTasks.includes(taskWithThisId.id)) {
-					checkedCheckoutTasks.push(i);
+				if (taskWithThisId && !checkedItemIds.includes(taskWithThisId.id)) {
+					checkedItemIds.push(i);
 				}
 			}
 		}
@@ -201,9 +201,9 @@
 
 		if (e.detail.checked) {
 			let allIds = filteredAccounts.map((account) => account.id);
-			checkedCheckoutTasks = allIds;
+			checkedItemIds = allIds;
 		} else {
-			checkedCheckoutTasks = [];
+			checkedItemIds = [];
 		}
 	};
 
@@ -216,8 +216,8 @@
 		if (accountId) {
 			accountIds = [accountId];
 		} else {
-			let all = $shiftPressed || checkedCheckoutTasks.filter((item) => item != -1).length === 0;
-			accountIds = all ? filteredAccounts.map((account) => account.id) : checkedCheckoutTasks;
+			let all = $shiftPressed || checkedItemIds.filter((item) => item != -1).length === 0;
+			accountIds = all ? filteredAccounts.map((account) => account.id) : checkedItemIds;
 		}
 
 		switch (state) {
@@ -368,7 +368,7 @@
 
 	// Sets the value of buttonTextCount
 	$: {
-		let items = checkedCheckoutTasks;
+		let items = checkedItemIds;
 		if ($shiftPressed || items.length == 0 || items.length == filteredAccounts.length) {
 			buttonTextCount = 'All';
 		} else {
@@ -411,7 +411,7 @@
 	<Tags
 		{tagsCount}
 		{selectedTags}
-		checkedItems={checkedCheckoutTasks}
+		checkedItems={checkedItemIds}
 		on:selectTag={handleSelectTag}
 		on:addTagToTasks={addTagToAccount}
 		on:deleteSelectedTags={deleteSelectedTags}
@@ -436,7 +436,7 @@
 			let:value
 			let:row
 			page="accounts"
-			checked={checkedCheckoutTasks.includes(row.itemId)}
+			checked={checkedItemIds.includes(row.itemId)}
 			on:checked={handleChecked}
 			on:delete={handleTask}
 			on:start={handleTask}

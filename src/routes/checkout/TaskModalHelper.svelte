@@ -6,7 +6,7 @@
 	import type { LaunchType } from '../../types';
 
 	export let showModal: boolean = false;
-	export let checkedCheckoutTasks: number[] = [];
+	export let checkedItemIds: number[] = [];
 	export let closeModal: () => void = () => {
 		showModal = false;
 		isDuplicating = false;
@@ -55,7 +55,7 @@
 			/>
 		{:else if currentModal === ModalType.CreateTasks}
 			<CreateTasksModal
-				{checkedCheckoutTasks}
+				{checkedItemIds}
 				closeModal={closeAllModals}
 				{sku}
 				{preferredSizeInput}

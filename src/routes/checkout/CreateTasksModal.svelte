@@ -18,7 +18,7 @@
 	}
 	export let closeModal: () => void;
 	export let currentModal: ModalType;
-	export let checkedCheckoutTasks: number[] = [];
+	export let checkedItemIds: number[] = [];
 
 	export let sku = '';
 	export let preferredSizeInput = '';
@@ -120,7 +120,7 @@
 		verboseTasks.update((tasks) => {
 			let iter = 0;
 			return tasks.map((task) => {
-				if (checkedCheckoutTasks.length === 0 || checkedCheckoutTasks.includes(task.id)) {
+				if (checkedItemIds.length === 0 || checkedItemIds.includes(task.id)) {
 					if (editSku) {
 						task.product.product_id = sku;
 					}
@@ -168,7 +168,7 @@
 		let updatedTasks: OutboundTask[] = [];
 		let iter = 0;
 		$verboseTasks.forEach((task: OutboundTask) => {
-			if (checkedCheckoutTasks.length === 0 || checkedCheckoutTasks.includes(task.id)) {
+			if (checkedItemIds.length === 0 || checkedItemIds.includes(task.id)) {
 				task.account = null;
 				task.id = 0;
 
@@ -292,7 +292,7 @@
 
 			predictedTaskCount = filteredAccounts.length;
 		} else {
-			predictedTaskCount = checkedCheckoutTasks.length === 0 ? 'all' : checkedCheckoutTasks.length;
+			predictedTaskCount = checkedItemIds.length === 0 ? 'all' : checkedItemIds.length;
 		}
 	}
 

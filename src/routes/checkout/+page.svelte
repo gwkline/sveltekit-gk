@@ -43,7 +43,7 @@
 	let lastChecked: number | null = null;
 	let secondLastChecked: number | null = null;
 	let checkedAll: boolean = false;
-	let checkedCheckoutTasks: number[] = [];
+	let checkedItemIds: number[] = [];
 	let totalSelectedTasks: number = 0;
 
 	let filteredTasks: Task[] = [];
@@ -144,7 +144,7 @@
 
 	const deleteSelectedTagsByTasks = () => {
 		verboseTasks.update((tasks) => {
-			let selectedIndices = checkedCheckoutTasks;
+			let selectedIndices = checkedItemIds;
 
 			// Get the selected tasks based on indices
 			let selectedTasks = selectedIndices.map((index) => tasks[index]);
@@ -206,10 +206,7 @@
 		let updatedTasks: Task[] = [];
 		verboseTasks.update((tasks) => {
 			return tasks.map((task) => {
-				if (
-					checkedCheckoutTasks.includes(task.id) &&
-					!task.tags.some((t) => t.name === newTagText)
-				) {
+				if (checkedItemIds.includes(task.id) && !task.tags.some((t) => t.name === newTagText)) {
 					task.tags.push({ name: newTagText });
 					updatedTasks.push(task);
 				}
@@ -227,13 +224,13 @@
 		secondLastChecked = lastChecked;
 		lastChecked = itemId;
 
-		let arrayOfTaskIndexes = checkedCheckoutTasks;
-		if (checkedCheckoutTasks.includes(itemId)) {
+		let arrayOfTaskIndexes = checkedItemIds;
+		if (checkedItemIds.includes(itemId)) {
 			arrayOfTaskIndexes.splice(arrayOfTaskIndexes.indexOf(itemId), 1);
 		} else {
 			arrayOfTaskIndexes.push(itemId);
 		}
-		checkedCheckoutTasks = arrayOfTaskIndexes;
+		checkedItemIds = arrayOfTaskIndexes;
 
 		if ($shiftPressed && lastChecked === itemId && secondLastChecked !== null) {
 			let start = Math.min(lastChecked, secondLastChecked);
@@ -241,8 +238,8 @@
 
 			for (let i = start + 1; i < end; i++) {
 				let taskWithThisId = $verboseTasks.find((task) => task.id === i);
-				if (taskWithThisId && !checkedCheckoutTasks.includes(taskWithThisId.id)) {
-					checkedCheckoutTasks.push(i);
+				if (taskWithThisId && !checkedItemIds.includes(taskWithThisId.id)) {
+					checkedItemIds.push(i);
 				}
 			}
 		}
@@ -253,9 +250,9 @@
 
 		if (e.detail.checked) {
 			let allIds = filteredTasks.map((task) => task.id);
-			checkedCheckoutTasks = allIds;
+			checkedItemIds = allIds;
 		} else {
-			checkedCheckoutTasks = [];
+			checkedItemIds = [];
 		}
 	};
 
@@ -268,9 +265,9 @@
 		if (taskId) {
 			taskIds = [taskId];
 		} else {
-			let all = $shiftPressed || checkedCheckoutTasks.filter((item) => item != -1).length === 0;
+			let all = $shiftPressed || checkedItemIds.filter((item) => item != -1).length === 0;
 			let visibleItems = filteredTasks.map((task) => task.id);
-			let overlap = checkedCheckoutTasks.filter((item) => visibleItems.includes(item));
+			let overlap = checkedItemIds.filter((item) => visibleItems.includes(item));
 
 			taskIds = all ? filteredTasks.map((task) => task.id) : overlap;
 		}
@@ -312,15 +309,15 @@
 						return tasks.filter((task) => !taskIds.includes(task.id));
 					});
 
-					// Reset checkedCheckoutTasks
-					checkedCheckoutTasks = [];
+					// Reset checkedItemIds
+					checkedItemIds = [];
 					isLoading.set({ [`${state}${taskId}`]: false, confirmation: false });
 					showConfirmationModal = false;
 				});
 				break;
 			case 'edit':
 				if (taskId) {
-					checkedCheckoutTasks = [taskId];
+					checkedItemIds = [taskId];
 				}
 				isEditing = true;
 				showModal = true;
@@ -417,7 +414,7 @@
 		}
 
 		tableData = tableDataShortenedTemp;
-		checkedCheckoutTasks = checkedCheckoutTasks.filter((item) => tableIds.includes(item));
+		checkedItemIds = checkedItemIds.filter((item) => tableIds.includes(item));
 	}
 
 	// Sets the value of allTags and tagsCount
@@ -483,7 +480,7 @@
 
 	// Sets the value of buttonTextCount
 	$: {
-		let items = checkedCheckoutTasks;
+		let items = checkedItemIds;
 		let visibleItems = filteredTasks.map((task) => task.id);
 		let overlap = items.filter((item) => visibleItems.includes(item));
 
@@ -542,7 +539,7 @@
 	<Tags
 		{tagsCount}
 		{selectedTags}
-		checkedItems={checkedCheckoutTasks}
+		checkedItems={checkedItemIds}
 		on:selectTag={handleSelectTag}
 		on:deleteSelectedTags={deleteSelectedTags}
 		on:deleteSelectedTasks={deleteSelectedTasksByTags}
@@ -560,7 +557,7 @@
 		{headers}
 		{checkedAll}
 		{sortState}
-		checkedCount={checkedCheckoutTasks.length}
+		checkedCount={checkedItemIds.length}
 		on:sort={handleSort}
 		on:checkedAll={handleCheckedAll}
 	>
@@ -571,7 +568,7 @@
 			let:row
 			let:page
 			page="checkout"
-			checked={checkedCheckoutTasks.includes(row.itemId)}
+			checked={checkedItemIds.includes(row.itemId)}
 			on:checked={handleChecked}
 			on:delete={handleTask}
 			on:start={handleTask}
@@ -599,7 +596,7 @@
 />
 
 {#if showModal}
-	<TaskModalHelper {checkedCheckoutTasks} bind:showModal bind:isEditing bind:isDuplicating />
+	<TaskModalHelper {checkedItemIds} bind:showModal bind:isEditing bind:isDuplicating />
 {/if}
 
 {#if showConfirmationModal}

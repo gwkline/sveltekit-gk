@@ -13,7 +13,7 @@
 	import type { Tag } from '../../types';
 
 	export let showModal: boolean = false;
-	export let checkedCheckoutTasks: number[] = [];
+	export let checkedItemIds: number[] = [];
 	export let closeModal: () => void = () => {
 		showModal = false;
 		isDuplicating = false;
@@ -158,7 +158,7 @@
 	};
 
 	const editTasks = () => {
-		let tasks = $verboseNacTasks.filter((task) => checkedCheckoutTasks.includes(task.id));
+		let tasks = $verboseNacTasks.filter((task) => checkedItemIds.includes(task.id));
 
 		tasks.map((task) => {
 			if (editProxyList) {
@@ -199,7 +199,7 @@
 		if (!isEditing && !isDuplicating) {
 			predictedTaskCount = accountEmails.length;
 		} else {
-			predictedTaskCount = checkedCheckoutTasks.length === 0 ? 'all' : checkedCheckoutTasks.length;
+			predictedTaskCount = checkedItemIds.length === 0 ? 'all' : checkedItemIds.length;
 		}
 	}
 </script>
