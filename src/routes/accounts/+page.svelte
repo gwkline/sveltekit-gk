@@ -8,6 +8,7 @@
 		makeRequest,
 		updateSortState,
 		updateSelectedTags,
+		addAdditionalTagGeneric,
 		removeTags,
 		addTag,
 		cleanDate
@@ -120,37 +121,18 @@
 		selectedTags = [];
 	};
 
-	const addAdditionalTag = (e: CustomEvent) => {
-		let newTagText = e.detail;
-		let updatedAccounts: (Account | ShortAccount)[] = [];
-		accounts.update((accounts) => {
-			return accounts.map((account) => {
-				let taskHasSelectedTag = account.tags.some((t) => selectedTags.includes(t.name));
-
-				// If the "No Tags" tag is selected and the task has no tags
-				if (selectedTags.includes('No Tags') && account.tags.length === 0) {
-					account.tags.push({ name: newTagText });
-					updatedAccounts.push(account);
-				}
-
-				// If the task has a selected tag
-				if (taskHasSelectedTag) {
-					// Add the new tag to the task
-					account.tags.push({ name: newTagText });
-
-					// Add the task to the updatedAccounts array
-					updatedAccounts.push(account);
-				}
-
-				return account;
-			});
-		});
-
-		if (updatedAccounts.length > 0) {
-			makeRequest('put', 'http://127.0.0.1:23432/accounts', updatedAccounts);
-		}
-		selectedTags = [];
+	const setSelectedTags = (newTags: string[]) => {
+		selectedTags = newTags;
 	};
+
+	const getSelectedTags = () => selectedTags;
+
+	const addAdditionalTag = addAdditionalTagGeneric(
+		accounts.update,
+		'http://127.0.0.1:23432/accounts',
+		getSelectedTags,
+		setSelectedTags
+	);
 
 	const addTagToAccount = (e: CustomEvent) => {
 		let newTagText = e.detail;

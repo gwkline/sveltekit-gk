@@ -11,7 +11,8 @@
 		updateSelectedTags,
 		saveSettings,
 		removeTags,
-		addTag
+		addTag,
+		addAdditionalTagGeneric
 	} from '../../helpers';
 	import {
 		verboseActivityTasks,
@@ -141,37 +142,20 @@
 		selectedTags = [];
 	};
 
-	const addAdditionalTag = (e: CustomEvent) => {
-		let newTagText = e.detail;
-		let updatedAccounts: (Account | ShortAccount)[] = [];
-		verboseActivityTasks.update((tasks) => {
-			return tasks.map((task) => {
-				let taskHasSelectedTag = task.account.tags.some((t) => selectedTags.includes(t.name));
-
-				// If the "No Tags" tag is selected and the task has no tags
-				if (selectedTags.includes('No Tags') && task.account.tags.length === 0) {
-					task.account.tags.push({ name: newTagText });
-					updatedAccounts.push(task.account);
-				}
-
-				// If the task has a selected tag
-				if (taskHasSelectedTag) {
-					// Add the new tag to the task
-					task.account.tags.push({ name: newTagText });
-
-					// Add the task to the updatedAccounts array
-					updatedAccounts.push(task.account);
-				}
-
-				return task;
-			});
-		});
-
-		if (updatedAccounts.length > 0) {
-			makeRequest('put', 'http://127.0.0.1:23432/accounts', updatedAccounts);
-		}
-		selectedTags = [];
+	const setSelectedTags = (newTags: string[]) => {
+		selectedTags = newTags;
 	};
+
+	const getAccountTagsFromTask = (task: any) => task.account.tags;
+	const getSelectedTags = () => selectedTags;
+
+	const addAdditionalTag = addAdditionalTagGeneric(
+		verboseActivityTasks.update,
+		'http://127.0.0.1:23432/accounts',
+		getSelectedTags,
+		setSelectedTags,
+		getAccountTagsFromTask
+	);
 
 	const addTagToAccount = (e: CustomEvent) => {
 		let newTagText = e.detail;

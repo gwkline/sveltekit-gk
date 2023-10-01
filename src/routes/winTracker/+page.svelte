@@ -9,7 +9,8 @@
 		updateSortState,
 		updateSelectedTags,
 		removeTags,
-		addTag
+		addTag,
+		addAdditionalTagGeneric
 	} from '../../helpers';
 	import { showTags, shiftPressed, isLoading, wins } from '../../datastore';
 	import type {
@@ -116,37 +117,17 @@
 		selectedTags = [];
 	};
 
-	const addAdditionalTag = (e: CustomEvent) => {
-		let newTagText = e.detail;
-		let updatedWins: Win[] = [];
-		wins.update((wins) => {
-			return wins.map((win) => {
-				let taskHasSelectedTag = win.tags.some((t) => selectedTags.includes(t.name));
-
-				// If the "No Tags" tag is selected and the task has no tags
-				if (selectedTags.includes('No Tags') && win.tags.length === 0) {
-					win.tags.push({ name: newTagText });
-					updatedWins.push(win);
-				}
-
-				// If the task has a selected tag
-				if (taskHasSelectedTag) {
-					// Add the new tag to the task
-					win.tags.push({ name: newTagText });
-
-					// Add the task to the updatedWins array
-					updatedWins.push(win);
-				}
-
-				return win;
-			});
-		});
-
-		if (updatedWins.length > 0) {
-			makeRequest('put', 'http://127.0.0.1:23432/wins', updatedWins);
-		}
-		selectedTags = [];
+	const setSelectedTags = (newTags: string[]) => {
+		selectedTags = newTags;
 	};
+	const getSelectedTags = () => selectedTags;
+
+	const addAdditionalTag = addAdditionalTagGeneric(
+		wins.update,
+		'http://127.0.0.1:23432/wins',
+		getSelectedTags,
+		setSelectedTags
+	);
 
 	const addTagToWin = (e: CustomEvent) => {
 		let newTagText = e.detail;

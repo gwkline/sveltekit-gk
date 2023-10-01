@@ -10,7 +10,8 @@ import type {
 	Profile,
 	Payment,
 	Win,
-	NacTask
+	NacTask,
+	Tag
 } from './types';
 import { goto } from '$app/navigation';
 import { browser } from '$app/environment';
@@ -28,7 +29,8 @@ import {
 	proxy_lists,
 	wins,
 	profiles,
-	verboseNacTasks
+	verboseNacTasks,
+	shiftPressed
 } from './datastore';
 import { get } from 'svelte/store';
 import {
@@ -240,7 +242,7 @@ export const getNACTasks = () => {
 					archived: task.proxy_list.archived
 				};
 
-				task['account'] = {};
+				task['account'] = {} as Account;
 				return task;
 			});
 			verboseNacTasks.set(cleanedData);
@@ -412,3 +414,77 @@ export const cleanDate = (dateString: string) => {
 		date.getFullYear()
 	);
 };
+
+export function addAdditionalTagGeneric<T>(
+	updateStore: (updater: (items: T[]) => T[]) => void,
+	apiEndpoint: string,
+	getSelectedTags: () => string[],
+	setSelectedTags: (newTags: string[]) => void,
+	getTags: (item: T) => Tag[] = (item: any) => item.tags
+) {
+	return (e: CustomEvent) => {
+		const newTagText = e.detail;
+		const updatedItems: T[] = [];
+		const selectedTags = getSelectedTags();
+
+		updateStore((items) => {
+			return items.map((item: any) => {
+				const tags = getTags(item);
+				const itemHasSelectedTag = tags.some((t: Tag) => selectedTags.includes(t.name));
+
+				if (selectedTags.includes('No Tags') && tags.length === 0) {
+					tags.push({ name: newTagText });
+					updatedItems.push(item);
+				}
+
+				if (itemHasSelectedTag) {
+					tags.push({ name: newTagText });
+					updatedItems.push(item);
+				}
+
+				return item;
+			});
+		});
+
+		if (updatedItems.length > 0) {
+			makeRequest('put', apiEndpoint, updatedItems);
+		}
+		setSelectedTags([]);
+	};
+}
+
+export function createHandleChecked(
+	getTasks: () => any[],
+	state: {
+		checkedItemIds: number[];
+		lastChecked: number | null;
+		secondLastChecked: number | null;
+		shiftPressed: boolean;
+	}
+) {
+	return (e: CustomEvent) => {
+		const itemId: number = e.detail;
+
+		state.secondLastChecked = state.lastChecked;
+		state.lastChecked = itemId;
+
+		if (state.checkedItemIds.includes(itemId)) {
+			state.checkedItemIds.splice(state.checkedItemIds.indexOf(itemId), 1);
+		} else {
+			state.checkedItemIds.push(itemId);
+		}
+
+		if (shiftPressed && state.lastChecked === itemId && state.secondLastChecked !== null) {
+			const start = Math.min(state.lastChecked, state.secondLastChecked);
+			const end = Math.max(state.lastChecked, state.secondLastChecked);
+			const tasks = getTasks();
+
+			for (let i = start + 1; i < end; i++) {
+				const taskWithThisId = tasks.find((task) => task.id === i);
+				if (taskWithThisId && !state.checkedItemIds.includes(taskWithThisId.id)) {
+					state.checkedItemIds.push(i);
+				}
+			}
+		}
+	};
+}

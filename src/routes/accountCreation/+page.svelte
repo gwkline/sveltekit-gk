@@ -12,7 +12,8 @@
 		updateSelectedTags,
 		saveSettings,
 		removeTags,
-		addTag
+		addTag,
+		addAdditionalTagGeneric
 	} from '../../helpers';
 	import { verboseNacTasks, settings, showTags, shiftPressed, isLoading } from '../../datastore';
 	import type {
@@ -166,37 +167,17 @@
 		selectedTags = []; // Clear selection after deleting
 	};
 
-	const addAdditionalTag = (e: CustomEvent) => {
-		let newTagText = e.detail;
-		let updatedTasks: NacTask[] = [];
-		verboseNacTasks.update((tasks) => {
-			return tasks.map((task) => {
-				let taskHasSelectedTag = task.tags.some((t) => selectedTags.includes(t.name));
-
-				// If the "No Tags" tag is selected and the task has no tags
-				if (selectedTags.includes('No Tags') && task.tags.length === 0) {
-					task.tags.push({ name: newTagText });
-					updatedTasks.push(task);
-				}
-
-				// If the task has a selected tag
-				if (taskHasSelectedTag) {
-					// Add the new tag to the task
-					task.tags.push({ name: newTagText });
-
-					// Add the task to the updatedTasks array
-					updatedTasks.push(task);
-				}
-
-				return task;
-			});
-		});
-
-		if (updatedTasks.length > 0) {
-			makeRequest('put', 'http://127.0.0.1:23432/tasks?type=checkout', updatedTasks);
-		}
-		selectedTags = [];
+	const setSelectedTags = (newTags: string[]) => {
+		selectedTags = newTags;
 	};
+	const getSelectedTags = () => selectedTags;
+
+	const addAdditionalTag = addAdditionalTagGeneric(
+		verboseNacTasks.update,
+		'http://127.0.0.1:23432/tasks?type=checkout',
+		getSelectedTags,
+		setSelectedTags
+	);
 
 	const addTagToTasks = (e: CustomEvent) => {
 		let newTagText = e.detail;

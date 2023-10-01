@@ -9,7 +9,8 @@
 		updateSortState,
 		updateSelectedTags,
 		removeTags,
-		addTag
+		addTag,
+		addAdditionalTagGeneric
 	} from '../../helpers';
 	import { showTags, shiftPressed, isLoading, profiles } from '../../datastore';
 	import type {
@@ -120,40 +121,18 @@
 		selectedTags = [];
 	};
 
-	const addAdditionalTag = (e: CustomEvent) => {
-		let newTagText = e.detail;
-		let updatedProfiles: (Account | Profile)[] = [];
-		profiles.update((profiles) => {
-			return profiles.map((profile) => {
-				if (profile.tags === undefined) {
-					profile.tags = [];
-				}
-				let taskHasSelectedTag = profile.tags?.some((t) => selectedTags.includes(t.name));
-
-				// If the "No Tags" tag is selected and the task has no tags
-				if (selectedTags.includes('No Tags') && profile.tags?.length === 0) {
-					profile.tags.push({ name: newTagText });
-					updatedProfiles.push(profile);
-				}
-
-				// If the task has a selected tag
-				if (taskHasSelectedTag) {
-					// Add the new tag to the task
-					profile.tags.push({ name: newTagText });
-
-					// Add the task to the updatedProfiles array
-					updatedProfiles.push(profile);
-				}
-
-				return profile;
-			});
-		});
-
-		if (updatedProfiles.length > 0) {
-			makeRequest('put', 'http://127.0.0.1:23432/profiles', updatedProfiles);
-		}
-		selectedTags = [];
+	const setSelectedTags = (newTags: string[]) => {
+		selectedTags = newTags;
 	};
+
+	const getSelectedTags = () => selectedTags;
+
+	const addAdditionalTag = addAdditionalTagGeneric(
+		profiles.update,
+		'http://127.0.0.1:23432/profiles',
+		getSelectedTags,
+		setSelectedTags
+	);
 
 	const addTagToAccount = (e: CustomEvent) => {
 		let newTagText = e.detail;

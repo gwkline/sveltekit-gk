@@ -9,7 +9,8 @@
 		updateSortState,
 		updateSelectedTags,
 		removeTags,
-		addTag
+		addTag,
+		addAdditionalTagGeneric
 	} from '../../helpers';
 	import { showTags, shiftPressed, isLoading, payments } from '../../datastore';
 	import type {
@@ -122,37 +123,17 @@
 		selectedTags = [];
 	};
 
-	const addAdditionalTag = (e: CustomEvent) => {
-		let newTagText = e.detail;
-		let updatedPayments: Payment[] = [];
-		payments.update((payments) => {
-			return payments.map((payment) => {
-				let taskHasSelectedTag = payment.tags.some((t) => selectedTags.includes(t.name));
-
-				// If the "No Tags" tag is selected and the task has no tags
-				if (selectedTags.includes('No Tags') && payment.tags.length === 0) {
-					payment.tags.push({ name: newTagText });
-					updatedPayments.push(payment);
-				}
-
-				// If the task has a selected tag
-				if (taskHasSelectedTag) {
-					// Add the new tag to the task
-					payment.tags.push({ name: newTagText });
-
-					// Add the task to the updatedPayments array
-					updatedPayments.push(payment);
-				}
-
-				return payment;
-			});
-		});
-
-		if (updatedPayments.length > 0) {
-			makeRequest('put', 'http://127.0.0.1:23432/payments', updatedPayments);
-		}
-		selectedTags = [];
+	const setSelectedTags = (newTags: string[]) => {
+		selectedTags = newTags;
 	};
+	const getSelectedTags = () => selectedTags;
+
+	const addAdditionalTag = addAdditionalTagGeneric(
+		payments.update,
+		'http://127.0.0.1:23432/payments',
+		getSelectedTags,
+		setSelectedTags
+	);
 
 	const addTagToPayment = (e: CustomEvent) => {
 		let newTagText = e.detail;

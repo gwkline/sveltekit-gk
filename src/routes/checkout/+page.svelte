@@ -1,7 +1,6 @@
 <script lang="ts">
 	import Tags from '$lib/Tags.svelte';
 	import Table from '$lib/Table.svelte';
-	import TaskTableRow from '$lib/TableRows/CheckoutTableRow.svelte';
 	import StatusBar from '$lib/StatusBar.svelte';
 	import UpdateBar from '$lib/UpdateBar.svelte';
 	import CheckoutNav from './CheckoutNav.svelte';
@@ -13,7 +12,9 @@
 		updateSelectedTags,
 		saveSettings,
 		removeTags,
-		addTag
+		addTag,
+		addAdditionalTagGeneric,
+		createHandleChecked
 	} from '../../helpers';
 	import { verboseTasks, settings, showTags, shiftPressed, isLoading } from '../../datastore';
 	import type {
@@ -97,7 +98,6 @@
 	};
 
 	const updateTagNames = (e: CustomEvent) => {
-		// Do not proceed with the function if the editedText is empty
 		let editedText = e.detail;
 
 		verboseTasks.update((tasks) => {
@@ -169,37 +169,18 @@
 		selectedTags = []; // Clear selection after deleting
 	};
 
-	const addAdditionalTag = (e: CustomEvent) => {
-		let newTagText = e.detail;
-		let updatedTasks: Task[] = [];
-		verboseTasks.update((tasks) => {
-			return tasks.map((task) => {
-				let taskHasSelectedTag = task.tags.some((t) => selectedTags.includes(t.name));
-
-				// If the "No Tags" tag is selected and the task has no tags
-				if (selectedTags.includes('No Tags') && task.tags.length === 0) {
-					task.tags.push({ name: newTagText });
-					updatedTasks.push(task);
-				}
-
-				// If the task has a selected tag
-				if (taskHasSelectedTag) {
-					// Add the new tag to the task
-					task.tags.push({ name: newTagText });
-
-					// Add the task to the updatedTasks array
-					updatedTasks.push(task);
-				}
-
-				return task;
-			});
-		});
-
-		if (updatedTasks.length > 0) {
-			makeRequest('put', 'http://127.0.0.1:23432/tasks?type=checkout', updatedTasks);
-		}
-		selectedTags = [];
+	const setSelectedTags = (newTags: string[]) => {
+		selectedTags = newTags;
 	};
+
+	const getSelectedTags = () => selectedTags;
+
+	const addAdditionalTag = addAdditionalTagGeneric(
+		verboseTasks.update,
+		'http://127.0.0.1:23432/tasks?type=checkout',
+		getSelectedTags,
+		setSelectedTags
+	);
 
 	const addTagToTasks = (e: CustomEvent) => {
 		let newTagText = e.detail;
@@ -257,9 +238,9 @@
 	};
 
 	const handleTask = (e: CustomEvent) => {
-		let state = e.type as states;
+		let eventState = e.type as states;
 		let taskId: number | null = e.detail?.id || null;
-		isLoading.set({ [`${state}${taskId}`]: true, confirmation: true });
+		isLoading.set({ [`${eventState}${taskId}`]: true, confirmation: true });
 
 		let taskIds: number[];
 		if (taskId) {
@@ -272,7 +253,7 @@
 			taskIds = all ? filteredTasks.map((task) => task.id) : overlap;
 		}
 
-		switch (state) {
+		switch (eventState) {
 			case 'start':
 				makeRequest('post', `http://127.0.0.1:23432/tasks/start?type=undefined`, taskIds, () => {
 					isLoading.set({ [`${state}${taskId}`]: false });
@@ -295,7 +276,7 @@
 				});
 				if (taskIds.length === 0) {
 					// If there are no valid tasks to stop, don't proceed.
-					isLoading.set({ [state]: false });
+					isLoading.set({ [eventState]: false });
 					return;
 				}
 				makeRequest('post', `http://127.0.0.1:23432/tasks/stop?type=undefined`, taskIds, () => {
