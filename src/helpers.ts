@@ -455,36 +455,40 @@ export function addAdditionalTagGeneric<T>(
 
 export function createHandleChecked(
 	getTasks: () => any[],
-	state: {
-		checkedItemIds: number[];
-		lastChecked: number | null;
-		secondLastChecked: number | null;
-		shiftPressed: boolean;
-	}
+	getCheckedItemIds: () => number[],
+	setCheckedItemIds: (ids: number[]) => void,
+	getLastChecked: () => number | null,
+	setLastChecked: (id: number | null) => void,
+	getSecondLastChecked: () => number | null,
+	setSecondLastChecked: (id: number | null) => void,
+	getShiftPressed: () => boolean
 ) {
 	return (e: CustomEvent) => {
 		const itemId: number = e.detail;
 
-		state.secondLastChecked = state.lastChecked;
-		state.lastChecked = itemId;
+		setSecondLastChecked(getLastChecked());
+		setLastChecked(itemId);
 
-		if (state.checkedItemIds.includes(itemId)) {
-			state.checkedItemIds.splice(state.checkedItemIds.indexOf(itemId), 1);
+		const checkedItemIds = getCheckedItemIds();
+		if (checkedItemIds.includes(itemId)) {
+			checkedItemIds.splice(checkedItemIds.indexOf(itemId), 1);
 		} else {
-			state.checkedItemIds.push(itemId);
+			checkedItemIds.push(itemId);
 		}
+		setCheckedItemIds(checkedItemIds);
 
-		if (shiftPressed && state.lastChecked === itemId && state.secondLastChecked !== null) {
-			const start = Math.min(state.lastChecked, state.secondLastChecked);
-			const end = Math.max(state.lastChecked, state.secondLastChecked);
+		if (getShiftPressed() && getLastChecked() === itemId && getSecondLastChecked() !== null) {
+			const start = Math.min(getLastChecked(), getSecondLastChecked()!);
+			const end = Math.max(getLastChecked(), getSecondLastChecked()!);
 			const tasks = getTasks();
 
 			for (let i = start + 1; i < end; i++) {
 				const taskWithThisId = tasks.find((task) => task.id === i);
-				if (taskWithThisId && !state.checkedItemIds.includes(taskWithThisId.id)) {
-					state.checkedItemIds.push(i);
+				if (taskWithThisId && !checkedItemIds.includes(taskWithThisId.id)) {
+					checkedItemIds.push(i);
 				}
 			}
+			setCheckedItemIds(checkedItemIds);
 		}
 	};
 }

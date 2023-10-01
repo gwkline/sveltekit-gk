@@ -21,14 +21,17 @@
 {:else if column === 'SKU' && typeof row.thisItem.product !== 'undefined'}
 	<SkuCell {value} size={row.thisItem.product.size || ''} />
 {:else if column === 'Account'}
-	<AccountCell {value} loggedIn={row.thisItem.account?.metadata?.logged_in || false} />
+	<AccountCell
+		{value}
+		loggedIn={row.thisItem.account?.metadata?.logged_in || false}
+		sameName={row.thisItem.account?.use_account_name || false}
+	/>
 {:else if column === 'Proxy'}
 	<ProxyCell {value} />
 {:else if column === 'Profile'}
 	<ProfileCell
 		profileName={row.thisItem.account?.profile.name || ''}
 		profileTags={row.thisItem.account?.profile.tags?.map((item) => item.name).join(', ') || ''}
-		sameName={row.thisItem.account?.use_account_name || false}
 	/>
 {:else}
 	<BaseCell {value} />

@@ -199,32 +199,22 @@
 		}
 	};
 
-	const handleChecked = (e: CustomEvent) => {
-		let itemId: number = e.detail;
-
-		secondLastChecked = lastChecked;
-		lastChecked = itemId;
-
-		let arrayOfTaskIndexes = checkedItemIds;
-		if (checkedItemIds.includes(itemId)) {
-			arrayOfTaskIndexes.splice(arrayOfTaskIndexes.indexOf(itemId), 1);
-		} else {
-			arrayOfTaskIndexes.push(itemId);
-		}
-		checkedItemIds = arrayOfTaskIndexes;
-
-		if ($shiftPressed && lastChecked === itemId && secondLastChecked !== null) {
-			let start = Math.min(lastChecked, secondLastChecked);
-			let end = Math.max(lastChecked, secondLastChecked);
-
-			for (let i = start + 1; i < end; i++) {
-				let taskWithThisId = $verboseTasks.find((task) => task.id === i);
-				if (taskWithThisId && !checkedItemIds.includes(taskWithThisId.id)) {
-					checkedItemIds.push(i);
-				}
-			}
-		}
-	};
+	const handleChecked = createHandleChecked(
+		() => $verboseTasks,
+		() => checkedItemIds,
+		(ids) => {
+			checkedItemIds = ids;
+		},
+		() => lastChecked,
+		(id) => {
+			lastChecked = id;
+		},
+		() => secondLastChecked,
+		(id) => {
+			secondLastChecked = id;
+		},
+		() => $shiftPressed
+	);
 
 	const handleCheckedAll = (e: CustomEvent) => {
 		checkedAll = e.detail.checked;
@@ -256,7 +246,7 @@
 		switch (eventState) {
 			case 'start':
 				makeRequest('post', `http://127.0.0.1:23432/tasks/start?type=undefined`, taskIds, () => {
-					isLoading.set({ [`${state}${taskId}`]: false });
+					isLoading.set({ [`${eventState}${taskId}`]: false });
 				});
 				break;
 			case 'focus':
@@ -265,7 +255,7 @@
 					`http://127.0.0.1:23432/task/${taskId}/focus?type=undefined`,
 					taskIds,
 					() => {
-						isLoading.set({ [`${state}${taskId}`]: false });
+						isLoading.set({ [`${eventState}${taskId}`]: false });
 					}
 				);
 				break;
@@ -280,7 +270,7 @@
 					return;
 				}
 				makeRequest('post', `http://127.0.0.1:23432/tasks/stop?type=undefined`, taskIds, () => {
-					isLoading.set({ [`${state}${taskId}`]: false });
+					isLoading.set({ [`${eventState}${taskId}`]: false });
 				});
 				break;
 			case 'delete':
@@ -292,7 +282,7 @@
 
 					// Reset checkedItemIds
 					checkedItemIds = [];
-					isLoading.set({ [`${state}${taskId}`]: false, confirmation: false });
+					isLoading.set({ [`${eventState}${taskId}`]: false, confirmation: false });
 					showConfirmationModal = false;
 				});
 				break;
