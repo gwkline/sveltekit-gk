@@ -15,7 +15,8 @@
 		addTag,
 		createAddAdditionalTag,
 		createHandleChecked,
-		createTableLogic
+		createTableLogic,
+		computeTagCounts
 	} from '../../helpers';
 	import { verboseTasks, settings, showTags, shiftPressed, isLoading } from '../../datastore';
 	import type {
@@ -340,45 +341,16 @@
 	}
 
 	// Sets the value of allTags and tagsCount
-	$: {
-		allTags = $verboseTasks
-			.map((task) => task.tags)
-			.flat()
-			.map((tag) => tag.name)
-			.filter((tag) => tag);
-
-		let filteredTags = filteredTasks
-			.map((task) => {
-				let tagSet = new Set();
-				return task.tags.filter((tag) => {
-					if (!tagSet.has(tag.name)) {
-						tagSet.add(tag.name);
-						return true;
-					}
-					return false;
-				});
-			})
-			.flat()
-			.map((tag) => tag.name)
-			.filter((tag) => tag);
-
-		let uniqueTags = [...new Set(allTags)];
-
-		tagsCount = uniqueTags.map((tag) => {
-			return {
-				tag: tag,
-				count: filteredTags.filter((t) => t === tag).length
-			};
-		});
-
-		// Count the number of accounts without any tags
-		let noTagsCount = $verboseTasks.filter((account) => account.tags.length === 0).length;
-
-		// Add a "No Tags" tag if there are any accounts without tags
-		if (noTagsCount > 0) {
-			tagsCount.unshift({ tag: 'No Tags', count: noTagsCount });
+	$: computeTagCounts(
+		() => $verboseTasks,
+		(task) => task.tags,
+		(tags) => {
+			allTags = tags;
+		},
+		(counts) => {
+			tagsCount = counts;
 		}
-	}
+	);
 
 	// Sets the value of totalSelectedTasks
 	$: {

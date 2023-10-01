@@ -11,7 +11,8 @@
 		removeTags,
 		addTag,
 		createAddAdditionalTag,
-		createHandleChecked
+		createHandleChecked,
+		computeTagCounts
 	} from '../../helpers';
 	import { showTags, shiftPressed, isLoading, profiles } from '../../datastore';
 	import type {
@@ -290,30 +291,16 @@
 	}
 
 	// Sets the value of allTags and tagsCount
-	$: {
-		allTags = $profiles
-			.map((profile) => profile.tags)
-			.flat()
-			.map((tag) => tag.name)
-			.filter((tag) => tag);
-
-		let uniqueTags = [...new Set(allTags)];
-
-		tagsCount = uniqueTags.map((tag) => {
-			return {
-				tag: tag,
-				count: allTags.filter((t) => t === tag).length
-			};
-		});
-
-		// Count the number of profiles without any tags
-		let noTagsCount = $profiles.filter((profile) => profile.tags.length === 0).length;
-
-		// Add a "No Tags" tag if there are any profiles without tags
-		if (noTagsCount > 0) {
-			tagsCount.unshift({ tag: 'No Tags', count: noTagsCount });
+	$: computeTagCounts(
+		() => $profiles,
+		(profile) => profile.tags,
+		(tags) => {
+			allTags = tags;
+		},
+		(counts) => {
+			tagsCount = counts;
 		}
-	}
+	);
 
 	// Sets the value of totalSelectedTasks
 	$: {

@@ -583,3 +583,34 @@ export function createTableLogic<T>(
 	setTableData(tableDataShortenedTemp);
 	setCheckedItemIds(getCheckedItemIds().filter((item) => getTableIds().includes(item)));
 }
+
+export function computeTagCounts<T>(
+	getItems: () => T[],
+	getTags: (item: T) => { name: string }[],
+	setAllTags: (tags: string[]) => void,
+	setTagsCount: (count: { tag: string; count: number }[]) => void
+) {
+	const allTags = getItems()
+		.map(getTags)
+		.flat()
+		.map((tag) => tag.name)
+		.filter((tag) => tag);
+
+	const uniqueTags = [...new Set(allTags)];
+
+	const tagsCount = uniqueTags.map((tag) => {
+		return {
+			tag: tag,
+			count: allTags.filter((t) => t === tag).length
+		};
+	});
+
+	const noTagsCount = getItems().filter((item) => getTags(item).length === 0).length;
+
+	if (noTagsCount > 0) {
+		tagsCount.unshift({ tag: 'No Tags', count: noTagsCount });
+	}
+
+	setAllTags(allTags);
+	setTagsCount(tagsCount);
+}

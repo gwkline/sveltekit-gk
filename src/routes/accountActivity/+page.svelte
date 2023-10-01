@@ -14,7 +14,8 @@
 		addTag,
 		createAddAdditionalTag,
 		createHandleChecked,
-		createTableLogic
+		createTableLogic,
+		computeTagCounts
 	} from '../../helpers';
 	import {
 		verboseActivityTasks,
@@ -369,30 +370,16 @@
 	}
 
 	// Sets the value of allTags and tagsCount
-	$: {
-		allTags = $verboseActivityTasks
-			.map((task) => task.account.tags)
-			.flat()
-			.map((tag) => tag.name)
-			.filter((tag) => tag);
-
-		let uniqueTags = [...new Set(allTags)];
-
-		tagsCount = uniqueTags.map((tag) => {
-			return {
-				tag: tag,
-				count: allTags.filter((t) => t === tag).length
-			};
-		});
-
-		// Count the number of accounts without any tags
-		let noTagsCount = $verboseActivityTasks.filter((task) => task.account.tags.length === 0).length;
-
-		// Add a "No Tags" tag if there are any accounts without tags
-		if (noTagsCount > 0) {
-			tagsCount.unshift({ tag: 'No Tags', count: noTagsCount });
+	$: computeTagCounts(
+		() => $verboseActivityTasks,
+		(task) => task.account.tags,
+		(tags) => {
+			allTags = tags;
+		},
+		(counts) => {
+			tagsCount = counts;
 		}
-	}
+	);
 
 	// Sets the value of totalSelectedTasks
 	$: {

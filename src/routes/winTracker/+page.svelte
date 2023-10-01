@@ -12,7 +12,8 @@
 		addTag,
 		createAddAdditionalTag,
 		createHandleChecked,
-		createTableLogic
+		createTableLogic,
+		computeTagCounts
 	} from '../../helpers';
 	import { showTags, shiftPressed, isLoading, wins } from '../../datastore';
 	import type {
@@ -243,30 +244,16 @@
 	}
 
 	// Sets the value of allTags and tagsCount
-	$: {
-		allTags = $wins
-			.map((win) => win.tags)
-			.flat()
-			.map((tag) => tag.name)
-			.filter((tag) => tag);
-
-		let uniqueTags = [...new Set(allTags)];
-
-		tagsCount = uniqueTags.map((tag) => {
-			return {
-				tag: tag,
-				count: allTags.filter((t) => t === tag).length
-			};
-		});
-
-		// Count the number of wins without any tags
-		let noTagsCount = $wins.filter((win) => win.tags.length === 0).length;
-
-		// Add a "No Tags" tag if there are any wins without tags
-		if (noTagsCount > 0) {
-			tagsCount.unshift({ tag: 'No Tags', count: noTagsCount });
+	$: computeTagCounts(
+		() => $wins,
+		(win) => win.tags,
+		(tags) => {
+			allTags = tags;
+		},
+		(counts) => {
+			tagsCount = counts;
 		}
-	}
+	);
 
 	// Sets the value of totalSelectedTasks
 	$: {
