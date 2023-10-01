@@ -13,7 +13,7 @@
 		saveSettings,
 		removeTags,
 		addTag,
-		addAdditionalTagGeneric,
+		createAddAdditionalTag,
 		createHandleChecked
 	} from '../../helpers';
 	import { verboseNacTasks, settings, showTags, shiftPressed, isLoading } from '../../datastore';
@@ -173,7 +173,7 @@
 	};
 	const getSelectedTags = () => selectedTags;
 
-	const addAdditionalTag = addAdditionalTagGeneric(
+	const addAdditionalTag = createAddAdditionalTag(
 		verboseNacTasks.update,
 		'http://127.0.0.1:23432/tasks?type=checkout',
 		getSelectedTags,

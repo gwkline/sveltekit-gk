@@ -415,7 +415,7 @@ export const cleanDate = (dateString: string) => {
 	);
 };
 
-export function addAdditionalTagGeneric<T>(
+export function createAddAdditionalTag<T>(
 	updateStore: (updater: (items: T[]) => T[]) => void,
 	apiEndpoint: string,
 	getSelectedTags: () => string[],

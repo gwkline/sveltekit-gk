@@ -12,7 +12,7 @@
 		saveSettings,
 		removeTags,
 		addTag,
-		addAdditionalTagGeneric,
+		createAddAdditionalTag,
 		createHandleChecked
 	} from '../../helpers';
 	import {
@@ -150,7 +150,7 @@
 	const getAccountTagsFromTask = (task: any) => task.account.tags;
 	const getSelectedTags = () => selectedTags;
 
-	const addAdditionalTag = addAdditionalTagGeneric(
+	const addAdditionalTag = createAddAdditionalTag(
 		verboseActivityTasks.update,
 		'http://127.0.0.1:23432/accounts',
 		getSelectedTags,

@@ -10,7 +10,7 @@
 		updateSelectedTags,
 		removeTags,
 		addTag,
-		addAdditionalTagGeneric,
+		createAddAdditionalTag,
 		createHandleChecked
 	} from '../../helpers';
 	import { showTags, shiftPressed, isLoading, payments } from '../../datastore';
@@ -129,7 +129,7 @@
 	};
 	const getSelectedTags = () => selectedTags;
 
-	const addAdditionalTag = addAdditionalTagGeneric(
+	const addAdditionalTag = createAddAdditionalTag(
 		payments.update,
 		'http://127.0.0.1:23432/payments',
 		getSelectedTags,

@@ -13,7 +13,7 @@
 		saveSettings,
 		removeTags,
 		addTag,
-		addAdditionalTagGeneric,
+		createAddAdditionalTag,
 		createHandleChecked
 	} from '../../helpers';
 	import { verboseTasks, settings, showTags, shiftPressed, isLoading } from '../../datastore';
@@ -169,17 +169,13 @@
 		selectedTags = []; // Clear selection after deleting
 	};
 
-	const setSelectedTags = (newTags: string[]) => {
-		selectedTags = newTags;
-	};
-
-	const getSelectedTags = () => selectedTags;
-
-	const addAdditionalTag = addAdditionalTagGeneric(
+	const addAdditionalTag = createAddAdditionalTag(
 		verboseTasks.update,
 		'http://127.0.0.1:23432/tasks?type=checkout',
-		getSelectedTags,
-		setSelectedTags
+		() => selectedTags,
+		(newTags: string[]) => {
+			selectedTags = newTags;
+		}
 	);
 
 	const addTagToTasks = (e: CustomEvent) => {

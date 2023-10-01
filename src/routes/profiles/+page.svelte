@@ -10,7 +10,7 @@
 		updateSelectedTags,
 		removeTags,
 		addTag,
-		addAdditionalTagGeneric,
+		createAddAdditionalTag,
 		createHandleChecked
 	} from '../../helpers';
 	import { showTags, shiftPressed, isLoading, profiles } from '../../datastore';
@@ -128,7 +128,7 @@
 
 	const getSelectedTags = () => selectedTags;
 
-	const addAdditionalTag = addAdditionalTagGeneric(
+	const addAdditionalTag = createAddAdditionalTag(
 		profiles.update,
 		'http://127.0.0.1:23432/profiles',
 		getSelectedTags,

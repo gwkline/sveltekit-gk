@@ -8,7 +8,7 @@
 		makeRequest,
 		updateSortState,
 		updateSelectedTags,
-		addAdditionalTagGeneric,
+		createAddAdditionalTag,
 		removeTags,
 		addTag,
 		cleanDate,
@@ -128,7 +128,7 @@
 
 	const getSelectedTags = () => selectedTags;
 
-	const addAdditionalTag = addAdditionalTagGeneric(
+	const addAdditionalTag = createAddAdditionalTag(
 		accounts.update,
 		'http://127.0.0.1:23432/accounts',
 		getSelectedTags,
