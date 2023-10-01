@@ -6,6 +6,7 @@
 	import ProfileCell from '../TableCells/ProfileCell.svelte';
 	import BrowserCell from '../TableCells/BrowserCell.svelte';
 	import type { TableRowType, Task } from '../../types';
+	import BaseCell from '$lib/TableCells/BaseCell.svelte';
 
 	export let value: string;
 	export let column: string;
@@ -30,5 +31,5 @@
 		sameName={row.thisItem.account?.use_account_name || false}
 	/>
 {:else}
-	{value}
+	<BaseCell {value} />
 {/if}
