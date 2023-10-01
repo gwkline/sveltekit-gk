@@ -52,7 +52,6 @@
 	let allTags: string[] = [];
 	let tagsCount: { tag: string; count: number }[] = [];
 
-	let headers: string[] = [];
 	let headerConfig: HeaderConfigType<Payment> = {
 		Name: (payment) => payment.card_name || '',
 		'Card Number': (payment) => maskCardNumber(payment.card_number),
@@ -128,18 +127,6 @@
 		selectedTags = [];
 	};
 
-	const setSelectedTags = (newTags: string[]) => {
-		selectedTags = newTags;
-	};
-	const getSelectedTags = () => selectedTags;
-
-	const addAdditionalTag = createAddAdditionalTag(
-		payments.update,
-		'http://127.0.0.1:23432/payments',
-		getSelectedTags,
-		setSelectedTags
-	);
-
 	const addTagToPayment = (e: CustomEvent) => {
 		let newTagText = e.detail;
 		let updatedPayments: Payment[] = [];
@@ -156,23 +143,6 @@
 			makeRequest('put', 'http://127.0.0.1:23432/payments', updatedPayments);
 		}
 	};
-
-	const handleChecked = createHandleChecked(
-		() => $payments,
-		() => checkedItemIds,
-		(ids) => {
-			checkedItemIds = ids;
-		},
-		() => lastChecked,
-		(id) => {
-			lastChecked = id;
-		},
-		() => secondLastChecked,
-		(id) => {
-			secondLastChecked = id;
-		},
-		() => $shiftPressed
-	);
 
 	const handleCheckedAll = (e: CustomEvent) => {
 		checkedAll = e.detail.checked;
@@ -224,32 +194,56 @@
 
 	const handleEdit = () => {};
 
+	const addAdditionalTag = createAddAdditionalTag(
+		payments.update,
+		'http://127.0.0.1:23432/payments',
+		() => selectedTags,
+		(newTags: string[]) => {
+			selectedTags = newTags;
+		}
+	);
+
+	const handleChecked = createHandleChecked(
+		() => $payments,
+		() => checkedItemIds,
+		(ids) => {
+			checkedItemIds = ids;
+		},
+		() => lastChecked,
+		(id) => {
+			lastChecked = id;
+		},
+		() => secondLastChecked,
+		(id) => {
+			secondLastChecked = id;
+		},
+		() => $shiftPressed
+	);
+
 	// Sets the value of filteredTasks and tableData
-	$: {
-		createTableLogic(
-			() => $payments,
-			() => searchValue,
-			() => selectedTags,
-			() => selectedState,
-			(tasks) => {
-				filteredPayments = tasks;
-			},
-			() => headerConfig,
-			(ids) => {
-				tableIds = ids;
-			},
-			() => tableIds,
-			() => sortState,
-			(data) => {
-				tableData = data;
-			},
-			(ids) => {
-				checkedItemIds = ids;
-			},
-			() => checkedItemIds,
-			false
-		);
-	}
+	$: createTableLogic(
+		() => $payments,
+		() => searchValue,
+		() => selectedTags,
+		() => selectedState,
+		(tasks) => {
+			filteredPayments = tasks;
+		},
+		() => headerConfig,
+		(ids) => {
+			tableIds = ids;
+		},
+		() => tableIds,
+		() => sortState,
+		(data) => {
+			tableData = data;
+		},
+		(ids) => {
+			checkedItemIds = ids;
+		},
+		() => checkedItemIds,
+		false
+	);
 
 	// Sets the value of allTags and tagsCount
 	$: computeTagCounts(

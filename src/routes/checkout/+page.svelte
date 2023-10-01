@@ -172,15 +172,6 @@
 		selectedTags = []; // Clear selection after deleting
 	};
 
-	const addAdditionalTag = createAddAdditionalTag(
-		verboseTasks.update,
-		'http://127.0.0.1:23432/tasks?type=checkout',
-		() => selectedTags,
-		(newTags: string[]) => {
-			selectedTags = newTags;
-		}
-	);
-
 	const addTagToTasks = (e: CustomEvent) => {
 		let newTagText = e.detail;
 		let updatedTasks: Task[] = [];
@@ -197,23 +188,6 @@
 			makeRequest('put', 'http://127.0.0.1:23432/tasks?type=checkout', updatedTasks);
 		}
 	};
-
-	const handleChecked = createHandleChecked(
-		() => $verboseTasks,
-		() => checkedItemIds,
-		(ids) => {
-			checkedItemIds = ids;
-		},
-		() => lastChecked,
-		(id) => {
-			lastChecked = id;
-		},
-		() => secondLastChecked,
-		(id) => {
-			secondLastChecked = id;
-		},
-		() => $shiftPressed
-	);
 
 	const handleCheckedAll = (e: CustomEvent) => {
 		checkedAll = e.detail.checked;
@@ -315,32 +289,56 @@
 		saveSettings(e.detail.name, e.detail.value);
 	};
 
+	const addAdditionalTag = createAddAdditionalTag(
+		verboseTasks.update,
+		'http://127.0.0.1:23432/tasks?type=checkout',
+		() => selectedTags,
+		(newTags: string[]) => {
+			selectedTags = newTags;
+		}
+	);
+
+	const handleChecked = createHandleChecked(
+		() => $verboseTasks,
+		() => checkedItemIds,
+		(ids) => {
+			checkedItemIds = ids;
+		},
+		() => lastChecked,
+		(id) => {
+			lastChecked = id;
+		},
+		() => secondLastChecked,
+		(id) => {
+			secondLastChecked = id;
+		},
+		() => $shiftPressed
+	);
+
 	// Sets the value of filteredTasks and tableData
-	$: {
-		createTableLogic(
-			() => $verboseTasks,
-			() => searchValue,
-			() => selectedTags,
-			() => selectedState,
-			(tasks) => {
-				filteredTasks = tasks;
-			},
-			() => headerConfig,
-			(ids) => {
-				tableIds = ids;
-			},
-			() => tableIds,
-			() => sortState,
-			(data) => {
-				tableData = data;
-			},
-			(ids) => {
-				checkedItemIds = ids;
-			},
-			() => checkedItemIds,
-			true
-		);
-	}
+	$: createTableLogic(
+		() => $verboseTasks,
+		() => searchValue,
+		() => selectedTags,
+		() => selectedState,
+		(tasks) => {
+			filteredTasks = tasks;
+		},
+		() => headerConfig,
+		(ids) => {
+			tableIds = ids;
+		},
+		() => tableIds,
+		() => sortState,
+		(data) => {
+			tableData = data;
+		},
+		(ids) => {
+			checkedItemIds = ids;
+		},
+		() => checkedItemIds,
+		true
+	);
 
 	// Sets the value of allTags and tagsCount
 	$: computeTagCounts(
@@ -362,13 +360,11 @@
 	);
 
 	// Sets the value of buttonTextCount
-	$: {
-		buttonTextCount = computeButtonTextCount(
-			() => checkedItemIds,
-			() => filteredTasks,
-			() => $shiftPressed
-		);
-	}
+	$: buttonTextCount = computeButtonTextCount(
+		() => checkedItemIds,
+		() => filteredTasks,
+		() => $shiftPressed
+	);
 
 	// Sets the value of filterOn
 	$: {

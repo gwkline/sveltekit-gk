@@ -145,21 +145,6 @@
 		selectedTags = [];
 	};
 
-	const setSelectedTags = (newTags: string[]) => {
-		selectedTags = newTags;
-	};
-
-	const getAccountTagsFromTask = (task: any) => task.account.tags;
-	const getSelectedTags = () => selectedTags;
-
-	const addAdditionalTag = createAddAdditionalTag(
-		verboseActivityTasks.update,
-		'http://127.0.0.1:23432/accounts',
-		getSelectedTags,
-		setSelectedTags,
-		getAccountTagsFromTask
-	);
-
 	const addTagToAccount = (e: CustomEvent) => {
 		let newTagText = e.detail;
 		let updatedAccounts: (Account | ShortAccount)[] = [];
@@ -176,23 +161,6 @@
 			makeRequest('put', 'http://127.0.0.1:23432/accounts', updatedAccounts);
 		}
 	};
-
-	const handleChecked = createHandleChecked(
-		() => $verboseActivityTasks,
-		() => checkedItemIds,
-		(ids) => {
-			checkedItemIds = ids;
-		},
-		() => lastChecked,
-		(id) => {
-			lastChecked = id;
-		},
-		() => secondLastChecked,
-		(id) => {
-			secondLastChecked = id;
-		},
-		() => $shiftPressed
-	);
 
 	const handleCheckedAll = (e: CustomEvent) => {
 		checkedAll = e.detail.checked;
@@ -342,32 +310,57 @@
 		saveSettings(e.detail.name, e.detail.value);
 	};
 
+	const addAdditionalTag = createAddAdditionalTag(
+		verboseActivityTasks.update,
+		'http://127.0.0.1:23432/accounts',
+		() => selectedTags,
+		(newTags: string[]) => {
+			selectedTags = newTags;
+		},
+		(task: any) => task.account.tags
+	);
+
+	const handleChecked = createHandleChecked(
+		() => $verboseActivityTasks,
+		() => checkedItemIds,
+		(ids) => {
+			checkedItemIds = ids;
+		},
+		() => lastChecked,
+		(id) => {
+			lastChecked = id;
+		},
+		() => secondLastChecked,
+		(id) => {
+			secondLastChecked = id;
+		},
+		() => $shiftPressed
+	);
+
 	// Sets the value of filteredTasks and tableData
-	$: {
-		createTableLogic(
-			() => $verboseActivityTasks,
-			() => searchValue,
-			() => selectedTags,
-			() => selectedState,
-			(tasks) => {
-				filteredTasks = tasks;
-			},
-			() => headerConfig,
-			(ids) => {
-				tableIds = ids;
-			},
-			() => tableIds,
-			() => sortState,
-			(data) => {
-				tableData = data;
-			},
-			(ids) => {
-				checkedItemIds = ids;
-			},
-			() => checkedItemIds,
-			true
-		);
-	}
+	$: createTableLogic(
+		() => $verboseActivityTasks,
+		() => searchValue,
+		() => selectedTags,
+		() => selectedState,
+		(tasks) => {
+			filteredTasks = tasks;
+		},
+		() => headerConfig,
+		(ids) => {
+			tableIds = ids;
+		},
+		() => tableIds,
+		() => sortState,
+		(data) => {
+			tableData = data;
+		},
+		(ids) => {
+			checkedItemIds = ids;
+		},
+		() => checkedItemIds,
+		true
+	);
 
 	// Sets the value of allTags and tagsCount
 	$: computeTagCounts(
@@ -389,13 +382,11 @@
 	);
 
 	// Sets the value of buttonTextCount
-	$: {
-		buttonTextCount = computeButtonTextCount(
-			() => checkedItemIds,
-			() => filteredTasks,
-			() => $shiftPressed
-		);
-	}
+	$: buttonTextCount = computeButtonTextCount(
+		() => checkedItemIds,
+		() => filteredTasks,
+		() => $shiftPressed
+	);
 
 	// Sets the value of filterOn
 	$: {

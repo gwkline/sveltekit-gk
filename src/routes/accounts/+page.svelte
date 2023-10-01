@@ -54,7 +54,6 @@
 	let allTags: string[] = [];
 	let tagsCount: { tag: string; count: number }[] = [];
 
-	let headers: string[] = [];
 	let headerConfig: HeaderConfigType<ShortAccount> = {
 		Account: (account) => account?.username ?? '',
 		Proxy: (account) => account?.proxy ?? '',
@@ -126,19 +125,6 @@
 		selectedTags = [];
 	};
 
-	const setSelectedTags = (newTags: string[]) => {
-		selectedTags = newTags;
-	};
-
-	const getSelectedTags = () => selectedTags;
-
-	const addAdditionalTag = createAddAdditionalTag(
-		accounts.update,
-		'http://127.0.0.1:23432/accounts',
-		getSelectedTags,
-		setSelectedTags
-	);
-
 	const addTagToAccount = (e: CustomEvent) => {
 		let newTagText = e.detail;
 		let updatedAccounts: (Account | ShortAccount)[] = [];
@@ -155,23 +141,6 @@
 			makeRequest('put', 'http://127.0.0.1:23432/accounts', updatedAccounts);
 		}
 	};
-
-	const handleChecked = createHandleChecked(
-		() => $accounts,
-		() => checkedItemIds,
-		(ids) => {
-			checkedItemIds = ids;
-		},
-		() => lastChecked,
-		(id) => {
-			lastChecked = id;
-		},
-		() => secondLastChecked,
-		(id) => {
-			secondLastChecked = id;
-		},
-		() => $shiftPressed
-	);
 
 	const handleCheckedAll = (e: CustomEvent) => {
 		checkedAll = e.detail.checked;
@@ -227,32 +196,56 @@
 
 	const handleEdit = () => {};
 
+	const addAdditionalTag = createAddAdditionalTag(
+		accounts.update,
+		'http://127.0.0.1:23432/accounts',
+		() => selectedTags,
+		(newTags: string[]) => {
+			selectedTags = newTags;
+		}
+	);
+
+	const handleChecked = createHandleChecked(
+		() => $accounts,
+		() => checkedItemIds,
+		(ids) => {
+			checkedItemIds = ids;
+		},
+		() => lastChecked,
+		(id) => {
+			lastChecked = id;
+		},
+		() => secondLastChecked,
+		(id) => {
+			secondLastChecked = id;
+		},
+		() => $shiftPressed
+	);
+
 	// Sets the value of filteredTasks and tableData
-	$: {
-		createTableLogic(
-			() => $accounts,
-			() => searchValue,
-			() => selectedTags,
-			() => selectedState,
-			(tasks) => {
-				filteredAccounts = tasks;
-			},
-			() => headerConfig,
-			(ids) => {
-				tableIds = ids;
-			},
-			() => tableIds,
-			() => sortState,
-			(data) => {
-				tableData = data;
-			},
-			(ids) => {
-				checkedItemIds = ids;
-			},
-			() => checkedItemIds,
-			false
-		);
-	}
+	$: createTableLogic(
+		() => $accounts,
+		() => searchValue,
+		() => selectedTags,
+		() => selectedState,
+		(tasks) => {
+			filteredAccounts = tasks;
+		},
+		() => headerConfig,
+		(ids) => {
+			tableIds = ids;
+		},
+		() => tableIds,
+		() => sortState,
+		(data) => {
+			tableData = data;
+		},
+		(ids) => {
+			checkedItemIds = ids;
+		},
+		() => checkedItemIds,
+		false
+	);
 
 	// Sets the value of allTags and tagsCount
 	$: computeTagCounts(
@@ -274,13 +267,11 @@
 	);
 
 	// Sets the value of buttonTextCount
-	$: {
-		buttonTextCount = computeButtonTextCount(
-			() => checkedItemIds,
-			() => filteredAccounts,
-			() => $shiftPressed
-		);
-	}
+	$: buttonTextCount = computeButtonTextCount(
+		() => checkedItemIds,
+		() => filteredAccounts,
+		() => $shiftPressed
+	);
 
 	// Sets the value of filterOn
 	$: {

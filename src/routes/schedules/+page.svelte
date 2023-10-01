@@ -55,23 +55,6 @@
 		searchValue = e.detail;
 	};
 
-	const handleChecked = createHandleChecked(
-		() => $schedules,
-		() => checkedItemIds,
-		(ids) => {
-			checkedItemIds = ids;
-		},
-		() => lastChecked,
-		(id) => {
-			lastChecked = id;
-		},
-		() => secondLastChecked,
-		(id) => {
-			secondLastChecked = id;
-		},
-		() => $shiftPressed
-	);
-
 	const handleCheckedAll = (e: CustomEvent) => {
 		checkedAll = e.detail.checked;
 
@@ -122,42 +105,47 @@
 
 	const handleEdit = () => {};
 
-	// Sets the value of filteredTasks and tableData
-	$: {
-		createTableLogic(
-			() => $schedules,
-			() => searchValue,
-			() => selectedTags,
-			() => selectedState,
-			(tasks) => {
-				filteredSchedules = tasks;
-			},
-			() => headerConfig,
-			(ids) => {
-				tableIds = ids;
-			},
-			() => tableIds,
-			() => sortState,
-			(data) => {
-				tableData = data;
-			},
-			(ids) => {
-				checkedItemIds = ids;
-			},
-			() => checkedItemIds,
-			false
-		);
-	}
+	const handleChecked = createHandleChecked(
+		() => $schedules,
+		() => checkedItemIds,
+		(ids) => {
+			checkedItemIds = ids;
+		},
+		() => lastChecked,
+		(id) => {
+			lastChecked = id;
+		},
+		() => secondLastChecked,
+		(id) => {
+			secondLastChecked = id;
+		},
+		() => $shiftPressed
+	);
 
-	// Sets the value of buttonTextCount
-	$: {
-		let items = checkedItemIds;
-		if ($shiftPressed || items.length == 0 || items.length == filteredSchedules.length) {
-			buttonTextCount = 'All';
-		} else {
-			buttonTextCount = `(${items.length})`;
-		}
-	}
+	// Sets the value of filteredTasks and tableData
+	$: createTableLogic(
+		() => $schedules,
+		() => searchValue,
+		() => selectedTags,
+		() => selectedState,
+		(tasks) => {
+			filteredSchedules = tasks;
+		},
+		() => headerConfig,
+		(ids) => {
+			tableIds = ids;
+		},
+		() => tableIds,
+		() => sortState,
+		(data) => {
+			tableData = data;
+		},
+		(ids) => {
+			checkedItemIds = ids;
+		},
+		() => checkedItemIds,
+		false
+	);
 
 	// Sets the value of filterOn
 	$: {
