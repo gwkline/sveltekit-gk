@@ -73,4 +73,10 @@
 		align-items: center;
 		justify-content: start;
 	}
+
+	.action {
+		display: flex;
+		align-items: center;
+		justify-content: flex-end;
+	}
 </style>
