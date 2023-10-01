@@ -16,7 +16,8 @@
 		createHandleChecked,
 		createTableLogic,
 		computeTagCounts,
-		computeTotalSelectedTasks
+		computeTotalSelectedTasks,
+		computeButtonTextCount
 	} from '../../helpers';
 	import {
 		verboseActivityTasks,
@@ -39,7 +40,6 @@
 	} from '../../types';
 	import ActivityTableRow from '$lib/TableRows/ActivityTableRow.svelte';
 	import ActivityNavBottom from './ActivityNavBottom.svelte';
-	import ActivityModeCell from '$lib/TableCells/ActivityModeCell.svelte';
 	import BaseTableRow from '$lib/TableRows/BaseTableRow.svelte';
 
 	let searchValue: string = '';
@@ -67,7 +67,6 @@
 	let allTags: string[] = [];
 	let tagsCount: { tag: string; count: number }[] = [];
 
-	let headers: string[] = [];
 	let headerConfig: HeaderConfigType<ActivityTask> = {
 		Account: (task: ActivityTask) => task?.account?.username ?? '',
 		Proxy: (task: ActivityTask) => task?.account?.proxy ?? '',
@@ -391,12 +390,11 @@
 
 	// Sets the value of buttonTextCount
 	$: {
-		let items = checkedItemIds;
-		if ($shiftPressed || items.length == 0 || items.length == filteredTasks.length) {
-			buttonTextCount = `All`;
-		} else {
-			buttonTextCount = `(${items.length})`;
-		}
+		buttonTextCount = computeButtonTextCount(
+			() => checkedItemIds,
+			() => filteredTasks,
+			() => $shiftPressed
+		);
 	}
 
 	// Sets the value of filterOn

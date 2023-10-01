@@ -14,7 +14,8 @@
 		createHandleChecked,
 		computeTagCounts,
 		createTableLogic,
-		computeTotalSelectedTasks
+		computeTotalSelectedTasks,
+		computeButtonTextCount
 	} from '../../helpers';
 	import { showTags, shiftPressed, isLoading, profiles } from '../../datastore';
 	import type {
@@ -270,12 +271,11 @@
 
 	// Sets the value of buttonTextCount
 	$: {
-		let items = checkedItemIds;
-		if ($shiftPressed || items.length == 0 || items.length == filteredProfiles.length) {
-			buttonTextCount = 'All';
-		} else {
-			buttonTextCount = `(${items.length})`;
-		}
+		buttonTextCount = computeButtonTextCount(
+			() => checkedItemIds,
+			() => filteredProfiles,
+			() => $shiftPressed
+		);
 	}
 
 	// Sets the value of filterOn

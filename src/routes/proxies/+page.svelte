@@ -4,6 +4,7 @@
 	import ProxyNav from './ProxyNav.svelte';
 	import ConfirmationModal from '$lib/ConfirmationModal.svelte';
 	import {
+		computeButtonTextCount,
 		createHandleChecked,
 		createTableLogic,
 		makeRequest,
@@ -151,12 +152,11 @@
 
 	// Sets the value of buttonTextCount
 	$: {
-		let items = checkedItemIds;
-		if ($shiftPressed || items.length == 0 || items.length == filteredProxyLists.length) {
-			buttonTextCount = 'All';
-		} else {
-			buttonTextCount = `(${items.length})`;
-		}
+		buttonTextCount = computeButtonTextCount(
+			() => checkedItemIds,
+			() => filteredProxyLists,
+			() => $shiftPressed
+		);
 	}
 
 	// Sets the value of filterOn

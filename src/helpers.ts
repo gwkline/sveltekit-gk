@@ -638,3 +638,19 @@ export function computeTotalSelectedTasks<T>(
 
 	return selectedTasks.size;
 }
+
+export function computeButtonTextCount(
+	getCheckedItemIds: () => number[],
+	getFilteredTasks: () => any[],
+	getShiftPressed: () => boolean
+): string {
+	const items = getCheckedItemIds();
+	const visibleItems = getFilteredTasks().map((task: any) => task.id); // Replace 'any' with the appropriate type
+	const overlap = items.filter((item) => visibleItems.includes(item));
+
+	if (getShiftPressed() || overlap.length == 0 || overlap.length == visibleItems.length) {
+		return `All`;
+	} else {
+		return `(${overlap.length})`;
+	}
+}

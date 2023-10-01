@@ -17,7 +17,8 @@
 		createHandleChecked,
 		createTableLogic,
 		computeTagCounts,
-		computeTotalSelectedTasks
+		computeTotalSelectedTasks,
+		computeButtonTextCount
 	} from '../../helpers';
 	import { verboseTasks, settings, showTags, shiftPressed, isLoading } from '../../datastore';
 	import type {
@@ -362,15 +363,11 @@
 
 	// Sets the value of buttonTextCount
 	$: {
-		let items = checkedItemIds;
-		let visibleItems = filteredTasks.map((task) => task.id);
-		let overlap = items.filter((item) => visibleItems.includes(item));
-
-		if ($shiftPressed || overlap.length == 0 || overlap.length == visibleItems.length) {
-			buttonTextCount = `All`;
-		} else {
-			buttonTextCount = `(${overlap.length})`;
-		}
+		buttonTextCount = computeButtonTextCount(
+			() => checkedItemIds,
+			() => filteredTasks,
+			() => $shiftPressed
+		);
 	}
 
 	// Sets the value of filterOn
