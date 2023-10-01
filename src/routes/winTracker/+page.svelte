@@ -13,7 +13,8 @@
 		createAddAdditionalTag,
 		createHandleChecked,
 		createTableLogic,
-		computeTagCounts
+		computeTagCounts,
+		computeTotalSelectedTasks
 	} from '../../helpers';
 	import { showTags, shiftPressed, isLoading, wins } from '../../datastore';
 	import type {
@@ -256,24 +257,11 @@
 	);
 
 	// Sets the value of totalSelectedTasks
-	$: {
-		// Get all tasks with selected tags, but don't count a task more than once
-		const selectedTasks = new Set();
-		if (selectedTags.length > 0) {
-			$wins.forEach((win) => {
-				const taskTags = win.tags.map((t) => t.name);
-				if (selectedTags.some((tag) => taskTags.includes(tag))) {
-					selectedTasks.add(win.id);
-				}
-
-				// If the "No Tags" tag is selected, add tasks that have no tags
-				if (selectedTags.includes('No Tags') && win.tags.length === 0) {
-					selectedTasks.add(win.id);
-				}
-			});
-		}
-		totalSelectedTasks = selectedTasks.size;
-	}
+	$: totalSelectedTasks = computeTotalSelectedTasks(
+		() => $wins,
+		() => selectedTags,
+		(task) => task.tags
+	);
 
 	// Sets the value of buttonTextCount
 	$: {

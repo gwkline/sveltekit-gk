@@ -3,7 +3,12 @@
 	import UpdateBar from '$lib/UpdateBar.svelte';
 	import ProxyNav from './ProxyNav.svelte';
 	import ConfirmationModal from '$lib/ConfirmationModal.svelte';
-	import { createTableLogic, makeRequest, updateSortState } from '../../helpers';
+	import {
+		createHandleChecked,
+		createTableLogic,
+		makeRequest,
+		updateSortState
+	} from '../../helpers';
 	import { shiftPressed, isLoading, proxy_lists } from '../../datastore';
 	import type {
 		HeaderConfigType,
@@ -36,7 +41,6 @@
 
 	let selectedTags: string[] = [];
 
-	let headers: string[] = [];
 	let headerConfig: HeaderConfigType<ProxyList> = {
 		Name: (proxy_list) => proxy_list.name,
 		Count: (proxy_list) => proxy_list.proxies?.length.toString() || '0',
@@ -51,32 +55,22 @@
 		searchValue = e.detail;
 	};
 
-	const handleChecked = (e: CustomEvent) => {
-		let itemId: number = e.detail;
-
-		secondLastChecked = lastChecked;
-		lastChecked = itemId;
-
-		let arrayOfTaskIndexes = checkedItemIds;
-		if (checkedItemIds.includes(itemId)) {
-			arrayOfTaskIndexes.splice(arrayOfTaskIndexes.indexOf(itemId), 1);
-		} else {
-			arrayOfTaskIndexes.push(itemId);
-		}
-		checkedItemIds = arrayOfTaskIndexes;
-
-		if ($shiftPressed && lastChecked === itemId && secondLastChecked !== null) {
-			let start = Math.min(lastChecked, secondLastChecked);
-			let end = Math.max(lastChecked, secondLastChecked);
-
-			for (let i = start + 1; i < end; i++) {
-				let taskWithThisId = $proxy_lists.find((proxy_list) => proxy_list.id === i);
-				if (taskWithThisId && !checkedItemIds.includes(taskWithThisId.id)) {
-					checkedItemIds.push(i);
-				}
-			}
-		}
-	};
+	const handleChecked = createHandleChecked(
+		() => $proxy_lists,
+		() => checkedItemIds,
+		(ids) => {
+			checkedItemIds = ids;
+		},
+		() => lastChecked,
+		(id) => {
+			lastChecked = id;
+		},
+		() => secondLastChecked,
+		(id) => {
+			secondLastChecked = id;
+		},
+		() => $shiftPressed
+	);
 
 	const handleCheckedAll = (e: CustomEvent) => {
 		checkedAll = e.detail.checked;

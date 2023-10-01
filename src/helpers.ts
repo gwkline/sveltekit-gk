@@ -614,3 +614,27 @@ export function computeTagCounts<T>(
 	setAllTags(allTags);
 	setTagsCount(tagsCount);
 }
+
+export function computeTotalSelectedTasks<T>(
+	getItems: () => T[],
+	getSelectedTags: () => string[],
+	getTags: (item: T) => { name: string }[]
+): number {
+	const selectedTasks = new Set<number>();
+
+	if (getSelectedTags().length > 0) {
+		getItems().forEach((item) => {
+			const itemTags = getTags(item).map((t) => t.name);
+
+			if (getSelectedTags().some((tag) => itemTags.includes(tag))) {
+				selectedTasks.add(item.id);
+			}
+
+			if (getSelectedTags().includes('No Tags') && getTags(item).length === 0) {
+				selectedTasks.add(item.id);
+			}
+		});
+	}
+
+	return selectedTasks.size;
+}

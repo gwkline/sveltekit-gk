@@ -12,7 +12,9 @@
 		addTag,
 		createAddAdditionalTag,
 		createHandleChecked,
-		computeTagCounts
+		computeTagCounts,
+		createTableLogic,
+		computeTotalSelectedTasks
 	} from '../../helpers';
 	import { showTags, shiftPressed, isLoading, profiles } from '../../datastore';
 	import type {
@@ -220,74 +222,31 @@
 
 	const handleEdit = () => {};
 
-	// Sets the value of filteredProfiles and tableData
+	// Sets the value of filteredTasks and tableData
 	$: {
-		let filtered = $profiles.filter((profile) => {
-			// Keyword Search
-			let keywordMatch = true;
-			if (searchValue !== '') {
-				keywordMatch = JSON.stringify(profile).toLowerCase().includes(searchValue.toLowerCase());
-			}
-
-			// Tag Filtering
-			let tagMatch;
-			if (selectedTags.includes('No Tags')) {
-				tagMatch =
-					profile.tags.length === 0 ||
-					selectedTags.some((tag) => profile.tags.map((tagObj) => tagObj.name).includes(tag));
-			} else {
-				tagMatch =
-					selectedTags.length === 0 ||
-					selectedTags.some((tag) => profile.tags.map((tagObj) => tagObj.name).includes(tag));
-			}
-
-			// ActivityState Filtering
-			return keywordMatch && tagMatch;
-		});
-
-		filteredProfiles = filtered;
-
-		headers = Object.keys(headerConfig);
-		tableIds = [];
-
-		let tableDataShortenedTemp = filtered.map((row, index) => {
-			const rowObject: TableRowType<Profile | ShortProfile> = {
-				index: index + 1,
-				itemId: row.id,
-				thisItem: row
-			};
-			for (const header of headers) {
-				rowObject[header] = headerConfig[header](row);
-			}
-			tableIds.push(row.id);
-			return rowObject;
-		});
-
-		if (typeof sortState.column === 'string') {
-			// Get the getter function for the sort column
-			const getSortValue = headerConfig[sortState.column];
-			const indices = tableDataShortenedTemp.map((_, index) => index); // Initialize indices array
-
-			indices.sort((aIndex, bIndex) => {
-				// Use the getter function to extract the sort value
-				const aValue = getSortValue(filtered[aIndex]).toLowerCase();
-				const bValue = getSortValue(filtered[bIndex]).toLowerCase();
-
-				if (aValue < bValue) {
-					return sortState.direction === 1 ? -1 : 1;
-				}
-				if (aValue > bValue) {
-					return sortState.direction === 1 ? 1 : -1;
-				}
-				return 0;
-			});
-
-			// Sort the tableDataShortenedTemp array and the tableIds array according to the sorted indices
-			tableDataShortenedTemp = indices.map((index) => tableDataShortenedTemp[index]);
-			tableIds = indices.map((index) => tableIds[index]);
-		}
-
-		tableData = tableDataShortenedTemp;
+		createTableLogic(
+			() => $profiles,
+			() => searchValue,
+			() => selectedTags,
+			() => selectedState,
+			(tasks) => {
+				filteredProfiles = tasks;
+			},
+			() => headerConfig,
+			(ids) => {
+				tableIds = ids;
+			},
+			() => tableIds,
+			() => sortState,
+			(data) => {
+				tableData = data;
+			},
+			(ids) => {
+				checkedItemIds = ids;
+			},
+			() => checkedItemIds,
+			false
+		);
 	}
 
 	// Sets the value of allTags and tagsCount
@@ -303,24 +262,11 @@
 	);
 
 	// Sets the value of totalSelectedTasks
-	$: {
-		// Get all tasks with selected tags, but don't count a task more than once
-		const selectedTasks = new Set();
-		if (selectedTags.length > 0) {
-			$profiles.forEach((profile) => {
-				const taskTags = profile.tags.map((t) => t.name);
-				if (selectedTags.some((tag) => taskTags.includes(tag))) {
-					selectedTasks.add(profile.id);
-				}
-
-				// If the "No Tags" tag is selected, add tasks that have no tags
-				if (selectedTags.includes('No Tags') && profile.tags.length === 0) {
-					selectedTasks.add(profile.id);
-				}
-			});
-		}
-		totalSelectedTasks = selectedTasks.size;
-	}
+	$: totalSelectedTasks = computeTotalSelectedTasks(
+		() => $profiles,
+		() => selectedTags,
+		(task) => task.tags
+	);
 
 	// Sets the value of buttonTextCount
 	$: {
