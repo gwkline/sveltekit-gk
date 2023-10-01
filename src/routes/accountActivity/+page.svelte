@@ -467,35 +467,33 @@
 	/>
 {/if}
 
-<div class="container">
-	<Table
+<Table
+	let:row
+	{tableData}
+	headers={Object.keys(headerConfig)}
+	{checkedAll}
+	{sortState}
+	on:sort={handleSort}
+	on:checkedAll={handleCheckedAll}
+>
+	<BaseTableRow
+		{row}
+		let:column
+		let:value
 		let:row
-		{tableData}
-		headers={Object.keys(headerConfig)}
-		{checkedAll}
-		{sortState}
-		on:sort={handleSort}
-		on:checkedAll={handleCheckedAll}
+		let:page
+		page="activity"
+		checked={checkedItemIds.includes(row.itemId)}
+		on:checked={handleChecked}
+		on:delete={handleTask}
+		on:start={handleTask}
+		on:edit={handleTask}
+		on:stop={handleTask}
+		on:focus={handleTask}
 	>
-		<BaseTableRow
-			{row}
-			let:column
-			let:value
-			let:row
-			let:page
-			page="activity"
-			checked={checkedItemIds.includes(row.itemId)}
-			on:checked={handleChecked}
-			on:delete={handleTask}
-			on:start={handleTask}
-			on:edit={handleTask}
-			on:stop={handleTask}
-			on:focus={handleTask}
-		>
-			<ActivityTableRow {value} {column} {row} {page} />
-		</BaseTableRow>
-	</Table>
-</div>
+		<ActivityTableRow {value} {column} {row} {page} />
+	</BaseTableRow>
+</Table>
 
 <ActivityNavBottom
 	{buttonTextCount}
@@ -523,12 +521,3 @@
 		}}
 	/>
 {/if}
-
-<style>
-	.container {
-		flex-grow: 1;
-		overflow-y: auto;
-		scroll-behavior: smooth;
-		margin-top: 10px;
-	}
-</style>

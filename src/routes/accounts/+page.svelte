@@ -338,34 +338,32 @@
 	/>
 {/if}
 
-<div class="container">
-	<Table
+<Table
+	let:row
+	{tableData}
+	headers={Object.keys(headerConfig)}
+	{checkedAll}
+	{sortState}
+	on:sort={handleSort}
+	on:checkedAll={handleCheckedAll}
+>
+	<BaseTableRow
+		{row}
+		let:column
+		let:value
 		let:row
-		{tableData}
-		headers={Object.keys(headerConfig)}
-		{checkedAll}
-		{sortState}
-		on:sort={handleSort}
-		on:checkedAll={handleCheckedAll}
+		page="accounts"
+		checked={checkedItemIds.includes(row.itemId)}
+		on:checked={handleChecked}
+		on:delete={handleTask}
+		on:start={handleTask}
+		on:edit={handleTask}
+		on:stop={handleTask}
+		on:focus={handleTask}
 	>
-		<BaseTableRow
-			{row}
-			let:column
-			let:value
-			let:row
-			page="accounts"
-			checked={checkedItemIds.includes(row.itemId)}
-			on:checked={handleChecked}
-			on:delete={handleTask}
-			on:start={handleTask}
-			on:edit={handleTask}
-			on:stop={handleTask}
-			on:focus={handleTask}
-		>
-			<AccountTableRow {value} {column} {row} />
-		</BaseTableRow>
-	</Table>
-</div>
+		<AccountTableRow {value} {column} {row} />
+	</BaseTableRow>
+</Table>
 
 {#if showConfirmationModal}
 	<ConfirmationModal
@@ -379,11 +377,3 @@
 		}}
 	/>
 {/if}
-
-<style>
-	.container {
-		flex-grow: 1;
-		overflow-y: auto;
-		scroll-behavior: smooth;
-	}
-</style>

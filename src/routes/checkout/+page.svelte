@@ -444,36 +444,34 @@
 	/>
 {/if}
 
-<div class="table-container">
-	<Table
+<Table
+	let:row
+	{tableData}
+	headers={Object.keys(headerConfig)}
+	{checkedAll}
+	{sortState}
+	checkedCount={checkedItemIds.length}
+	on:sort={handleSort}
+	on:checkedAll={handleCheckedAll}
+>
+	<BaseTableRow
+		{row}
+		let:column
+		let:value
 		let:row
-		{tableData}
-		headers={Object.keys(headerConfig)}
-		{checkedAll}
-		{sortState}
-		checkedCount={checkedItemIds.length}
-		on:sort={handleSort}
-		on:checkedAll={handleCheckedAll}
+		let:page
+		page="checkout"
+		checked={checkedItemIds.includes(row.itemId)}
+		on:checked={handleChecked}
+		on:delete={handleTask}
+		on:start={handleTask}
+		on:edit={handleTask}
+		on:stop={handleTask}
+		on:focus={handleTask}
 	>
-		<BaseTableRow
-			{row}
-			let:column
-			let:value
-			let:row
-			let:page
-			page="checkout"
-			checked={checkedItemIds.includes(row.itemId)}
-			on:checked={handleChecked}
-			on:delete={handleTask}
-			on:start={handleTask}
-			on:edit={handleTask}
-			on:stop={handleTask}
-			on:focus={handleTask}
-		>
-			<CheckoutTableRow {value} {column} {row} {page} />
-		</BaseTableRow>
-	</Table>
-</div>
+		<CheckoutTableRow {value} {column} {row} {page} />
+	</BaseTableRow>
+</Table>
 
 <CheckoutNavBottom
 	{buttonTextCount}
@@ -504,13 +502,3 @@
 		}}
 	/>
 {/if}
-
-<style>
-	.table-container {
-		margin-top: 10px;
-
-		flex-grow: 1;
-		overflow-y: auto;
-		scroll-behavior: smooth;
-	}
-</style>
