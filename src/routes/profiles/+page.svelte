@@ -393,7 +393,7 @@
 	<Table
 		let:row
 		{tableData}
-		{headers}
+		headers={Object.keys(headerConfig)}
 		{checkedAll}
 		{sortState}
 		on:sort={handleSort}

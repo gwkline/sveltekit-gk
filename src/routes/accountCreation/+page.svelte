@@ -14,7 +14,8 @@
 		removeTags,
 		addTag,
 		createAddAdditionalTag,
-		createHandleChecked
+		createHandleChecked,
+		createTableLogic
 	} from '../../helpers';
 	import { verboseNacTasks, settings, showTags, shiftPressed, isLoading } from '../../datastore';
 	import type {
@@ -331,74 +332,29 @@
 
 	// Sets the value of filteredTasks and tableData
 	$: {
-		let filtered = $verboseNacTasks.filter((task) => {
-			// Keyword Search
-			let keywordMatch = true;
-			if (searchValue !== '') {
-				keywordMatch = JSON.stringify(task).toLowerCase().includes(searchValue.toLowerCase());
-			}
-
-			// Tag Filtering
-			let tagMatch;
-			if (selectedTags.includes('No Tags')) {
-				tagMatch =
-					task.tags.length === 0 ||
-					selectedTags.some((tag) => task.tags.map((tagObj) => tagObj.name).includes(tag));
-			} else {
-				tagMatch =
-					selectedTags.length === 0 ||
-					selectedTags.some((tag) => task.tags.map((tagObj) => tagObj.name).includes(tag));
-			}
-
-			// CheckoutState Filtering
-			let stateMatch = !selectedState || task.state === selectedState;
-			return keywordMatch && tagMatch && stateMatch;
-		});
-
-		filteredTasks = filtered;
-
-		headers = Object.keys(headerConfig);
-		tableIds = [];
-
-		let tableDataShortenedTemp = filtered.map((row, index) => {
-			const rowObject: TableRowType<NacTask> = {
-				index: index + 1,
-				itemId: row.id,
-				thisItem: row
-			};
-			for (const header of headers) {
-				rowObject[header] = headerConfig[header](row);
-			}
-			tableIds.push(row.id);
-			return rowObject;
-		});
-
-		if (typeof sortState.column === 'string') {
-			// Get the getter function for the sort column
-			const getSortValue = headerConfig[sortState.column];
-			const indices = tableDataShortenedTemp.map((_, index) => index); // Initialize indices array
-
-			indices.sort((aIndex, bIndex) => {
-				// Use the getter function to extract the sort value
-				const aValue = getSortValue(filtered[aIndex]).toLowerCase();
-				const bValue = getSortValue(filtered[bIndex]).toLowerCase();
-
-				if (aValue < bValue) {
-					return sortState.direction === 1 ? -1 : 1;
-				}
-				if (aValue > bValue) {
-					return sortState.direction === 1 ? 1 : -1;
-				}
-				return 0;
-			});
-
-			// Sort the tableDataShortenedTemp array and the tableIds array according to the sorted indices
-			tableDataShortenedTemp = indices.map((index) => tableDataShortenedTemp[index]);
-			tableIds = indices.map((index) => tableIds[index]);
-		}
-
-		tableData = tableDataShortenedTemp;
-		checkedItemIds = checkedItemIds.filter((item) => tableIds.includes(item));
+		createTableLogic(
+			() => $verboseNacTasks,
+			() => searchValue,
+			() => selectedTags,
+			() => selectedState,
+			(tasks) => {
+				filteredTasks = tasks;
+			},
+			() => headerConfig,
+			(ids) => {
+				tableIds = ids;
+			},
+			() => tableIds,
+			() => sortState,
+			(data) => {
+				tableData = data;
+			},
+			(ids) => {
+				checkedItemIds = ids;
+			},
+			() => checkedItemIds,
+			true
+		);
 	}
 
 	// Sets the value of allTags and tagsCount
@@ -537,7 +493,7 @@
 	<Table
 		let:row
 		{tableData}
-		{headers}
+		headers={Object.keys(headerConfig)}
 		{checkedAll}
 		{sortState}
 		on:sort={handleSort}

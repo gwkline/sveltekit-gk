@@ -11,7 +11,9 @@ import type {
 	Payment,
 	Win,
 	NacTask,
-	Tag
+	Tag,
+	TableRowType,
+	HeaderConfigType
 } from './types';
 import { goto } from '$app/navigation';
 import { browser } from '$app/environment';
@@ -29,8 +31,7 @@ import {
 	proxy_lists,
 	wins,
 	profiles,
-	verboseNacTasks,
-	shiftPressed
+	verboseNacTasks
 } from './datastore';
 import { get } from 'svelte/store';
 import {
@@ -478,8 +479,8 @@ export function createHandleChecked(
 		setCheckedItemIds(checkedItemIds);
 
 		if (getShiftPressed() && getLastChecked() === itemId && getSecondLastChecked() !== null) {
-			const start = Math.min(getLastChecked(), getSecondLastChecked()!);
-			const end = Math.max(getLastChecked(), getSecondLastChecked()!);
+			const start = Math.min(getLastChecked() as number, getSecondLastChecked()!);
+			const end = Math.max(getLastChecked() as number, getSecondLastChecked()!);
 			const tasks = getTasks();
 
 			for (let i = start + 1; i < end; i++) {
@@ -491,4 +492,94 @@ export function createHandleChecked(
 			setCheckedItemIds(checkedItemIds);
 		}
 	};
+}
+
+export function createTableLogic<T>(
+	getDataSource: () => T[],
+	getSearchValue: () => string,
+	getSelectedTags: () => string[],
+	getSelectedState: () => string | null,
+	setFilteredTasks: (tasks: T[]) => void,
+	getHeaderConfig: () => HeaderConfigType<T>,
+	setTableIds: (ids: number[]) => void,
+	getTableIds: () => number[],
+	getSortState: () => SortState,
+	setTableData: (data: TableRowType<T>[]) => void,
+	setCheckedItemIds: (ids: number[]) => void,
+	getCheckedItemIds: () => number[],
+	filterState: boolean = false
+) {
+	const filtered = getDataSource().filter((task) => {
+		// Keyword Search
+		let keywordMatch = true;
+		if (getSearchValue() !== '') {
+			keywordMatch = JSON.stringify(task).toLowerCase().includes(getSearchValue().toLowerCase());
+		}
+
+		// Tag Filtering
+		let tagMatch;
+		if (getSelectedTags().includes('No Tags')) {
+			tagMatch =
+				task.tags.length === 0 ||
+				getSelectedTags().some((tag) => task.tags.map((tagObj) => tagObj.name).includes(tag));
+		} else {
+			tagMatch =
+				getSelectedTags().length === 0 ||
+				getSelectedTags().some((tag) => task.tags.map((tagObj) => tagObj.name).includes(tag));
+		}
+
+		if (filterState) {
+			// CheckoutState Filtering
+			const stateMatch = !getSelectedState() || task.state === getSelectedState();
+			return keywordMatch && tagMatch && stateMatch;
+		} else {
+			return keywordMatch && tagMatch;
+		}
+	});
+
+	setFilteredTasks(filtered);
+
+	const headers = Object.keys(getHeaderConfig());
+	setTableIds([]);
+
+	let tableDataShortenedTemp = filtered.map((row, index) => {
+		const rowObject: TableRowType<T> = {
+			index: index + 1,
+			itemId: row.id,
+			thisItem: row
+		};
+		for (const header of headers) {
+			rowObject[header] = getHeaderConfig()[header](row);
+		}
+		const newIds = [...getTableIds(), row.id];
+		setTableIds(newIds);
+		return rowObject;
+	});
+
+	if (typeof getSortState().column === 'string') {
+		// Get the getter function for the sort column
+		const getSortValue = getHeaderConfig()[getSortState().column as string];
+		const indices = tableDataShortenedTemp.map((_, index) => index); // Initialize indices array
+
+		indices.sort((aIndex, bIndex) => {
+			// Use the getter function to extract the sort value
+			const aValue = getSortValue(filtered[aIndex]).toLowerCase();
+			const bValue = getSortValue(filtered[bIndex]).toLowerCase();
+
+			if (aValue < bValue) {
+				return getSortState().direction === 1 ? -1 : 1;
+			}
+			if (aValue > bValue) {
+				return getSortState().direction === 1 ? 1 : -1;
+			}
+			return 0;
+		});
+
+		// Sort the tableDataShortenedTemp array and the tableIds array according to the sorted indices
+		tableDataShortenedTemp = indices.map((index) => tableDataShortenedTemp[index]);
+		setTableIds(indices.map((index) => getTableIds()[index]));
+	}
+
+	setTableData(tableDataShortenedTemp);
+	setCheckedItemIds(getCheckedItemIds().filter((item) => getTableIds().includes(item)));
 }

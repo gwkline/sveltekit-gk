@@ -11,7 +11,8 @@
 		removeTags,
 		addTag,
 		createAddAdditionalTag,
-		createHandleChecked
+		createHandleChecked,
+		createTableLogic
 	} from '../../helpers';
 	import { showTags, shiftPressed, isLoading, wins } from '../../datastore';
 	import type {
@@ -214,74 +215,31 @@
 
 	const handleEdit = () => {};
 
-	// Sets the value of filteredWins and tableData
+	// Sets the value of filteredTasks and tableData
 	$: {
-		let filtered = $wins.filter((win) => {
-			// Keyword Search
-			let keywordMatch = true;
-			if (searchValue !== '') {
-				keywordMatch = JSON.stringify(win).toLowerCase().includes(searchValue.toLowerCase());
-			}
-
-			// Tag Filtering
-			let tagMatch;
-			if (selectedTags.includes('No Tags')) {
-				tagMatch =
-					win.tags.length === 0 ||
-					selectedTags.some((tag) => win.tags.map((tagObj) => tagObj.name).includes(tag));
-			} else {
-				tagMatch =
-					selectedTags.length === 0 ||
-					selectedTags.some((tag) => win.tags.map((tagObj) => tagObj.name).includes(tag));
-			}
-
-			// ActivityState Filtering
-			return keywordMatch && tagMatch;
-		});
-
-		filteredWins = filtered;
-
-		headers = Object.keys(headerConfig);
-		tableIds = [];
-
-		let tableDataShortenedTemp = filtered.map((row, index) => {
-			const rowObject: TableRowType<Win> = {
-				index: index + 1,
-				itemId: row.id,
-				thisItem: row
-			};
-			for (const header of headers) {
-				rowObject[header] = headerConfig[header](row);
-			}
-			tableIds.push(row.id);
-			return rowObject;
-		});
-
-		if (typeof sortState.column === 'string') {
-			// Get the getter function for the sort column
-			const getSortValue = headerConfig[sortState.column];
-			const indices = tableDataShortenedTemp.map((_, index) => index); // Initialize indices array
-
-			indices.sort((aIndex, bIndex) => {
-				// Use the getter function to extract the sort value
-				const aValue = getSortValue(filtered[aIndex]).toLowerCase();
-				const bValue = getSortValue(filtered[bIndex]).toLowerCase();
-
-				if (aValue < bValue) {
-					return sortState.direction === 1 ? -1 : 1;
-				}
-				if (aValue > bValue) {
-					return sortState.direction === 1 ? 1 : -1;
-				}
-				return 0;
-			});
-
-			// Sort the tableDataShortenedTemp array and the tableIds array according to the sorted indices
-			tableDataShortenedTemp = indices.map((index) => tableDataShortenedTemp[index]);
-			tableIds = indices.map((index) => tableIds[index]);
-		}
-
-		tableData = tableDataShortenedTemp;
+		createTableLogic(
+			() => $wins,
+			() => searchValue,
+			() => selectedTags,
+			() => selectedState,
+			(tasks) => {
+				filteredWins = tasks;
+			},
+			() => headerConfig,
+			(ids) => {
+				tableIds = ids;
+			},
+			() => tableIds,
+			() => sortState,
+			(data) => {
+				tableData = data;
+			},
+			(ids) => {
+				checkedItemIds = ids;
+			},
+			() => checkedItemIds,
+			false
+		);
 	}
 
 	// Sets the value of allTags and tagsCount
@@ -388,7 +346,7 @@
 	<Table
 		let:row
 		{tableData}
-		{headers}
+		headers={Object.keys(headerConfig)}
 		{checkedAll}
 		{sortState}
 		on:sort={handleSort}

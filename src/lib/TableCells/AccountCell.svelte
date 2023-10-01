@@ -5,7 +5,7 @@
 
 	export let value: string = '';
 	export let loggedIn: boolean | null;
-	export let sameName: boolean;
+	export let sameName: boolean = false;
 </script>
 
 <div class="container">

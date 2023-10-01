@@ -3,7 +3,7 @@
 	import UpdateBar from '$lib/UpdateBar.svelte';
 	import ProxyNav from './ScheduleNav.svelte';
 	import ConfirmationModal from '$lib/ConfirmationModal.svelte';
-	import { makeRequest, updateSortState } from '../../helpers';
+	import { createTableLogic, makeRequest, updateSortState } from '../../helpers';
 	import { shiftPressed, isLoading, schedules } from '../../datastore';
 	import type {
 		HeaderConfigType,
@@ -128,62 +128,31 @@
 
 	const handleEdit = () => {};
 
-	// Sets the value of filteredSchedules and tableData
+	// Sets the value of filteredTasks and tableData
 	$: {
-		let filtered = $schedules.filter((schedule) => {
-			// Keyword Search
-			let keywordMatch = true;
-			if (searchValue !== '') {
-				keywordMatch = JSON.stringify(schedule).toLowerCase().includes(searchValue.toLowerCase());
-			}
-
-			// ActivityState Filtering
-			return keywordMatch;
-		});
-
-		filteredSchedules = filtered;
-
-		headers = Object.keys(headerConfig);
-		tableIds = [];
-
-		let tableDataShortenedTemp = filtered.map((row, index) => {
-			const rowObject: TableRowType<Schedule> = {
-				index: index + 1,
-				itemId: row.id,
-				thisItem: row
-			};
-			for (const header of headers) {
-				rowObject[header] = headerConfig[header](row);
-			}
-			tableIds.push(row.id);
-			return rowObject;
-		});
-
-		if (typeof sortState.column === 'string') {
-			// Get the getter function for the sort column
-			const getSortValue = headerConfig[sortState.column];
-			const indices = tableDataShortenedTemp.map((_, index) => index); // Initialize indices array
-
-			indices.sort((aIndex, bIndex) => {
-				// Use the getter function to extract the sort value
-				const aValue = getSortValue(filtered[aIndex]).toLowerCase();
-				const bValue = getSortValue(filtered[bIndex]).toLowerCase();
-
-				if (aValue < bValue) {
-					return sortState.direction === 1 ? -1 : 1;
-				}
-				if (aValue > bValue) {
-					return sortState.direction === 1 ? 1 : -1;
-				}
-				return 0;
-			});
-
-			// Sort the tableDataShortenedTemp array and the tableIds array according to the sorted indices
-			tableDataShortenedTemp = indices.map((index) => tableDataShortenedTemp[index]);
-			tableIds = indices.map((index) => tableIds[index]);
-		}
-
-		tableData = tableDataShortenedTemp;
+		createTableLogic(
+			() => $schedules,
+			() => searchValue,
+			() => selectedTags,
+			() => selectedState,
+			(tasks) => {
+				filteredSchedules = tasks;
+			},
+			() => headerConfig,
+			(ids) => {
+				tableIds = ids;
+			},
+			() => tableIds,
+			() => sortState,
+			(data) => {
+				tableData = data;
+			},
+			(ids) => {
+				checkedItemIds = ids;
+			},
+			() => checkedItemIds,
+			false
+		);
 	}
 
 	// Sets the value of buttonTextCount
@@ -231,7 +200,7 @@
 	<Table
 		let:row
 		{tableData}
-		{headers}
+		headers={Object.keys(headerConfig)}
 		{checkedAll}
 		{sortState}
 		on:sort={handleSort}
