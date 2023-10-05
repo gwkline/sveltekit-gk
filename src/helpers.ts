@@ -1,4 +1,3 @@
-import axios, { AxiosError, type AxiosResponse } from 'axios';
 import type {
 	Account,
 	Settings,
@@ -31,7 +30,8 @@ import {
 	proxy_lists,
 	wins,
 	profiles,
-	verboseNacTasks
+	verboseNacTasks,
+	server
 } from './datastore';
 import { get } from 'svelte/store';
 import {
@@ -45,13 +45,17 @@ import {
 	faCheck
 } from '@fortawesome/free-solid-svg-icons';
 
-export const makeRequest = (
+export const makeRequest = async (
 	method: string,
 	url: string,
 	data: object | null = null,
-	callback: (response: AxiosResponse) => void = (response) => {
-		if (response.status > 399) {
-			console.log('Request Error:', response.status, response.data);
+	fetchFunc: (
+		input: RequestInfo | URL,
+		init?: RequestInit | undefined
+	) => Promise<Response> = fetch,
+	callback: (response: Response) => void = (response) => {
+		if (!response.ok) {
+			console.log('Request Error:', response.status, response.statusText);
 		}
 	},
 	headers = {}
@@ -68,28 +72,32 @@ export const makeRequest = (
 		}
 	}
 
-	return axios
-		.request({
-			method: method,
-			url: url,
-			headers: { ...defaultHeaders, ...headers },
-			data: data
-		})
+	return fetchFunc(url, {
+		method: method,
+		headers: { ...defaultHeaders, ...headers },
+		body: data ? JSON.stringify(data) : null
+	})
 		.then((response) => {
 			accessDenied.set(false);
 			networkError.set(false);
+
 			if (callback) {
 				callback(response);
 			}
+
 			return response;
 		})
-		.catch((error: AxiosError) => {
-			if (error.message === 'Request failed with status code 403') {
-				accessDenied.set(true);
-			} else if (error.message === 'Network Error') {
+		.catch((error) => {
+			if (error.name === 'AbortError') {
+				console.log('Request aborted');
+			} else if (error.name === 'TypeError' && error.message === 'Failed to fetch') {
 				networkError.set(true);
+			} else if (error.name === 'TypeError') {
+				console.log('Request Error:', error.message);
+			} else {
+				console.log('Unexpected Error:', error);
 			}
-			console.log('Request Error:', error.message, error.name, error.code);
+
 			return error;
 		});
 };
@@ -119,6 +127,7 @@ export const findMemberships = async (): Promise<WhopMembershipType[]> => {
 	}
 
 	const parsed_response = await response.json();
+
 	return parsed_response.data as WhopMembershipType[];
 };
 
@@ -194,32 +203,45 @@ export const saveSettings = (settingKey: SettingsKeys, value: string) => {
 	return makeRequest(method, url, get(settings));
 };
 
-export const getSettings = () => {
-	makeRequest('get', 'http://127.0.0.1:23432/settings', null, (response) => {
-		settings.set(response.data);
+type FetchType = (input: RequestInfo | URL, init?: RequestInit | undefined) => Promise<Response>;
+export const getSettings = async (fetch: FetchType) => {
+	makeRequest('get', 'http://127.0.0.1:23432/settings', null, fetch, async (response) => {
+		settings.set(await response.json());
 	});
 };
 
-export const getCheckoutTasks = () => {
-	makeRequest('get', 'http://127.0.0.1:23432/tasks?type=checkout', null, (response) => {
-		const data = response.data;
-		const cleanedData = data.map((task: Task) => {
-			task['account'] = cleanAccount(task.account as Account);
-			return task;
-		});
-		verboseTasks.set(cleanedData);
+export const getServer = async (fetch: FetchType) => {
+	makeRequest('get', 'http://127.0.0.1:23432/server', null, fetch, async (response) => {
+		server.set(await response.json());
 	});
 };
 
-export const getSchedules = () => {
-	makeRequest('get', 'http://127.0.0.1:23432/schedules', null, (response) => {
-		schedules.set(response.data);
+export const getCheckoutTasks = async (fetch: FetchType) => {
+	makeRequest(
+		'get',
+		'http://127.0.0.1:23432/tasks?type=checkout',
+		null,
+		fetch,
+		async (response) => {
+			const data = await response.json();
+			const cleanedData = data.map((task: Task) => {
+				task['account'] = cleanAccount(task.account as Account);
+				return task;
+			});
+			verboseTasks.set(cleanedData);
+		}
+	);
+};
+
+export const getSchedules = async (fetch: FetchType) => {
+	makeRequest('get', 'http://127.0.0.1:23432/schedules', null, fetch, async (response) => {
+		schedules.set(await response.json());
 	});
 };
 
-export const getActivityTasks = () => {
-	makeRequest('get', 'http://127.0.0.1:23432/accounts/activity', null, (response) => {
-		const data = response.data;
+export const getActivityTasks = async (fetch: FetchType) => {
+	makeRequest('get', 'http://127.0.0.1:23432/accounts/activity', null, fetch, async (response) => {
+		const data = await response.json();
 		const cleanedData = data.map((task: Task) => {
 			task['account'] = cleanAccount(task.account as Account);
 			return task;
@@ -228,13 +250,14 @@ export const getActivityTasks = () => {
 	});
 };
 
-export const getNACTasks = () => {
+export const getNACTasks = async (fetch: FetchType) => {
 	makeRequest(
 		'get',
 		'http://127.0.0.1:23432/tasks?type=nike_account_creation',
 		null,
-		(response) => {
-			const data = response.data;
+		fetch,
+		async (response) => {
+			const data = await response.json();
 			const cleanedData = data.map((task: NacTask) => {
 				task.proxy_list = {
 					id: task.proxy_list.id,
@@ -251,9 +274,9 @@ export const getNACTasks = () => {
 	);
 };
 
-export const getAccounts = () => {
-	makeRequest('get', 'http://127.0.0.1:23432/accounts', null, (response) => {
-		const rawAccounts: Account[] = response.data;
+export const getAccounts = async (fetch: FetchType) => {
+	makeRequest('get', 'http://127.0.0.1:23432/accounts', null, fetch, async (response) => {
+		const rawAccounts: Account[] = await response.json();
 		const cleanedAccounts = rawAccounts.map((account) => {
 			return cleanAccount(account as Account);
 		});
@@ -262,9 +285,10 @@ export const getAccounts = () => {
 	});
 };
 
-export const getProfiles = () => {
-	makeRequest('get', 'http://127.0.0.1:23432/profiles', null, (response) => {
-		const profs = response.data.map((profile: Profile) => {
+export const getProfiles = async (fetch: FetchType) => {
+	makeRequest('get', 'http://127.0.0.1:23432/profiles', null, fetch, async (response) => {
+		const body = await response.json();
+		const profs = body.map((profile: Profile) => {
 			if (profile.tags === undefined) {
 				profile.tags = [];
 			}
@@ -275,21 +299,30 @@ export const getProfiles = () => {
 	});
 };
 
-export const getPayments = () => {
-	makeRequest('get', 'http://127.0.0.1:23432/payments', null, (response) => {
-		payments.set(response.data);
+export const getPayments = async (fetch: FetchType) => {
+	makeRequest('get', 'http://127.0.0.1:23432/payments', null, fetch, async (response) => {
+		const body = await response.json();
+		payments.set(
+			body.map((payment: Payment) => {
+				if (payment.tags === null) {
+					payment.tags = [];
+				}
+				return payment;
+			})
+		);
 	});
 };
 
-export const getProxies = () => {
-	makeRequest('get', 'http://127.0.0.1:23432/proxy_lists', null, (response) => {
-		proxy_lists.set(response.data);
+export const getProxies = async (fetch: FetchType) => {
+	makeRequest('get', 'http://127.0.0.1:23432/proxy_lists', null, fetch, async (response) => {
+		proxy_lists.set(await response.json());
 	});
 };
 
-export const getWins = () => {
-	makeRequest('get', 'http://127.0.0.1:23432/wins', null, (response) => {
-		let cleanedWins: Win[] = response.data.map((win: Win) => {
+export const getWins = async (fetch: FetchType) => {
+	makeRequest('get', 'http://127.0.0.1:23432/wins', null, fetch, async (response) => {
+		const body = await response.json();
+		let cleanedWins: Win[] = body.map((win: Win) => {
 			if (win.tags === null) {
 				win.tags = [];
 			}
@@ -355,15 +388,11 @@ export const removeTags = (objects: HasTag[], tags: string[], url: string) => {
 	const objectsToUpdate: HasTag[] = [];
 
 	objects = objects.map((object) => {
-		try {
-			const initialTagsLength = object.tags.length;
-			object.tags = object.tags.filter((t) => !tags.includes(t.name));
+		const initialTagsLength = object.tags.length;
+		object.tags = object.tags.filter((t) => !tags.includes(t.name));
 
-			if (object.tags.length !== initialTagsLength) {
-				objectsToUpdate.push(object);
-			}
-		} catch {
-			console.log(object);
+		if (object.tags.length !== initialTagsLength) {
+			objectsToUpdate.push(object);
 		}
 
 		return object;
@@ -416,20 +445,20 @@ export const cleanDate = (dateString: string) => {
 	);
 };
 
-export function createAddAdditionalTag<T>(
-	updateStore: (updater: (items: T[]) => T[]) => void,
+export function createAddAdditionalTag<HasTag>(
+	updateStore: (updater: (items: HasTag[]) => HasTag[]) => void,
 	apiEndpoint: string,
 	getSelectedTags: () => string[],
 	setSelectedTags: (newTags: string[]) => void,
-	getTags: (item: T) => Tag[] = (item: any) => item.tags
+	getTags: (item: HasTag) => Tag[] = (item) => item.tags
 ) {
 	return (e: CustomEvent) => {
 		const newTagText = e.detail;
-		const updatedItems: T[] = [];
+		const updatedItems: HasTag[] = [];
 		const selectedTags = getSelectedTags();
 
 		updateStore((items) => {
-			return items.map((item: any) => {
+			return items.map((item) => {
 				const tags = getTags(item);
 				const itemHasSelectedTag = tags.some((t: Tag) => selectedTags.includes(t.name));
 
@@ -455,7 +484,7 @@ export function createAddAdditionalTag<T>(
 }
 
 export function createHandleChecked(
-	getTasks: () => any[],
+	getTasks: () => HasTag[],
 	getCheckedItemIds: () => number[],
 	setCheckedItemIds: (ids: number[]) => void,
 	getLastChecked: () => number | null,
@@ -493,18 +522,17 @@ export function createHandleChecked(
 		}
 	};
 }
-
-export function createTableLogic<T>(
-	getDataSource: () => T[],
+export function createTableLogic<HasTag>(
+	getDataSource: () => HasTag[],
 	getSearchValue: () => string,
 	getSelectedTags: () => string[],
 	getSelectedState: () => string | null,
-	setFilteredTasks: (tasks: T[]) => void,
-	getHeaderConfig: () => HeaderConfigType<T>,
+	setFilteredTasks: (tasks: HasTag[]) => void,
+	getHeaderConfig: () => HeaderConfigType<HasTag>,
 	setTableIds: (ids: number[]) => void,
 	getTableIds: () => number[],
 	getSortState: () => SortState,
-	setTableData: (data: TableRowType<T>[]) => void,
+	setTableData: (data: TableRowType<HasTag>[]) => void,
 	setCheckedItemIds: (ids: number[]) => void,
 	getCheckedItemIds: () => number[],
 	filterState: boolean = false
@@ -521,11 +549,11 @@ export function createTableLogic<T>(
 		if (getSelectedTags().includes('No Tags')) {
 			tagMatch =
 				task.tags.length === 0 ||
-				getSelectedTags().some((tag) => task.tags.map((tagObj) => tagObj.name).includes(tag));
+				getSelectedTags().some((tag) => task.tags.map((tagObj: Tag) => tagObj.name).includes(tag));
 		} else {
 			tagMatch =
 				getSelectedTags().length === 0 ||
-				getSelectedTags().some((tag) => task.tags.map((tagObj) => tagObj.name).includes(tag));
+				getSelectedTags().some((tag) => task.tags.map((tagObj: Tag) => tagObj.name).includes(tag));
 		}
 
 		if (filterState) {
@@ -543,7 +571,7 @@ export function createTableLogic<T>(
 	setTableIds([]);
 
 	let tableDataShortenedTemp = filtered.map((row, index) => {
-		const rowObject: TableRowType<T> = {
+		const rowObject: TableRowType<HasTag> = {
 			index: index + 1,
 			itemId: row.id,
 			thisItem: row
@@ -584,16 +612,18 @@ export function createTableLogic<T>(
 	setCheckedItemIds(getCheckedItemIds().filter((item) => getTableIds().includes(item)));
 }
 
-export function computeTagCounts<T>(
-	getItems: () => T[],
-	getTags: (item: T) => { name: string }[],
+export function computeTagCounts<HasTag>(
+	getItems: () => HasTag[],
+	getTags: (item: HasTag) => { name: string }[],
 	setAllTags: (tags: string[]) => void,
 	setTagsCount: (count: { tag: string; count: number }[]) => void
 ) {
 	const allTags = getItems()
 		.map(getTags)
 		.flat()
-		.map((tag) => tag.name)
+		.map((tag) => {
+			return tag.name;
+		})
 		.filter((tag) => tag);
 
 	const uniqueTags = [...new Set(allTags)];
@@ -615,10 +645,10 @@ export function computeTagCounts<T>(
 	setTagsCount(tagsCount);
 }
 
-export function computeTotalSelectedTasks<T>(
-	getItems: () => T[],
+export function computeTotalSelectedTasks<HasTag>(
+	getItems: () => HasTag[],
 	getSelectedTags: () => string[],
-	getTags: (item: T) => { name: string }[]
+	getTags: (item: HasTag) => { name: string }[]
 ): number {
 	const selectedTasks = new Set<number>();
 
@@ -641,11 +671,11 @@ export function computeTotalSelectedTasks<T>(
 
 export function computeButtonTextCount(
 	getCheckedItemIds: () => number[],
-	getFilteredTasks: () => any[],
+	getFilteredTasks: () => HasTag[],
 	getShiftPressed: () => boolean
 ): string {
 	const items = getCheckedItemIds();
-	const visibleItems = getFilteredTasks().map((task: any) => task.id); // Replace 'any' with the appropriate type
+	const visibleItems = getFilteredTasks().map((task: HasTag) => task.id); // Replace 'any' with the appropriate type
 	const overlap = items.filter((item) => visibleItems.includes(item));
 
 	if (getShiftPressed() || overlap.length == 0 || overlap.length == visibleItems.length) {

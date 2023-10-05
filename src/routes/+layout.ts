@@ -10,29 +10,33 @@ import {
 	getProfiles,
 	getProxies,
 	getSchedules,
+	getServer,
 	getSettings,
 	getWins
 } from '../helpers';
 import type { LayoutLoad } from './$types';
 
-export const load: LayoutLoad = async () => {
+export const load: LayoutLoad = async ({ fetch }) => {
 	return {
-		x1: getSettings(),
-		x2: getActivityTasks(),
-		x3: getSchedules(),
-		x4: getNACTasks(),
-		x5: getAccounts(),
-		x6: getCheckoutTasks(),
-		x7: getPayments(),
-		x8: getProfiles(),
-		x9: getProxies(),
-		x10: getWins(),
-		x11: getSchedules()
+		streamed: {
+			x6: getCheckoutTasks(fetch),
+			x4: getNACTasks(fetch),
+			x2: getActivityTasks(fetch),
+			x1: getSettings(fetch),
+			x5: getAccounts(fetch),
+			x7: getPayments(fetch),
+			x8: getProfiles(fetch),
+			x3: getSchedules(fetch),
+			x9: getProxies(fetch),
+			x10: getWins(fetch),
+			x11: getSchedules(fetch),
+			x12: getServer(fetch)
+		}
 	};
 };
 
-async function sleep(ms: number) {
-	return new Promise((resolve) => {
-		setTimeout(resolve, ms);
-	});
-}
+// async function sleep(ms: number) {
+// 	return new Promise((resolve) => {
+// 		setTimeout(resolve, ms);
+// 	});
+// }

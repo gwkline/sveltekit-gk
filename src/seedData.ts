@@ -1,4 +1,4 @@
-import type { Account, Schedule, Settings, Task } from './types';
+import type { Account, Schedule, Settings, ShortAccount, Task } from './types';
 
 export const seedTasks: Task[] = [
 	{
@@ -9694,7 +9694,7 @@ export const seedSettings: Settings = {
 	skip_bp: false
 };
 
-export const seedAccounts: Account[] = [
+export const seedAccounts: ShortAccount[] = [
 	{
 		id: 1690,
 		profile_id: 3533,

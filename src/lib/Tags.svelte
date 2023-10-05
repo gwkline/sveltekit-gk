@@ -415,6 +415,7 @@
 		color: var(--off-black);
 		font-size: 12px;
 		transition: transform 0.1s ease;
+		cursor: pointer;
 	}
 
 	.tag-text {

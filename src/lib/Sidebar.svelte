@@ -16,7 +16,7 @@
 		faArrowRight
 	} from '@fortawesome/free-solid-svg-icons';
 	import SidebarElement from './SidebarElement.svelte';
-	import { sidebarCollapsed } from '../datastore';
+	import { server, sidebarCollapsed } from '../datastore';
 	import { page } from '$app/stores';
 
 	export let toggle = () => {
@@ -129,6 +129,14 @@
 		{/each}
 	</ul>
 	<div>
+		<SidebarElement
+			text={$server.version}
+			icon={null}
+			style={'settings'}
+			collapsed={$sidebarCollapsed}
+			page={null}
+			disabled={false}
+		/>
 		<SidebarElement
 			text={'Collapse'}
 			icon={$sidebarCollapsed ? faArrowRight : faArrowLeft}

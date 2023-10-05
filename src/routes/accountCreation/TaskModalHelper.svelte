@@ -119,7 +119,6 @@
 				tags: selectedNacTags
 			};
 		});
-		console.log(tasks);
 	};
 
 	const testConnection = async () => {

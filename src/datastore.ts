@@ -11,7 +11,8 @@ import type {
 	Payment,
 	ProxyList,
 	Win,
-	NacTask
+	NacTask,
+	ServerInfo
 } from './types';
 import { seedAccounts, seedSettings, seedTasks } from './seedData';
 
@@ -22,13 +23,19 @@ const persistentStore = <T>(key: string, startValue: T): Writable<T> => {
 	if (browser) {
 		// We're in the browser
 		const storedValue = localStorage.getItem(key);
-		initialValue = storedValue === null ? startValue : JSON.parse(storedValue);
+		if (storedValue === null || typeof storedValue === 'undefined') {
+			// No value in localStorage, use the startValue
+			initialValue = startValue;
+		} else {
+			// We found a value in localStorage, use it
+			initialValue = JSON.parse(storedValue);
+		}
 	}
 
 	const store = writable<T>(initialValue);
 
 	store.subscribe(($value) => {
-		if (browser) {
+		if (browser && $value !== undefined) {
 			// We're in the browser
 			localStorage.setItem(key, JSON.stringify($value));
 		}
@@ -48,6 +55,7 @@ export const networkError = writable(false);
 export const validAccessToken = persistentStore('validAccessToken', false);
 export const accessTokenExpiration = persistentStore('accessTokenExpiration', -1);
 export const settings = persistentStore<Settings>('settings', seedSettings);
+export const server = persistentStore<ServerInfo>('server', {} as ServerInfo);
 export const accounts = persistentStore<ShortAccount[]>('accounts', seedAccounts);
 export const payments = persistentStore<Payment[]>('payments', []);
 export const proxy_lists = persistentStore<ProxyList[]>('proxy_lists', []);

@@ -226,6 +226,13 @@
 		margin-top: 20px;
 	}
 
+	/* .state-info {
+		margin-top: 20px;
+		display: grid;
+		grid-gap: 1em;
+		grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+	} */
+
 	.state-item {
 		display: flex;
 		align-items: center;

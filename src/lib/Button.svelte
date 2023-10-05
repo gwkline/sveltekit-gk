@@ -61,7 +61,7 @@
 		width: auto;
 		font-family: Roboto;
 		font-style: normal;
-		border: 1px solid var(--light-gray-1);
+		border: 1px solid transparent;
 		border-radius: 6px;
 		cursor: pointer;
 		justify-content: center;
@@ -76,10 +76,6 @@
 
 	.outline {
 		border: 1px solid var(--light-gray-4, #e0e0e0);
-	}
-
-	.noOutline {
-		border: 1px solid var(--light-gray-1);
 	}
 
 	.circle {
@@ -122,6 +118,12 @@
 	button.success.alternate,
 	button.warning.alternate {
 		color: var(--white);
+		border: 1px solid rgba(0, 0, 0, 0.14);
+		box-shadow: none !important;
+	}
+
+	button.alternate:hover {
+		border: 1px solid rgba(0, 0, 0, 0.14);
 	}
 
 	button.default.alternate {

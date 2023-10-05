@@ -70,6 +70,7 @@
 		<div class="button-group">
 			<Button
 				variant="primary"
+				shadow={false}
 				alternate={true}
 				onclick={() => handleTaskAction('start')}
 				isLoading={$isLoading.start}
@@ -84,6 +85,7 @@
 				alternate={true}
 				onclick={() => handleTaskAction('stop')}
 				isLoading={$isLoading.stop}
+				shadow={false}
 				size="md"
 				icon={faStop}
 				resizable={false}

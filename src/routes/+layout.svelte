@@ -13,6 +13,7 @@
 		getProfiles,
 		getProxies,
 		getSchedules,
+		getServer,
 		getSettings,
 		getWins
 	} from '../helpers';
@@ -40,22 +41,6 @@
 
 	const dataPromise = data;
 	let eventSource: EventSource;
-
-	const loadData = async () => {
-		return {
-			x1: await getSettings(),
-			x2: await getActivityTasks(),
-			x3: await getSchedules(),
-			x4: await getNACTasks(),
-			x5: await getAccounts(),
-			x6: await getCheckoutTasks(),
-			x7: await getPayments(),
-			x8: await getProfiles(),
-			x9: await getProxies(),
-			x10: await getWins(),
-			x11: await getSchedules()
-		};
-	};
 
 	// On component mount
 	onMount(() => {
