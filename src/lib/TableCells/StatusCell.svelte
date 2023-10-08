@@ -24,9 +24,13 @@
 			Waiting: 'var(--primary-contrast)',
 			Error: 'var(--danger-red-contrast)',
 			AwaitingResults: 'var(--primary-contrast)',
-			Complete: 'var(--success-green-contrast)',
+			Complete: 'var(--danger-red-contrast)',
 			Winning: 'var(--success-green-contrast)'
 		};
+
+		if (page === 'activity' || page === 'nac') {
+			x['Complete'] = 'var(--success-green-contrast)';
+		}
 
 		return x[state];
 	};
