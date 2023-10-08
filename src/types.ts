@@ -123,6 +123,14 @@ export type Product = {
 	properties: object | null;
 };
 
+export type ServerInfo = {
+	latest_version: string;
+	max_starting_limit: number;
+	timestamp: string;
+	update: boolean;
+	version: string;
+};
+
 export type Account = {
 	id: number;
 	profile_id: number;
@@ -521,7 +529,7 @@ export type SettingsKeys =
 	| 'max_starting_tasks'
 	| 'max_starting_activity_tasks';
 
-export interface Win {
+export type Win = {
 	id: number;
 	site: string;
 	account_name: string;
@@ -549,4 +557,4 @@ export interface Win {
 	tags: Tag[];
 	order_first_name: string;
 	order_last_name: string;
-}
+};

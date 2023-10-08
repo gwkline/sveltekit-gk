@@ -95,7 +95,7 @@
 		white-space: nowrap;
 	}
 	.checkbox {
-		padding-left: 15px;
+		padding-left: 10px;
 		display: flex;
 		align-items: center;
 	}

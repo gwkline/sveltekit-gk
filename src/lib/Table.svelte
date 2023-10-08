@@ -12,20 +12,30 @@
 	$: tableCount = tableData.length;
 </script>
 
-<table>
-	<TableHead {headers} {sortState} {checkedAll} on:sort on:checkedAll {tableCount} {checkedCount} />
+<div class="table-container">
+	<table>
+		<TableHead
+			{headers}
+			{sortState}
+			{checkedAll}
+			on:sort
+			on:checkedAll
+			{tableCount}
+			{checkedCount}
+		/>
 
-	<tbody>
-		{#each tableData as row}
-			<slot {row} />
-		{/each}
-	</tbody>
-</table>
-{#if tableData.length == 0}
-	<div class="loading-state">
-		<p>There's nothing to show right now...</p>
-	</div>
-{/if}
+		<tbody>
+			{#each tableData as row}
+				<slot {row} />
+			{/each}
+		</tbody>
+	</table>
+	{#if tableData.length == 0}
+		<div class="loading-state">
+			<p>There's nothing to show right now...</p>
+		</div>
+	{/if}
+</div>
 
 <style>
 	table {
@@ -37,7 +47,12 @@
 		max-height: 100vh;
 		table-layout: auto;
 	}
-
+	.table-container {
+		margin-top: 10px;
+		flex-grow: 1;
+		overflow-y: auto;
+		scroll-behavior: smooth;
+	}
 	.loading-state {
 		display: flex;
 		justify-content: center;

@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { faCreditCard } from '@fortawesome/free-solid-svg-icons';
 	import Fa from 'svelte-fa';
 
 	export let value: string;

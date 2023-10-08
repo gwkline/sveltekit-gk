@@ -12,7 +12,13 @@
 		updateSelectedTags,
 		saveSettings,
 		removeTags,
-		addTag
+		addTag,
+		createAddAdditionalTag,
+		createHandleChecked,
+		createTableLogic,
+		computeTagCounts,
+		computeTotalSelectedTasks,
+		computeButtonTextCount
 	} from '../../helpers';
 	import { verboseNacTasks, settings, showTags, shiftPressed, isLoading } from '../../datastore';
 	import type {
@@ -53,7 +59,6 @@
 	let allTags: string[] = [];
 	let tagsCount: { tag: string; count: number }[] = [];
 
-	let headers: string[] = [];
 	let headerConfig: HeaderConfigType<NacTask> = {
 		Account: (task: NacTask) => task?.email ?? '',
 		Proxy: (task: NacTask) => task?.proxy ?? '',
@@ -166,38 +171,6 @@
 		selectedTags = []; // Clear selection after deleting
 	};
 
-	const addAdditionalTag = (e: CustomEvent) => {
-		let newTagText = e.detail;
-		let updatedTasks: NacTask[] = [];
-		verboseNacTasks.update((tasks) => {
-			return tasks.map((task) => {
-				let taskHasSelectedTag = task.tags.some((t) => selectedTags.includes(t.name));
-
-				// If the "No Tags" tag is selected and the task has no tags
-				if (selectedTags.includes('No Tags') && task.tags.length === 0) {
-					task.tags.push({ name: newTagText });
-					updatedTasks.push(task);
-				}
-
-				// If the task has a selected tag
-				if (taskHasSelectedTag) {
-					// Add the new tag to the task
-					task.tags.push({ name: newTagText });
-
-					// Add the task to the updatedTasks array
-					updatedTasks.push(task);
-				}
-
-				return task;
-			});
-		});
-
-		if (updatedTasks.length > 0) {
-			makeRequest('put', 'http://127.0.0.1:23432/tasks?type=checkout', updatedTasks);
-		}
-		selectedTags = [];
-	};
-
 	const addTagToTasks = (e: CustomEvent) => {
 		let newTagText = e.detail;
 		let updatedTasks: NacTask[] = [];
@@ -212,33 +185,6 @@
 		});
 		if (updatedTasks.length > 0) {
 			makeRequest('put', 'http://127.0.0.1:23432/tasks?type=checkout', updatedTasks);
-		}
-	};
-
-	const handleChecked = (e: CustomEvent) => {
-		let itemId: number = e.detail;
-
-		secondLastChecked = lastChecked;
-		lastChecked = itemId;
-
-		let arrayOfTaskIndexes = checkedItemIds;
-		if (checkedItemIds.includes(itemId)) {
-			arrayOfTaskIndexes.splice(arrayOfTaskIndexes.indexOf(itemId), 1);
-		} else {
-			arrayOfTaskIndexes.push(itemId);
-		}
-		checkedItemIds = arrayOfTaskIndexes;
-
-		if ($shiftPressed && lastChecked === itemId && secondLastChecked !== null) {
-			let start = Math.min(lastChecked, secondLastChecked);
-			let end = Math.max(lastChecked, secondLastChecked);
-
-			for (let i = start + 1; i < end; i++) {
-				let taskWithThisId = $verboseNacTasks.find((task) => task.id === i);
-				if (taskWithThisId && !checkedItemIds.includes(taskWithThisId.id)) {
-					checkedItemIds.push(i);
-				}
-			}
 		}
 	};
 
@@ -357,151 +303,82 @@
 		saveSettings(e.detail.name, e.detail.value);
 	};
 
-	// Sets the value of filteredTasks and tableData
-	$: {
-		let filtered = $verboseNacTasks.filter((task) => {
-			// Keyword Search
-			let keywordMatch = true;
-			if (searchValue !== '') {
-				keywordMatch = JSON.stringify(task).toLowerCase().includes(searchValue.toLowerCase());
-			}
-
-			// Tag Filtering
-			let tagMatch;
-			if (selectedTags.includes('No Tags')) {
-				tagMatch =
-					task.tags.length === 0 ||
-					selectedTags.some((tag) => task.tags.map((tagObj) => tagObj.name).includes(tag));
-			} else {
-				tagMatch =
-					selectedTags.length === 0 ||
-					selectedTags.some((tag) => task.tags.map((tagObj) => tagObj.name).includes(tag));
-			}
-
-			// CheckoutState Filtering
-			let stateMatch = !selectedState || task.state === selectedState;
-			return keywordMatch && tagMatch && stateMatch;
-		});
-
-		filteredTasks = filtered;
-
-		headers = Object.keys(headerConfig);
-		tableIds = [];
-
-		let tableDataShortenedTemp = filtered.map((row, index) => {
-			const rowObject: TableRowType<NacTask> = {
-				index: index + 1,
-				itemId: row.id,
-				thisItem: row
-			};
-			for (const header of headers) {
-				rowObject[header] = headerConfig[header](row);
-			}
-			tableIds.push(row.id);
-			return rowObject;
-		});
-
-		if (typeof sortState.column === 'string') {
-			// Get the getter function for the sort column
-			const getSortValue = headerConfig[sortState.column];
-			const indices = tableDataShortenedTemp.map((_, index) => index); // Initialize indices array
-
-			indices.sort((aIndex, bIndex) => {
-				// Use the getter function to extract the sort value
-				const aValue = getSortValue(filtered[aIndex]).toLowerCase();
-				const bValue = getSortValue(filtered[bIndex]).toLowerCase();
-
-				if (aValue < bValue) {
-					return sortState.direction === 1 ? -1 : 1;
-				}
-				if (aValue > bValue) {
-					return sortState.direction === 1 ? 1 : -1;
-				}
-				return 0;
-			});
-
-			// Sort the tableDataShortenedTemp array and the tableIds array according to the sorted indices
-			tableDataShortenedTemp = indices.map((index) => tableDataShortenedTemp[index]);
-			tableIds = indices.map((index) => tableIds[index]);
+	const addAdditionalTag = createAddAdditionalTag(
+		verboseNacTasks.update,
+		'http://127.0.0.1:23432/tasks?type=checkout',
+		() => selectedTags,
+		(newTags: string[]) => {
+			selectedTags = newTags;
 		}
+	);
 
-		tableData = tableDataShortenedTemp;
-		checkedItemIds = checkedItemIds.filter((item) => tableIds.includes(item));
-	}
+	const handleChecked = createHandleChecked(
+		() => $verboseNacTasks,
+		() => checkedItemIds,
+		(ids) => {
+			checkedItemIds = ids;
+		},
+		() => lastChecked,
+		(id) => {
+			lastChecked = id;
+		},
+		() => secondLastChecked,
+		(id) => {
+			secondLastChecked = id;
+		},
+		() => $shiftPressed
+	);
+
+	// Sets the value of filteredTasks and tableData
+	$: createTableLogic(
+		() => $verboseNacTasks,
+		() => searchValue,
+		() => selectedTags,
+		() => selectedState,
+		(tasks) => {
+			filteredTasks = tasks;
+		},
+		() => headerConfig,
+		(ids) => {
+			tableIds = ids;
+		},
+		() => tableIds,
+		() => sortState,
+		(data) => {
+			tableData = data;
+		},
+		(ids) => {
+			checkedItemIds = ids;
+		},
+		() => checkedItemIds,
+		true
+	);
 
 	// Sets the value of allTags and tagsCount
-	$: {
-		allTags = $verboseNacTasks
-			.map((task) => task.tags)
-			.flat()
-			.map((tag) => tag.name)
-			.filter((tag) => tag);
-
-		let filteredTags = filteredTasks
-			.map((task) => {
-				let tagSet = new Set();
-				return task.tags.filter((tag) => {
-					if (!tagSet.has(tag.name)) {
-						tagSet.add(tag.name);
-						return true;
-					}
-					return false;
-				});
-			})
-			.flat()
-			.map((tag) => tag.name)
-			.filter((tag) => tag);
-
-		let uniqueTags = [...new Set(allTags)];
-
-		tagsCount = uniqueTags.map((tag) => {
-			return {
-				tag: tag,
-				count: filteredTags.filter((t) => t === tag).length
-			};
-		});
-
-		// Count the number of accounts without any tags
-		let noTagsCount = $verboseNacTasks.filter((account) => account.tags.length === 0).length;
-
-		// Add a "No Tags" tag if there are any accounts without tags
-		if (noTagsCount > 0) {
-			tagsCount.unshift({ tag: 'No Tags', count: noTagsCount });
+	$: computeTagCounts(
+		() => $verboseNacTasks,
+		(task) => task.tags,
+		(tags) => {
+			allTags = tags;
+		},
+		(counts) => {
+			tagsCount = counts;
 		}
-	}
+	);
 
 	// Sets the value of totalSelectedTasks
-	$: {
-		// Get all tasks with selected tags, but don't count a task more than once
-		const selectedTasks = new Set();
-		if (selectedTags.length > 0) {
-			$verboseNacTasks.forEach((task) => {
-				const taskTags = task.tags.map((t) => t.name);
-				if (selectedTags.some((tag) => taskTags.includes(tag))) {
-					selectedTasks.add(task.id);
-				}
-
-				// If the "No Tags" tag is selected, add tasks that have no tags
-				if (selectedTags.includes('No Tags') && task.tags.length === 0) {
-					selectedTasks.add(task.id);
-				}
-			});
-		}
-		totalSelectedTasks = selectedTasks.size;
-	}
+	$: totalSelectedTasks = computeTotalSelectedTasks(
+		() => $verboseNacTasks,
+		() => selectedTags,
+		(task) => task.tags
+	);
 
 	// Sets the value of buttonTextCount
-	$: {
-		let items = checkedItemIds;
-		let visibleItems = filteredTasks.map((task) => task.id);
-		let overlap = items.filter((item) => visibleItems.includes(item));
-
-		if ($shiftPressed || overlap.length == 0 || overlap.length == visibleItems.length) {
-			buttonTextCount = `All`;
-		} else {
-			buttonTextCount = `(${overlap.length})`;
-		}
-	}
+	$: buttonTextCount = computeButtonTextCount(
+		() => checkedItemIds,
+		() => filteredTasks,
+		() => $shiftPressed
+	);
 
 	// Sets the value of filterOn
 	$: {
@@ -565,7 +442,7 @@
 	<Table
 		let:row
 		{tableData}
-		{headers}
+		headers={Object.keys(headerConfig)}
 		{checkedAll}
 		{sortState}
 		on:sort={handleSort}

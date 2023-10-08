@@ -11,9 +11,10 @@
 	let launches: LaunchType[] = [];
 
 	isLoading.set({ launches: true });
-	makeRequest('get', 'http://127.0.0.1:23432/nike/launches?region=US', null, (response) => {
+	makeRequest('get', 'http://127.0.0.1:23432/nike/launches?region=US', null, async (response) => {
 		const seen = new Set();
-		launches = response.data.filter((el: LaunchType) => {
+		const body = await response.json();
+		launches = body.filter((el: LaunchType) => {
 			const duplicate = seen.has(el.product_id);
 			seen.add(el.product_id);
 			return !duplicate;

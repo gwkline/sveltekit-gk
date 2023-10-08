@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { TableRowType, ProxyList } from '../../types';
+	import BaseCell from '$lib/TableCells/BaseCell.svelte';
 	import DateAddedCell from '../TableCells/DateAddedCell.svelte';
 
 	export let value: string;
@@ -9,5 +9,5 @@
 {#if column === 'Date Added'}
 	<DateAddedCell {value} />
 {:else}
-	{value}
+	<BaseCell {value} />
 {/if}

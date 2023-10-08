@@ -1,10 +1,11 @@
 <script lang="ts">
 	import Tooltip from '$lib/Tooltip.svelte';
-	import { faUser, faUserSlash } from '@fortawesome/free-solid-svg-icons';
+	import { faCreditCard, faUser, faUserSlash } from '@fortawesome/free-solid-svg-icons';
 	import Fa from 'svelte-fa';
 
 	export let value: string = '';
 	export let loggedIn: boolean | null;
+	export let sameName: boolean = false;
 </script>
 
 <div class="container">
@@ -12,17 +13,22 @@
 		<span>{value.split('@')[0]}</span>
 		<span class="bottom-text">{'@' + value.split('@')[1]}</span>
 	</div>
-	{#if loggedIn}
-		<div class="icon">
+	<div class="icons">
+		{#if loggedIn}
 			<Tooltip text="Account has a valid session">
 				<Fa icon={faUser} color="var(--primary)" />
 			</Tooltip>
-		</div>
-	{:else if loggedIn === false}
-		<Tooltip text="Account has a valid session">
-			<Fa icon={faUserSlash} color="var(--danger-red)" />
-		</Tooltip>
-	{/if}
+		{:else if loggedIn === false}
+			<Tooltip text="Account has a valid session">
+				<Fa icon={faUserSlash} color="var(--danger-red)" />
+			</Tooltip>
+		{/if}
+		{#if sameName}
+			<Tooltip text="Checkout will use account first/last name">
+				<Fa icon={faCreditCard} color="var(--light-gray-4)" />
+			</Tooltip>
+		{/if}
+	</div>
 </div>
 
 <style>
@@ -32,11 +38,12 @@
 		align-items: left;
 		justify-content: left;
 	}
-	.icon {
+	.icons {
 		display: flex;
 		flex-direction: row;
 		padding-left: 10px;
 		align-items: center;
+		gap: 10px;
 	}
 	.username {
 		display: flex;

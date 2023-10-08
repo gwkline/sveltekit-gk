@@ -13,6 +13,7 @@
 		getProfiles,
 		getProxies,
 		getSchedules,
+		getServer,
 		getSettings,
 		getWins
 	} from '../helpers';
@@ -32,42 +33,14 @@
 	import type { Writable } from 'svelte/store';
 	import type { EventData, VerboseTask } from '../types';
 	import { onNavigate } from '$app/navigation';
+	import Fa from 'svelte-fa';
+	import { faSpinner } from '@fortawesome/free-solid-svg-icons';
+	import type { PageData } from './$types';
 
-	onNavigate((navigation) => {
-		if (!document.startViewTransition) return;
+	export let data: PageData;
 
-		return new Promise((resolve) => {
-			document.startViewTransition(async () => {
-				resolve();
-				await navigation.complete;
-			});
-		});
-	});
-
+	const dataPromise = data;
 	let eventSource: EventSource;
-
-	const handleKeydown = (event: KeyboardEvent) => {
-		if (event.key === 'Shift') {
-			shiftPressed.set(true);
-		}
-	};
-	const handleKeyup = (event: KeyboardEvent) => {
-		if (event.key === 'Shift') {
-			shiftPressed.set(false);
-		}
-	};
-
-	getSettings();
-	getActivityTasks();
-	getSchedules();
-	getNACTasks();
-	getAccounts();
-	getCheckoutTasks();
-	getPayments();
-	getProfiles();
-	getProxies();
-	getWins();
-	getSchedules();
 
 	// On component mount
 	onMount(() => {
@@ -99,6 +72,24 @@
 			};
 		}
 	});
+	// On component destroy
+	onDestroy(() => {
+		// Close the connection to the event stream
+		if (eventSource) {
+			eventSource.close();
+		}
+	});
+	onNavigate((navigation) => {
+		if (!document.startViewTransition) return;
+
+		return new Promise((resolve) => {
+			document.startViewTransition(async () => {
+				resolve();
+				await navigation.complete;
+			});
+		});
+	});
+	inject({ mode: dev ? 'development' : 'production' });
 
 	const updateTasks = (updatedTasks: EventData[]) => {
 		updatedTasks.forEach((newTaskData) => {
@@ -133,16 +124,16 @@
 			}
 		});
 	};
-
-	// On component destroy
-	onDestroy(() => {
-		// Close the connection to the event stream
-		if (eventSource) {
-			eventSource.close();
+	const handleKeydown = (event: KeyboardEvent) => {
+		if (event.key === 'Shift') {
+			shiftPressed.set(true);
 		}
-	});
-
-	inject({ mode: dev ? 'development' : 'production' });
+	};
+	const handleKeyup = (event: KeyboardEvent) => {
+		if (event.key === 'Shift') {
+			shiftPressed.set(false);
+		}
+	};
 </script>
 
 <head>
@@ -179,7 +170,15 @@
 		</UpdateBar>
 	{/if}
 	<div class="border-card">
-		<slot />
+		{#await dataPromise}
+			<div style="display: flex; justify-content: center; align-items: center; height: 100%;">
+				<Fa icon={faSpinner} spin size="2x" />
+			</div>
+		{:then}
+			<slot />
+		{:catch error}
+			<p style="color: red">{error.message}</p>
+		{/await}
 	</div>
 </div>
 
@@ -222,7 +221,7 @@
 		flex-direction: column;
 	}
 
-	@keyframes fade-in {
+	/* @keyframes fade-in {
 		from {
 			opacity: 0;
 		}
@@ -256,5 +255,5 @@
 		animation:
 			210ms cubic-bezier(0, 0, 0.2, 1) 90ms both fade-in,
 			300ms cubic-bezier(0.4, 0, 0.2, 1) both slide-from-right;
-	}
+	} */
 </style>

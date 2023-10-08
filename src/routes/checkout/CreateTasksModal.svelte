@@ -104,16 +104,22 @@
 			};
 		});
 
-		return makeRequest('post', 'http://127.0.0.1:23432/tasks?type=checkout', tasks, (response) => {
-			let newTasks = response.data.created;
-			let cleanedData = newTasks.map((task: Task) => {
-				task['account'] = cleanAccount(task.account as Account);
-				return task;
-			});
-			verboseTasks.update((tasks) => {
-				return tasks.concat(cleanedData);
-			});
-		});
+		return makeRequest(
+			'post',
+			'http://127.0.0.1:23432/tasks?type=checkout',
+			tasks,
+			async (response) => {
+				let body = await response.json();
+				let newTasks = body.created;
+				let cleanedData = newTasks.map((task: Task) => {
+					task['account'] = cleanAccount(task.account as Account);
+					return task;
+				});
+				verboseTasks.update((tasks) => {
+					return tasks.concat(cleanedData);
+				});
+			}
+		);
 	};
 	const editTasks = () => {
 		let updatedTasks: OutboundTask[] = [];
@@ -214,10 +220,11 @@
 			'post',
 			'http://127.0.0.1:23432/tasks?type=checkout',
 			updatedTasks,
-			(response) => {
+			async (response) => {
 				if (response.status === 200) {
+					let body = await response.json();
 					// Add the newly created tasks to the verboseTasks list
-					verboseTasks.update((tasks) => [...tasks, ...response.data.created]);
+					verboseTasks.update((tasks) => [...tasks, ...body.created]);
 				}
 			}
 		);

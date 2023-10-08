@@ -1,4 +1,5 @@
 <script lang="ts">
+	import BaseCell from '$lib/TableCells/BaseCell.svelte';
 	import type { TableRowType, Schedule } from '../../types';
 	import DateAddedCell from '../TableCells/DateAddedCell.svelte';
 
@@ -9,5 +10,5 @@
 {#if column === 'Date Added'}
 	<DateAddedCell {value} />
 {:else}
-	{value}
+	<BaseCell {value} />
 {/if}

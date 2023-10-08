@@ -9,7 +9,13 @@
 		updateSortState,
 		updateSelectedTags,
 		removeTags,
-		addTag
+		addTag,
+		createAddAdditionalTag,
+		createHandleChecked,
+		computeTagCounts,
+		createTableLogic,
+		computeTotalSelectedTasks,
+		computeButtonTextCount
 	} from '../../helpers';
 	import { showTags, shiftPressed, isLoading, profiles } from '../../datastore';
 	import type {
@@ -48,7 +54,6 @@
 	let allTags: string[] = [];
 	let tagsCount: { tag: string; count: number }[] = [];
 
-	let headers: string[] = [];
 	let headerConfig: HeaderConfigType<Profile> = {
 		'Profile Name': (profile) => profile.name,
 		'Line 1': (profile) => profile.shipping?.address_1 || '',
@@ -120,41 +125,6 @@
 		selectedTags = [];
 	};
 
-	const addAdditionalTag = (e: CustomEvent) => {
-		let newTagText = e.detail;
-		let updatedProfiles: (Account | Profile)[] = [];
-		profiles.update((profiles) => {
-			return profiles.map((profile) => {
-				if (profile.tags === undefined) {
-					profile.tags = [];
-				}
-				let taskHasSelectedTag = profile.tags?.some((t) => selectedTags.includes(t.name));
-
-				// If the "No Tags" tag is selected and the task has no tags
-				if (selectedTags.includes('No Tags') && profile.tags?.length === 0) {
-					profile.tags.push({ name: newTagText });
-					updatedProfiles.push(profile);
-				}
-
-				// If the task has a selected tag
-				if (taskHasSelectedTag) {
-					// Add the new tag to the task
-					profile.tags.push({ name: newTagText });
-
-					// Add the task to the updatedProfiles array
-					updatedProfiles.push(profile);
-				}
-
-				return profile;
-			});
-		});
-
-		if (updatedProfiles.length > 0) {
-			makeRequest('put', 'http://127.0.0.1:23432/profiles', updatedProfiles);
-		}
-		selectedTags = [];
-	};
-
 	const addTagToAccount = (e: CustomEvent) => {
 		let newTagText = e.detail;
 		let updatedProfiles: (Account | Profile)[] = [];
@@ -169,33 +139,6 @@
 		});
 		if (updatedProfiles.length > 0) {
 			makeRequest('put', 'http://127.0.0.1:23432/profiles', updatedProfiles);
-		}
-	};
-
-	const handleChecked = (e: CustomEvent) => {
-		let itemId: number = e.detail;
-
-		secondLastChecked = lastChecked;
-		lastChecked = itemId;
-
-		let arrayOfTaskIndexes = checkedItemIds;
-		if (checkedItemIds.includes(itemId)) {
-			arrayOfTaskIndexes.splice(arrayOfTaskIndexes.indexOf(itemId), 1);
-		} else {
-			arrayOfTaskIndexes.push(itemId);
-		}
-		checkedItemIds = arrayOfTaskIndexes;
-
-		if ($shiftPressed && lastChecked === itemId && secondLastChecked !== null) {
-			let start = Math.min(lastChecked, secondLastChecked);
-			let end = Math.max(lastChecked, secondLastChecked);
-
-			for (let i = start + 1; i < end; i++) {
-				let taskWithThisId = $profiles.find((profile) => profile.id === i);
-				if (taskWithThisId && !checkedItemIds.includes(taskWithThisId.id)) {
-					checkedItemIds.push(i);
-				}
-			}
 		}
 	};
 
@@ -249,131 +192,81 @@
 
 	const handleEdit = () => {};
 
-	// Sets the value of filteredProfiles and tableData
-	$: {
-		let filtered = $profiles.filter((profile) => {
-			// Keyword Search
-			let keywordMatch = true;
-			if (searchValue !== '') {
-				keywordMatch = JSON.stringify(profile).toLowerCase().includes(searchValue.toLowerCase());
-			}
-
-			// Tag Filtering
-			let tagMatch;
-			if (selectedTags.includes('No Tags')) {
-				tagMatch =
-					profile.tags.length === 0 ||
-					selectedTags.some((tag) => profile.tags.map((tagObj) => tagObj.name).includes(tag));
-			} else {
-				tagMatch =
-					selectedTags.length === 0 ||
-					selectedTags.some((tag) => profile.tags.map((tagObj) => tagObj.name).includes(tag));
-			}
-
-			// ActivityState Filtering
-			return keywordMatch && tagMatch;
-		});
-
-		filteredProfiles = filtered;
-
-		headers = Object.keys(headerConfig);
-		tableIds = [];
-
-		let tableDataShortenedTemp = filtered.map((row, index) => {
-			const rowObject: TableRowType<Profile | ShortProfile> = {
-				index: index + 1,
-				itemId: row.id,
-				thisItem: row
-			};
-			for (const header of headers) {
-				rowObject[header] = headerConfig[header](row);
-			}
-			tableIds.push(row.id);
-			return rowObject;
-		});
-
-		if (typeof sortState.column === 'string') {
-			// Get the getter function for the sort column
-			const getSortValue = headerConfig[sortState.column];
-			const indices = tableDataShortenedTemp.map((_, index) => index); // Initialize indices array
-
-			indices.sort((aIndex, bIndex) => {
-				// Use the getter function to extract the sort value
-				const aValue = getSortValue(filtered[aIndex]).toLowerCase();
-				const bValue = getSortValue(filtered[bIndex]).toLowerCase();
-
-				if (aValue < bValue) {
-					return sortState.direction === 1 ? -1 : 1;
-				}
-				if (aValue > bValue) {
-					return sortState.direction === 1 ? 1 : -1;
-				}
-				return 0;
-			});
-
-			// Sort the tableDataShortenedTemp array and the tableIds array according to the sorted indices
-			tableDataShortenedTemp = indices.map((index) => tableDataShortenedTemp[index]);
-			tableIds = indices.map((index) => tableIds[index]);
+	const addAdditionalTag = createAddAdditionalTag(
+		profiles.update,
+		'http://127.0.0.1:23432/profiles',
+		() => selectedTags,
+		(newTags: string[]) => {
+			selectedTags = newTags;
 		}
+	);
 
-		tableData = tableDataShortenedTemp;
-	}
+	const handleChecked = createHandleChecked(
+		() => $profiles,
+		() => checkedItemIds,
+		(ids) => {
+			checkedItemIds = ids;
+		},
+		() => lastChecked,
+		(id) => {
+			lastChecked = id;
+		},
+		() => secondLastChecked,
+		(id) => {
+			secondLastChecked = id;
+		},
+		() => $shiftPressed
+	);
+	// Sets the value of filteredTasks and tableData
+	$: createTableLogic(
+		() => $profiles,
+		() => searchValue,
+		() => selectedTags,
+		() => selectedState,
+		(tasks) => {
+			filteredProfiles = tasks;
+		},
+		() => headerConfig,
+		(ids) => {
+			tableIds = ids;
+		},
+		() => tableIds,
+		() => sortState,
+		(data) => {
+			tableData = data;
+		},
+		(ids) => {
+			checkedItemIds = ids;
+		},
+		() => checkedItemIds,
+		false
+	);
 
 	// Sets the value of allTags and tagsCount
-	$: {
-		allTags = $profiles
-			.map((profile) => profile.tags)
-			.flat()
-			.map((tag) => tag.name)
-			.filter((tag) => tag);
-
-		let uniqueTags = [...new Set(allTags)];
-
-		tagsCount = uniqueTags.map((tag) => {
-			return {
-				tag: tag,
-				count: allTags.filter((t) => t === tag).length
-			};
-		});
-
-		// Count the number of profiles without any tags
-		let noTagsCount = $profiles.filter((profile) => profile.tags.length === 0).length;
-
-		// Add a "No Tags" tag if there are any profiles without tags
-		if (noTagsCount > 0) {
-			tagsCount.unshift({ tag: 'No Tags', count: noTagsCount });
+	$: computeTagCounts(
+		() => $profiles,
+		(profile) => profile.tags,
+		(tags) => {
+			allTags = tags;
+		},
+		(counts) => {
+			tagsCount = counts;
 		}
-	}
+	);
 
 	// Sets the value of totalSelectedTasks
-	$: {
-		// Get all tasks with selected tags, but don't count a task more than once
-		const selectedTasks = new Set();
-		if (selectedTags.length > 0) {
-			$profiles.forEach((profile) => {
-				const taskTags = profile.tags.map((t) => t.name);
-				if (selectedTags.some((tag) => taskTags.includes(tag))) {
-					selectedTasks.add(profile.id);
-				}
-
-				// If the "No Tags" tag is selected, add tasks that have no tags
-				if (selectedTags.includes('No Tags') && profile.tags.length === 0) {
-					selectedTasks.add(profile.id);
-				}
-			});
-		}
-		totalSelectedTasks = selectedTasks.size;
-	}
+	$: totalSelectedTasks = computeTotalSelectedTasks(
+		() => $profiles,
+		() => selectedTags,
+		(task) => task.tags
+	);
 
 	// Sets the value of buttonTextCount
-	$: {
-		let items = checkedItemIds;
-		if ($shiftPressed || items.length == 0 || items.length == filteredProfiles.length) {
-			buttonTextCount = 'All';
-		} else {
-			buttonTextCount = `(${items.length})`;
-		}
-	}
+	$: buttonTextCount = computeButtonTextCount(
+		() => checkedItemIds,
+		() => filteredProfiles,
+		() => $shiftPressed
+	);
 
 	// Sets the value of filterOn
 	$: {
@@ -419,33 +312,31 @@
 	/>
 {/if}
 
-<div class="container">
-	<Table
-		let:row
-		{tableData}
-		{headers}
-		{checkedAll}
-		{sortState}
-		on:sort={handleSort}
-		on:checkedAll={handleCheckedAll}
+<Table
+	let:row
+	{tableData}
+	headers={Object.keys(headerConfig)}
+	{checkedAll}
+	{sortState}
+	on:sort={handleSort}
+	on:checkedAll={handleCheckedAll}
+>
+	<BaseTableRow
+		{row}
+		let:column
+		let:value
+		page="activity"
+		checked={checkedItemIds.includes(row.itemId)}
+		on:checked={handleChecked}
+		on:delete={handleTask}
+		on:start={handleTask}
+		on:edit={handleTask}
+		on:stop={handleTask}
+		on:focus={handleTask}
 	>
-		<BaseTableRow
-			{row}
-			let:column
-			let:value
-			page="activity"
-			checked={checkedItemIds.includes(row.itemId)}
-			on:checked={handleChecked}
-			on:delete={handleTask}
-			on:start={handleTask}
-			on:edit={handleTask}
-			on:stop={handleTask}
-			on:focus={handleTask}
-		>
-			<ProfileTableRow {value} {column} />
-		</BaseTableRow>
-	</Table>
-</div>
+		<ProfileTableRow {value} {column} />
+	</BaseTableRow>
+</Table>
 
 {#if showConfirmationModal}
 	<ConfirmationModal
@@ -459,11 +350,3 @@
 		}}
 	/>
 {/if}
-
-<style>
-	.container {
-		flex-grow: 1;
-		overflow-y: auto;
-		scroll-behavior: smooth;
-	}
-</style>

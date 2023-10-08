@@ -5,31 +5,17 @@
 
 	export let profileName: string;
 	export let profileTags = '';
-	export let sameName: boolean;
 </script>
 
-<div class="container">
-	{#if sameName}
-		<Tooltip text="Checkout will use account first/last name">
-			<Fa icon={faCreditCard} color="var(--light-gray-4)" />
-		</Tooltip>
-	{/if}
-	<div class="username">
-		<span>{profileName}</span>
-		<span class="bottom-text">{profileTags}</span>
-	</div>
+<div class="username">
+	<span>{profileName}</span>
+	<span class="bottom-text">{profileTags}</span>
 </div>
 
 <style>
-	.container {
-		display: flex;
-		flex-direction: row;
-		align-items: center;
-	}
 	.username {
 		display: flex;
 		flex-direction: column;
-		margin-left: 10px;
 	}
 	.bottom-text {
 		display: block;

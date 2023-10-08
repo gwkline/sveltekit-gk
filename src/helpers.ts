@@ -1,4 +1,3 @@
-import axios, { AxiosError, type AxiosResponse } from 'axios';
 import type {
 	Account,
 	Settings,
@@ -10,7 +9,10 @@ import type {
 	Profile,
 	Payment,
 	Win,
-	NacTask
+	NacTask,
+	Tag,
+	TableRowType,
+	HeaderConfigType
 } from './types';
 import { goto } from '$app/navigation';
 import { browser } from '$app/environment';
@@ -28,7 +30,8 @@ import {
 	proxy_lists,
 	wins,
 	profiles,
-	verboseNacTasks
+	verboseNacTasks,
+	server
 } from './datastore';
 import { get } from 'svelte/store';
 import {
@@ -42,13 +45,17 @@ import {
 	faCheck
 } from '@fortawesome/free-solid-svg-icons';
 
-export const makeRequest = (
+export const makeRequest = async (
 	method: string,
 	url: string,
 	data: object | null = null,
-	callback: (response: AxiosResponse) => void = (response) => {
-		if (response.status > 399) {
-			console.log('Request Error:', response.status, response.data);
+	fetchFunc: (
+		input: RequestInfo | URL,
+		init?: RequestInit | undefined
+	) => Promise<Response> = fetch,
+	callback: (response: Response) => void = (response) => {
+		if (!response.ok) {
+			console.log('Request Error:', response.status, response.statusText);
 		}
 	},
 	headers = {}
@@ -65,28 +72,32 @@ export const makeRequest = (
 		}
 	}
 
-	return axios
-		.request({
-			method: method,
-			url: url,
-			headers: { ...defaultHeaders, ...headers },
-			data: data
-		})
+	return fetchFunc(url, {
+		method: method,
+		headers: { ...defaultHeaders, ...headers },
+		body: data ? JSON.stringify(data) : null
+	})
 		.then((response) => {
 			accessDenied.set(false);
 			networkError.set(false);
+
 			if (callback) {
 				callback(response);
 			}
+
 			return response;
 		})
-		.catch((error: AxiosError) => {
-			if (error.message === 'Request failed with status code 403') {
-				accessDenied.set(true);
-			} else if (error.message === 'Network Error') {
+		.catch((error) => {
+			if (error.name === 'AbortError') {
+				console.log('Request aborted');
+			} else if (error.name === 'TypeError' && error.message === 'Failed to fetch') {
 				networkError.set(true);
+			} else if (error.name === 'TypeError') {
+				console.log('Request Error:', error.message);
+			} else {
+				console.log('Unexpected Error:', error);
 			}
-			console.log('Request Error:', error.message, error.name, error.code);
+
 			return error;
 		});
 };
@@ -116,6 +127,7 @@ export const findMemberships = async (): Promise<WhopMembershipType[]> => {
 	}
 
 	const parsed_response = await response.json();
+
 	return parsed_response.data as WhopMembershipType[];
 };
 
@@ -191,32 +203,45 @@ export const saveSettings = (settingKey: SettingsKeys, value: string) => {
 	return makeRequest(method, url, get(settings));
 };
 
-export const getSettings = () => {
-	makeRequest('get', 'http://127.0.0.1:23432/settings', null, (response) => {
-		settings.set(response.data);
+type FetchType = (input: RequestInfo | URL, init?: RequestInit | undefined) => Promise<Response>;
+export const getSettings = async (fetch: FetchType) => {
+	makeRequest('get', 'http://127.0.0.1:23432/settings', null, fetch, async (response) => {
+		settings.set(await response.json());
 	});
 };
 
-export const getCheckoutTasks = () => {
-	makeRequest('get', 'http://127.0.0.1:23432/tasks?type=checkout', null, (response) => {
-		const data = response.data;
-		const cleanedData = data.map((task: Task) => {
-			task['account'] = cleanAccount(task.account as Account);
-			return task;
-		});
-		verboseTasks.set(cleanedData);
+export const getServer = async (fetch: FetchType) => {
+	makeRequest('get', 'http://127.0.0.1:23432/server', null, fetch, async (response) => {
+		server.set(await response.json());
 	});
 };
 
-export const getSchedules = () => {
-	makeRequest('get', 'http://127.0.0.1:23432/schedules', null, (response) => {
-		schedules.set(response.data);
+export const getCheckoutTasks = async (fetch: FetchType) => {
+	makeRequest(
+		'get',
+		'http://127.0.0.1:23432/tasks?type=checkout',
+		null,
+		fetch,
+		async (response) => {
+			const data = await response.json();
+			const cleanedData = data.map((task: Task) => {
+				task['account'] = cleanAccount(task.account as Account);
+				return task;
+			});
+			verboseTasks.set(cleanedData);
+		}
+	);
+};
+
+export const getSchedules = async (fetch: FetchType) => {
+	makeRequest('get', 'http://127.0.0.1:23432/schedules', null, fetch, async (response) => {
+		schedules.set(await response.json());
 	});
 };
 
-export const getActivityTasks = () => {
-	makeRequest('get', 'http://127.0.0.1:23432/accounts/activity', null, (response) => {
-		const data = response.data;
+export const getActivityTasks = async (fetch: FetchType) => {
+	makeRequest('get', 'http://127.0.0.1:23432/accounts/activity', null, fetch, async (response) => {
+		const data = await response.json();
 		const cleanedData = data.map((task: Task) => {
 			task['account'] = cleanAccount(task.account as Account);
 			return task;
@@ -225,13 +250,14 @@ export const getActivityTasks = () => {
 	});
 };
 
-export const getNACTasks = () => {
+export const getNACTasks = async (fetch: FetchType) => {
 	makeRequest(
 		'get',
 		'http://127.0.0.1:23432/tasks?type=nike_account_creation',
 		null,
-		(response) => {
-			const data = response.data;
+		fetch,
+		async (response) => {
+			const data = await response.json();
 			const cleanedData = data.map((task: NacTask) => {
 				task.proxy_list = {
 					id: task.proxy_list.id,
@@ -240,7 +266,7 @@ export const getNACTasks = () => {
 					archived: task.proxy_list.archived
 				};
 
-				task['account'] = {};
+				task['account'] = {} as Account;
 				return task;
 			});
 			verboseNacTasks.set(cleanedData);
@@ -248,9 +274,9 @@ export const getNACTasks = () => {
 	);
 };
 
-export const getAccounts = () => {
-	makeRequest('get', 'http://127.0.0.1:23432/accounts', null, (response) => {
-		const rawAccounts: Account[] = response.data;
+export const getAccounts = async (fetch: FetchType) => {
+	makeRequest('get', 'http://127.0.0.1:23432/accounts', null, fetch, async (response) => {
+		const rawAccounts: Account[] = await response.json();
 		const cleanedAccounts = rawAccounts.map((account) => {
 			return cleanAccount(account as Account);
 		});
@@ -259,9 +285,10 @@ export const getAccounts = () => {
 	});
 };
 
-export const getProfiles = () => {
-	makeRequest('get', 'http://127.0.0.1:23432/profiles', null, (response) => {
-		const profs = response.data.map((profile: Profile) => {
+export const getProfiles = async (fetch: FetchType) => {
+	makeRequest('get', 'http://127.0.0.1:23432/profiles', null, fetch, async (response) => {
+		const body = await response.json();
+		const profs = body.map((profile: Profile) => {
 			if (profile.tags === undefined) {
 				profile.tags = [];
 			}
@@ -272,21 +299,30 @@ export const getProfiles = () => {
 	});
 };
 
-export const getPayments = () => {
-	makeRequest('get', 'http://127.0.0.1:23432/payments', null, (response) => {
-		payments.set(response.data);
+export const getPayments = async (fetch: FetchType) => {
+	makeRequest('get', 'http://127.0.0.1:23432/payments', null, fetch, async (response) => {
+		const body = await response.json();
+		payments.set(
+			body.map((payment: Payment) => {
+				if (payment.tags === null) {
+					payment.tags = [];
+				}
+				return payment;
+			})
+		);
 	});
 };
 
-export const getProxies = () => {
-	makeRequest('get', 'http://127.0.0.1:23432/proxy_lists', null, (response) => {
-		proxy_lists.set(response.data);
+export const getProxies = async (fetch: FetchType) => {
+	makeRequest('get', 'http://127.0.0.1:23432/proxy_lists', null, fetch, async (response) => {
+		proxy_lists.set(await response.json());
 	});
 };
 
-export const getWins = () => {
-	makeRequest('get', 'http://127.0.0.1:23432/wins', null, (response) => {
-		let cleanedWins: Win[] = response.data.map((win: Win) => {
+export const getWins = async (fetch: FetchType) => {
+	makeRequest('get', 'http://127.0.0.1:23432/wins', null, fetch, async (response) => {
+		const body = await response.json();
+		let cleanedWins: Win[] = body.map((win: Win) => {
 			if (win.tags === null) {
 				win.tags = [];
 			}
@@ -352,15 +388,11 @@ export const removeTags = (objects: HasTag[], tags: string[], url: string) => {
 	const objectsToUpdate: HasTag[] = [];
 
 	objects = objects.map((object) => {
-		try {
-			const initialTagsLength = object.tags.length;
-			object.tags = object.tags.filter((t) => !tags.includes(t.name));
+		const initialTagsLength = object.tags.length;
+		object.tags = object.tags.filter((t) => !tags.includes(t.name));
 
-			if (object.tags.length !== initialTagsLength) {
-				objectsToUpdate.push(object);
-			}
-		} catch {
-			console.log(object);
+		if (object.tags.length !== initialTagsLength) {
+			objectsToUpdate.push(object);
 		}
 
 		return object;
@@ -412,3 +444,243 @@ export const cleanDate = (dateString: string) => {
 		date.getFullYear()
 	);
 };
+
+export function createAddAdditionalTag<HasTag>(
+	updateStore: (updater: (items: HasTag[]) => HasTag[]) => void,
+	apiEndpoint: string,
+	getSelectedTags: () => string[],
+	setSelectedTags: (newTags: string[]) => void,
+	getTags: (item: HasTag) => Tag[] = (item) => item.tags
+) {
+	return (e: CustomEvent) => {
+		const newTagText = e.detail;
+		const updatedItems: HasTag[] = [];
+		const selectedTags = getSelectedTags();
+
+		updateStore((items) => {
+			return items.map((item) => {
+				const tags = getTags(item);
+				const itemHasSelectedTag = tags.some((t: Tag) => selectedTags.includes(t.name));
+
+				if (selectedTags.includes('No Tags') && tags.length === 0) {
+					tags.push({ name: newTagText });
+					updatedItems.push(item);
+				}
+
+				if (itemHasSelectedTag) {
+					tags.push({ name: newTagText });
+					updatedItems.push(item);
+				}
+
+				return item;
+			});
+		});
+
+		if (updatedItems.length > 0) {
+			makeRequest('put', apiEndpoint, updatedItems);
+		}
+		setSelectedTags([]);
+	};
+}
+
+export function createHandleChecked(
+	getTasks: () => HasTag[],
+	getCheckedItemIds: () => number[],
+	setCheckedItemIds: (ids: number[]) => void,
+	getLastChecked: () => number | null,
+	setLastChecked: (id: number | null) => void,
+	getSecondLastChecked: () => number | null,
+	setSecondLastChecked: (id: number | null) => void,
+	getShiftPressed: () => boolean
+) {
+	return (e: CustomEvent) => {
+		const itemId: number = e.detail;
+
+		setSecondLastChecked(getLastChecked());
+		setLastChecked(itemId);
+
+		const checkedItemIds = getCheckedItemIds();
+		if (checkedItemIds.includes(itemId)) {
+			checkedItemIds.splice(checkedItemIds.indexOf(itemId), 1);
+		} else {
+			checkedItemIds.push(itemId);
+		}
+		setCheckedItemIds(checkedItemIds);
+
+		if (getShiftPressed() && getLastChecked() === itemId && getSecondLastChecked() !== null) {
+			const start = Math.min(getLastChecked() as number, getSecondLastChecked()!);
+			const end = Math.max(getLastChecked() as number, getSecondLastChecked()!);
+			const tasks = getTasks();
+
+			for (let i = start + 1; i < end; i++) {
+				const taskWithThisId = tasks.find((task) => task.id === i);
+				if (taskWithThisId && !checkedItemIds.includes(taskWithThisId.id)) {
+					checkedItemIds.push(i);
+				}
+			}
+			setCheckedItemIds(checkedItemIds);
+		}
+	};
+}
+export function createTableLogic<HasTag>(
+	getDataSource: () => HasTag[],
+	getSearchValue: () => string,
+	getSelectedTags: () => string[],
+	getSelectedState: () => string | null,
+	setFilteredTasks: (tasks: HasTag[]) => void,
+	getHeaderConfig: () => HeaderConfigType<HasTag>,
+	setTableIds: (ids: number[]) => void,
+	getTableIds: () => number[],
+	getSortState: () => SortState,
+	setTableData: (data: TableRowType<HasTag>[]) => void,
+	setCheckedItemIds: (ids: number[]) => void,
+	getCheckedItemIds: () => number[],
+	filterState: boolean = false
+) {
+	const filtered = getDataSource().filter((task) => {
+		// Keyword Search
+		let keywordMatch = true;
+		if (getSearchValue() !== '') {
+			keywordMatch = JSON.stringify(task).toLowerCase().includes(getSearchValue().toLowerCase());
+		}
+
+		// Tag Filtering
+		let tagMatch;
+		if (getSelectedTags().includes('No Tags')) {
+			tagMatch =
+				task.tags.length === 0 ||
+				getSelectedTags().some((tag) => task.tags.map((tagObj: Tag) => tagObj.name).includes(tag));
+		} else {
+			tagMatch =
+				getSelectedTags().length === 0 ||
+				getSelectedTags().some((tag) => task.tags.map((tagObj: Tag) => tagObj.name).includes(tag));
+		}
+
+		if (filterState) {
+			// CheckoutState Filtering
+			const stateMatch = !getSelectedState() || task.state === getSelectedState();
+			return keywordMatch && tagMatch && stateMatch;
+		} else {
+			return keywordMatch && tagMatch;
+		}
+	});
+
+	setFilteredTasks(filtered);
+
+	const headers = Object.keys(getHeaderConfig());
+	setTableIds([]);
+
+	let tableDataShortenedTemp = filtered.map((row, index) => {
+		const rowObject: TableRowType<HasTag> = {
+			index: index + 1,
+			itemId: row.id,
+			thisItem: row
+		};
+		for (const header of headers) {
+			rowObject[header] = getHeaderConfig()[header](row);
+		}
+		const newIds = [...getTableIds(), row.id];
+		setTableIds(newIds);
+		return rowObject;
+	});
+
+	if (typeof getSortState().column === 'string') {
+		// Get the getter function for the sort column
+		const getSortValue = getHeaderConfig()[getSortState().column as string];
+		const indices = tableDataShortenedTemp.map((_, index) => index); // Initialize indices array
+
+		indices.sort((aIndex, bIndex) => {
+			// Use the getter function to extract the sort value
+			const aValue = getSortValue(filtered[aIndex]).toLowerCase();
+			const bValue = getSortValue(filtered[bIndex]).toLowerCase();
+
+			if (aValue < bValue) {
+				return getSortState().direction === 1 ? -1 : 1;
+			}
+			if (aValue > bValue) {
+				return getSortState().direction === 1 ? 1 : -1;
+			}
+			return 0;
+		});
+
+		// Sort the tableDataShortenedTemp array and the tableIds array according to the sorted indices
+		tableDataShortenedTemp = indices.map((index) => tableDataShortenedTemp[index]);
+		setTableIds(indices.map((index) => getTableIds()[index]));
+	}
+
+	setTableData(tableDataShortenedTemp);
+	setCheckedItemIds(getCheckedItemIds().filter((item) => getTableIds().includes(item)));
+}
+
+export function computeTagCounts<HasTag>(
+	getItems: () => HasTag[],
+	getTags: (item: HasTag) => { name: string }[],
+	setAllTags: (tags: string[]) => void,
+	setTagsCount: (count: { tag: string; count: number }[]) => void
+) {
+	const allTags = getItems()
+		.map(getTags)
+		.flat()
+		.map((tag) => {
+			return tag.name;
+		})
+		.filter((tag) => tag);
+
+	const uniqueTags = [...new Set(allTags)];
+
+	const tagsCount = uniqueTags.map((tag) => {
+		return {
+			tag: tag,
+			count: allTags.filter((t) => t === tag).length
+		};
+	});
+
+	const noTagsCount = getItems().filter((item) => getTags(item).length === 0).length;
+
+	if (noTagsCount > 0) {
+		tagsCount.unshift({ tag: 'No Tags', count: noTagsCount });
+	}
+
+	setAllTags(allTags);
+	setTagsCount(tagsCount);
+}
+
+export function computeTotalSelectedTasks<HasTag>(
+	getItems: () => HasTag[],
+	getSelectedTags: () => string[],
+	getTags: (item: HasTag) => { name: string }[]
+): number {
+	const selectedTasks = new Set<number>();
+
+	if (getSelectedTags().length > 0) {
+		getItems().forEach((item) => {
+			const itemTags = getTags(item).map((t) => t.name);
+
+			if (getSelectedTags().some((tag) => itemTags.includes(tag))) {
+				selectedTasks.add(item.id);
+			}
+
+			if (getSelectedTags().includes('No Tags') && getTags(item).length === 0) {
+				selectedTasks.add(item.id);
+			}
+		});
+	}
+
+	return selectedTasks.size;
+}
+
+export function computeButtonTextCount(
+	getCheckedItemIds: () => number[],
+	getFilteredTasks: () => HasTag[],
+	getShiftPressed: () => boolean
+): string {
+	const items = getCheckedItemIds();
+	const visibleItems = getFilteredTasks().map((task: HasTag) => task.id); // Replace 'any' with the appropriate type
+	const overlap = items.filter((item) => visibleItems.includes(item));
+
+	if (getShiftPressed() || overlap.length == 0 || overlap.length == visibleItems.length) {
+		return `All`;
+	} else {
+		return `(${overlap.length})`;
+	}
+}

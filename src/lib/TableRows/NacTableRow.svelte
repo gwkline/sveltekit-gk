@@ -4,6 +4,7 @@
 	import ProxyCell from '../TableCells/ProxyCell.svelte';
 	import BrowserCell from '../TableCells/BrowserCell.svelte';
 	import type { NacTask, TableRowType } from '../../types';
+	import BaseCell from '$lib/TableCells/BaseCell.svelte';
 
 	export let value: string;
 	export let column: string;
@@ -20,5 +21,5 @@
 {:else if column === 'Proxy'}
 	<ProxyCell {value} />
 {:else}
-	{value}
+	<BaseCell {value} />
 {/if}

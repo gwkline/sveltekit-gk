@@ -108,7 +108,7 @@
 		cursor: pointer;
 	}
 	.btn:hover {
-		background: var(--light-gray-4, #f2f2f2);
+		background: var(--light-gray-3, #f2f2f2);
 	}
 	.btn:active {
 		-webkit-box-shadow: inset 0px 0px 5px #b6b6b6;

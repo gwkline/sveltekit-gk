@@ -55,7 +55,7 @@
 
 	tr.active,
 	tr:hover {
-		background-color: var(--light-gray-2);
+		background-color: var(--light-gray-1);
 	}
 
 	td {
@@ -73,4 +73,10 @@
 		align-items: center;
 		justify-content: start;
 	}
+
+	/* .action {
+		display: flex;
+		align-items: center;
+		justify-content: flex-end;
+	} */
 </style>

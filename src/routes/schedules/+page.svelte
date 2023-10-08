@@ -3,7 +3,12 @@
 	import UpdateBar from '$lib/UpdateBar.svelte';
 	import ProxyNav from './ScheduleNav.svelte';
 	import ConfirmationModal from '$lib/ConfirmationModal.svelte';
-	import { makeRequest, updateSortState } from '../../helpers';
+	import {
+		createHandleChecked,
+		createTableLogic,
+		makeRequest,
+		updateSortState
+	} from '../../helpers';
 	import { shiftPressed, isLoading, schedules } from '../../datastore';
 	import type {
 		HeaderConfigType,
@@ -36,7 +41,6 @@
 
 	let selectedTags: string[] = [];
 
-	let headers: string[] = [];
 	let headerConfig: HeaderConfigType<Schedule> = {
 		Name: (schedule) => schedule.name,
 		Time: (schedule) => schedule.start_time,
@@ -49,33 +53,6 @@
 
 	const updateSearchValue = (e: CustomEvent) => {
 		searchValue = e.detail;
-	};
-
-	const handleChecked = (e: CustomEvent) => {
-		let itemId: number = e.detail;
-
-		secondLastChecked = lastChecked;
-		lastChecked = itemId;
-
-		let arrayOfTaskIndexes = checkedItemIds;
-		if (checkedItemIds.includes(itemId)) {
-			arrayOfTaskIndexes.splice(arrayOfTaskIndexes.indexOf(itemId), 1);
-		} else {
-			arrayOfTaskIndexes.push(itemId);
-		}
-		checkedItemIds = arrayOfTaskIndexes;
-
-		if ($shiftPressed && lastChecked === itemId && secondLastChecked !== null) {
-			let start = Math.min(lastChecked, secondLastChecked);
-			let end = Math.max(lastChecked, secondLastChecked);
-
-			for (let i = start + 1; i < end; i++) {
-				let taskWithThisId = $schedules.find((schedule) => schedule.id === i);
-				if (taskWithThisId && !checkedItemIds.includes(taskWithThisId.id)) {
-					checkedItemIds.push(i);
-				}
-			}
-		}
 	};
 
 	const handleCheckedAll = (e: CustomEvent) => {
@@ -128,73 +105,47 @@
 
 	const handleEdit = () => {};
 
-	// Sets the value of filteredSchedules and tableData
-	$: {
-		let filtered = $schedules.filter((schedule) => {
-			// Keyword Search
-			let keywordMatch = true;
-			if (searchValue !== '') {
-				keywordMatch = JSON.stringify(schedule).toLowerCase().includes(searchValue.toLowerCase());
-			}
+	const handleChecked = createHandleChecked(
+		() => $schedules,
+		() => checkedItemIds,
+		(ids) => {
+			checkedItemIds = ids;
+		},
+		() => lastChecked,
+		(id) => {
+			lastChecked = id;
+		},
+		() => secondLastChecked,
+		(id) => {
+			secondLastChecked = id;
+		},
+		() => $shiftPressed
+	);
 
-			// ActivityState Filtering
-			return keywordMatch;
-		});
-
-		filteredSchedules = filtered;
-
-		headers = Object.keys(headerConfig);
-		tableIds = [];
-
-		let tableDataShortenedTemp = filtered.map((row, index) => {
-			const rowObject: TableRowType<Schedule> = {
-				index: index + 1,
-				itemId: row.id,
-				thisItem: row
-			};
-			for (const header of headers) {
-				rowObject[header] = headerConfig[header](row);
-			}
-			tableIds.push(row.id);
-			return rowObject;
-		});
-
-		if (typeof sortState.column === 'string') {
-			// Get the getter function for the sort column
-			const getSortValue = headerConfig[sortState.column];
-			const indices = tableDataShortenedTemp.map((_, index) => index); // Initialize indices array
-
-			indices.sort((aIndex, bIndex) => {
-				// Use the getter function to extract the sort value
-				const aValue = getSortValue(filtered[aIndex]).toLowerCase();
-				const bValue = getSortValue(filtered[bIndex]).toLowerCase();
-
-				if (aValue < bValue) {
-					return sortState.direction === 1 ? -1 : 1;
-				}
-				if (aValue > bValue) {
-					return sortState.direction === 1 ? 1 : -1;
-				}
-				return 0;
-			});
-
-			// Sort the tableDataShortenedTemp array and the tableIds array according to the sorted indices
-			tableDataShortenedTemp = indices.map((index) => tableDataShortenedTemp[index]);
-			tableIds = indices.map((index) => tableIds[index]);
-		}
-
-		tableData = tableDataShortenedTemp;
-	}
-
-	// Sets the value of buttonTextCount
-	$: {
-		let items = checkedItemIds;
-		if ($shiftPressed || items.length == 0 || items.length == filteredSchedules.length) {
-			buttonTextCount = 'All';
-		} else {
-			buttonTextCount = `(${items.length})`;
-		}
-	}
+	// Sets the value of filteredTasks and tableData
+	$: createTableLogic(
+		() => $schedules,
+		() => searchValue,
+		() => selectedTags,
+		() => selectedState,
+		(tasks) => {
+			filteredSchedules = tasks;
+		},
+		() => headerConfig,
+		(ids) => {
+			tableIds = ids;
+		},
+		() => tableIds,
+		() => sortState,
+		(data) => {
+			tableData = data;
+		},
+		(ids) => {
+			checkedItemIds = ids;
+		},
+		() => checkedItemIds,
+		false
+	);
 
 	// Sets the value of filterOn
 	$: {
@@ -227,33 +178,31 @@
 	}}
 />
 
-<div class="container">
-	<Table
-		let:row
-		{tableData}
-		{headers}
-		{checkedAll}
-		{sortState}
-		on:sort={handleSort}
-		on:checkedAll={handleCheckedAll}
+<Table
+	let:row
+	{tableData}
+	headers={Object.keys(headerConfig)}
+	{checkedAll}
+	{sortState}
+	on:sort={handleSort}
+	on:checkedAll={handleCheckedAll}
+>
+	<BaseTableRow
+		{row}
+		let:column
+		let:value
+		page="activity"
+		checked={checkedItemIds.includes(row.itemId)}
+		on:checked={handleChecked}
+		on:delete={handleTask}
+		on:start={handleTask}
+		on:edit={handleTask}
+		on:stop={handleTask}
+		on:focus={handleTask}
 	>
-		<BaseTableRow
-			{row}
-			let:column
-			let:value
-			page="activity"
-			checked={checkedItemIds.includes(row.itemId)}
-			on:checked={handleChecked}
-			on:delete={handleTask}
-			on:start={handleTask}
-			on:edit={handleTask}
-			on:stop={handleTask}
-			on:focus={handleTask}
-		>
-			<ScheduleTableRow {value} {column} />
-		</BaseTableRow>
-	</Table>
-</div>
+		<ScheduleTableRow {value} {column} />
+	</BaseTableRow>
+</Table>
 
 {#if showConfirmationModal}
 	<ConfirmationModal
@@ -267,11 +216,3 @@
 		}}
 	/>
 {/if}
-
-<style>
-	.container {
-		flex-grow: 1;
-		overflow-y: auto;
-		scroll-behavior: smooth;
-	}
-</style>

@@ -3,7 +3,13 @@
 	import UpdateBar from '$lib/UpdateBar.svelte';
 	import ProxyNav from './ProxyNav.svelte';
 	import ConfirmationModal from '$lib/ConfirmationModal.svelte';
-	import { makeRequest, updateSortState } from '../../helpers';
+	import {
+		computeButtonTextCount,
+		createHandleChecked,
+		createTableLogic,
+		makeRequest,
+		updateSortState
+	} from '../../helpers';
 	import { shiftPressed, isLoading, proxy_lists } from '../../datastore';
 	import type {
 		HeaderConfigType,
@@ -36,7 +42,6 @@
 
 	let selectedTags: string[] = [];
 
-	let headers: string[] = [];
 	let headerConfig: HeaderConfigType<ProxyList> = {
 		Name: (proxy_list) => proxy_list.name,
 		Count: (proxy_list) => proxy_list.proxies?.length.toString() || '0',
@@ -49,33 +54,6 @@
 
 	const updateSearchValue = (e: CustomEvent) => {
 		searchValue = e.detail;
-	};
-
-	const handleChecked = (e: CustomEvent) => {
-		let itemId: number = e.detail;
-
-		secondLastChecked = lastChecked;
-		lastChecked = itemId;
-
-		let arrayOfTaskIndexes = checkedItemIds;
-		if (checkedItemIds.includes(itemId)) {
-			arrayOfTaskIndexes.splice(arrayOfTaskIndexes.indexOf(itemId), 1);
-		} else {
-			arrayOfTaskIndexes.push(itemId);
-		}
-		checkedItemIds = arrayOfTaskIndexes;
-
-		if ($shiftPressed && lastChecked === itemId && secondLastChecked !== null) {
-			let start = Math.min(lastChecked, secondLastChecked);
-			let end = Math.max(lastChecked, secondLastChecked);
-
-			for (let i = start + 1; i < end; i++) {
-				let taskWithThisId = $proxy_lists.find((proxy_list) => proxy_list.id === i);
-				if (taskWithThisId && !checkedItemIds.includes(taskWithThisId.id)) {
-					checkedItemIds.push(i);
-				}
-			}
-		}
 	};
 
 	const handleCheckedAll = (e: CustomEvent) => {
@@ -128,73 +106,54 @@
 
 	const handleEdit = () => {};
 
-	// Sets the value of filteredProxyLists and tableData
-	$: {
-		let filtered = $proxy_lists.filter((proxy_list) => {
-			// Keyword Search
-			let keywordMatch = true;
-			if (searchValue !== '') {
-				keywordMatch = JSON.stringify(proxy_list).toLowerCase().includes(searchValue.toLowerCase());
-			}
+	const handleChecked = createHandleChecked(
+		() => $proxy_lists,
+		() => checkedItemIds,
+		(ids) => {
+			checkedItemIds = ids;
+		},
+		() => lastChecked,
+		(id) => {
+			lastChecked = id;
+		},
+		() => secondLastChecked,
+		(id) => {
+			secondLastChecked = id;
+		},
+		() => $shiftPressed
+	);
 
-			// ActivityState Filtering
-			return keywordMatch;
-		});
-
-		filteredProxyLists = filtered;
-
-		headers = Object.keys(headerConfig);
-		tableIds = [];
-
-		let tableDataShortenedTemp = filtered.map((row, index) => {
-			const rowObject: TableRowType<ProxyList> = {
-				index: index + 1,
-				itemId: row.id,
-				thisItem: row
-			};
-			for (const header of headers) {
-				rowObject[header] = headerConfig[header](row);
-			}
-			tableIds.push(row.id);
-			return rowObject;
-		});
-
-		if (typeof sortState.column === 'string') {
-			// Get the getter function for the sort column
-			const getSortValue = headerConfig[sortState.column];
-			const indices = tableDataShortenedTemp.map((_, index) => index); // Initialize indices array
-
-			indices.sort((aIndex, bIndex) => {
-				// Use the getter function to extract the sort value
-				const aValue = getSortValue(filtered[aIndex]).toLowerCase();
-				const bValue = getSortValue(filtered[bIndex]).toLowerCase();
-
-				if (aValue < bValue) {
-					return sortState.direction === 1 ? -1 : 1;
-				}
-				if (aValue > bValue) {
-					return sortState.direction === 1 ? 1 : -1;
-				}
-				return 0;
-			});
-
-			// Sort the tableDataShortenedTemp array and the tableIds array according to the sorted indices
-			tableDataShortenedTemp = indices.map((index) => tableDataShortenedTemp[index]);
-			tableIds = indices.map((index) => tableIds[index]);
-		}
-
-		tableData = tableDataShortenedTemp;
-	}
+	// Sets the value of filteredTasks and tableData
+	$: createTableLogic(
+		() => $proxy_lists,
+		() => searchValue,
+		() => selectedTags,
+		() => selectedState,
+		(tasks) => {
+			filteredProxyLists = tasks;
+		},
+		() => headerConfig,
+		(ids) => {
+			tableIds = ids;
+		},
+		() => tableIds,
+		() => sortState,
+		(data) => {
+			tableData = data;
+		},
+		(ids) => {
+			checkedItemIds = ids;
+		},
+		() => checkedItemIds,
+		false
+	);
 
 	// Sets the value of buttonTextCount
-	$: {
-		let items = checkedItemIds;
-		if ($shiftPressed || items.length == 0 || items.length == filteredProxyLists.length) {
-			buttonTextCount = 'All';
-		} else {
-			buttonTextCount = `(${items.length})`;
-		}
-	}
+	$: buttonTextCount = computeButtonTextCount(
+		() => checkedItemIds,
+		() => filteredProxyLists,
+		() => $shiftPressed
+	);
 
 	// Sets the value of filterOn
 	$: {
@@ -227,33 +186,31 @@
 	}}
 />
 
-<div class="container">
-	<Table
-		let:row
-		{tableData}
-		{headers}
-		{checkedAll}
-		{sortState}
-		on:sort={handleSort}
-		on:checkedAll={handleCheckedAll}
+<Table
+	let:row
+	{tableData}
+	headers={Object.keys(headerConfig)}
+	{checkedAll}
+	{sortState}
+	on:sort={handleSort}
+	on:checkedAll={handleCheckedAll}
+>
+	<BaseTableRow
+		{row}
+		let:column
+		let:value
+		page="activity"
+		checked={checkedItemIds.includes(row.itemId)}
+		on:checked={handleChecked}
+		on:delete={handleTask}
+		on:start={handleTask}
+		on:edit={handleTask}
+		on:stop={handleTask}
+		on:focus={handleTask}
 	>
-		<BaseTableRow
-			{row}
-			let:column
-			let:value
-			page="activity"
-			checked={checkedItemIds.includes(row.itemId)}
-			on:checked={handleChecked}
-			on:delete={handleTask}
-			on:start={handleTask}
-			on:edit={handleTask}
-			on:stop={handleTask}
-			on:focus={handleTask}
-		>
-			<ProxyListTableRow {value} {column} />
-		</BaseTableRow>
-	</Table>
-</div>
+		<ProxyListTableRow {value} {column} />
+	</BaseTableRow>
+</Table>
 
 {#if showConfirmationModal}
 	<ConfirmationModal
@@ -267,11 +224,3 @@
 		}}
 	/>
 {/if}
-
-<style>
-	.container {
-		flex-grow: 1;
-		overflow-y: auto;
-		scroll-behavior: smooth;
-	}
-</style>
