@@ -135,12 +135,7 @@
 		});
 
 		if (taskIdsToRemove.length > 0) {
-			makeRequest(
-				'delete',
-				'http://127.0.0.1:23432/tasks?type=checkout',
-				taskIdsToRemove,
-				() => {}
-			);
+			makeRequest('delete', 'http://127.0.0.1:23432/tasks?type=checkout', taskIdsToRemove);
 		}
 		selectedTags = []; // Clear selection after deleting
 	};
@@ -218,19 +213,20 @@
 
 		switch (eventState) {
 			case 'start':
-				makeRequest('post', `http://127.0.0.1:23432/tasks/start?type=undefined`, taskIds, () => {
-					isLoading.set({ [`${eventState}${taskId}`]: false });
-				});
+				makeRequest('post', `http://127.0.0.1:23432/tasks/start?type=undefined`, taskIds).then(
+					() => {
+						isLoading.set({ [`${eventState}${taskId}`]: false });
+					}
+				);
 				break;
 			case 'focus':
 				makeRequest(
 					'get',
 					`http://127.0.0.1:23432/task/${taskId}/focus?type=undefined`,
-					taskIds,
-					() => {
-						isLoading.set({ [`${eventState}${taskId}`]: false });
-					}
-				);
+					taskIds
+				).then(() => {
+					isLoading.set({ [`${eventState}${taskId}`]: false });
+				});
 				break;
 			case 'stop':
 				taskIds = taskIds.filter((id) => {
@@ -242,12 +238,14 @@
 					isLoading.set({ [eventState]: false });
 					return;
 				}
-				makeRequest('post', `http://127.0.0.1:23432/tasks/stop?type=undefined`, taskIds, () => {
-					isLoading.set({ [`${eventState}${taskId}`]: false });
-				});
+				makeRequest('post', `http://127.0.0.1:23432/tasks/stop?type=undefined`, taskIds).then(
+					() => {
+						isLoading.set({ [`${eventState}${taskId}`]: false });
+					}
+				);
 				break;
 			case 'delete':
-				makeRequest('delete', `http://127.0.0.1:23432/tasks?type=checkout`, taskIds, () => {
+				makeRequest('delete', `http://127.0.0.1:23432/tasks?type=checkout`, taskIds).then(() => {
 					// Update verboseTasks by filtering out the tasks that were deleted
 					verboseTasks.update((tasks) => {
 						return tasks.filter((task) => !taskIds.includes(task.id));
