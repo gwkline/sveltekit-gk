@@ -2,6 +2,7 @@
 	import Tooltip from '$lib/Tooltip.svelte';
 	import { faCreditCard, faUser, faUserSlash } from '@fortawesome/free-solid-svg-icons';
 	import Fa from 'svelte-fa';
+	import { privacy } from '../../datastore';
 
 	export let value: string = '';
 	export let loggedIn: boolean | null;
@@ -9,7 +10,7 @@
 </script>
 
 <div class="container">
-	<div class="username">
+	<div class="username {$privacy ? 'blur' : ''}">
 		<span>{value.split('@')[0]}</span>
 		<span class="bottom-text">{'@' + value.split('@')[1]}</span>
 	</div>
@@ -37,6 +38,9 @@
 		flex-direction: row;
 		align-items: left;
 		justify-content: left;
+	}
+	.blur {
+		filter: blur(4px);
 	}
 	.icons {
 		display: flex;

@@ -45,6 +45,7 @@ const persistentStore = <T>(key: string, startValue: T): Writable<T> => {
 };
 
 export const sidebarCollapsed = persistentStore('sidebarCollapsed', true);
+export const privacy = persistentStore('privacy', false);
 export const showTags = persistentStore('showTags', false);
 
 export const isLoading = writable<Record<string, boolean>>({});

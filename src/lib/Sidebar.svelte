@@ -13,14 +13,20 @@
 		faKey,
 		faCamera,
 		faArrowLeft,
-		faArrowRight
+		faArrowRight,
+		faEyeSlash,
+		faEye
 	} from '@fortawesome/free-solid-svg-icons';
 	import SidebarElement from './SidebarElement.svelte';
-	import { server, sidebarCollapsed } from '../datastore';
+	import { privacy, server, sidebarCollapsed } from '../datastore';
 	import { page } from '$app/stores';
 
 	export let toggle = () => {
 		sidebarCollapsed.set(!$sidebarCollapsed);
+	};
+
+	export let togglePrivacy = () => {
+		privacy.set(!$privacy);
 	};
 
 	let url = ``;
@@ -135,6 +141,15 @@
 			style={'settings'}
 			collapsed={$sidebarCollapsed}
 			page={null}
+			disabled={false}
+		/>
+		<SidebarElement
+			text={'Privacy'}
+			icon={$privacy ? faEyeSlash : faEye}
+			style={'settings'}
+			collapsed={$sidebarCollapsed}
+			page={null}
+			onclick={togglePrivacy}
 			disabled={false}
 		/>
 		<SidebarElement
