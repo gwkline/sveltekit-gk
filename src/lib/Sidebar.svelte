@@ -96,9 +96,9 @@
 			disabled: false
 		},
 		{
-			page: 'showcases',
-			text: 'Showcases',
-			icon: faCamera,
+			page: 'settings',
+			text: 'Settings',
+			icon: faGear,
 			disabled: false
 		}
 	];
@@ -113,7 +113,7 @@
 			<SidebarElement
 				icon={null}
 				collapsed={$sidebarCollapsed}
-				page={''}
+				page=""
 				image_src="../purplelogo.png"
 				style="justify-content: center; !important"
 				disabled={false}
@@ -161,16 +161,6 @@
 			onclick={toggle}
 			disabled={false}
 		/>
-		<div class={url.includes('settings') ? 'active' : ''}>
-			<SidebarElement
-				text={'Settings'}
-				page={'settings'}
-				icon={faGear}
-				style={'settings'}
-				collapsed={$sidebarCollapsed}
-				disabled={true}
-			/>
-		</div>
 	</div>
 </div>
 

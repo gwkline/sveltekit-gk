@@ -12,7 +12,7 @@
 	export let onclick = () => {};
 
 	const redirect = () => {
-		if (!disabled && page !== null) {
+		if (!disabled) {
 			goto(`/${page}`);
 		}
 	};
@@ -20,7 +20,7 @@
 
 <button
 	class="{style} {disabled == true ? 'disabled' : ''} {collapsed ? 'collapsed' : ''}"
-	on:click={page ? redirect : onclick}
+	on:click={page != null ? redirect : onclick}
 >
 	{#if image_src == ''}
 		<div class="icon-wrapper">

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import Fa from 'svelte-fa';
+	import { privacy } from '../../datastore';
 
 	export let value: string;
 
@@ -8,7 +9,7 @@
 	};
 </script>
 
-<div class="container">
+<div class="container {$privacy ? 'blur' : ''}">
 	<Fa icon={cardType} color="var(--light-gray-4)" />
 	<div class="username">
 		<span>{value}</span>
@@ -31,5 +32,8 @@
 		display: block;
 		font-size: 11px;
 		color: #888;
+	}
+	.blur {
+		filter: blur(4px);
 	}
 </style>
