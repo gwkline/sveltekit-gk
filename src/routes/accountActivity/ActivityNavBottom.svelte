@@ -4,13 +4,14 @@
 	import { faPlay, faStop, faTrash } from '@fortawesome/free-solid-svg-icons';
 	import { createEventDispatcher } from 'svelte';
 	import Dropdown from '$lib/Dropdown.svelte';
-	import type { ActivityMode, Schedule } from '../../types';
+	import type { AccountOpMode, ActivityMode, Schedule } from '../../types';
 
 	export let buttonTextCount: string;
 	export let schedules: Schedule[] = [];
 
 	let modeValue: ActivityMode | '';
 	let scheduleValue: string;
+	let accountOpValue: AccountOpMode | '' = '';
 
 	const valueTitleMap: Record<ActivityMode, string> = {
 		login: 'Login/EA',
@@ -32,7 +33,29 @@
 		Manual: 'manual'
 	};
 
-	type states = 'start' | 'stop' | 'delete' | 'duplicate' | 'editSchedule' | 'editMode' | 'create';
+	let titleValueMapOps: Record<string, AccountOpMode> = {
+		'Change Nike Email': 'changeNikeEmail',
+		'Delete Nike Account': 'deleteNikeAccount',
+		'Disable Email Notifications': 'disableEmailNotifications',
+		'Update Nike Profile': 'updateNikeProfile'
+	};
+
+	const valueTitleMapOps: Record<AccountOpMode, string> = {
+		changeNikeEmail: 'Change Nike Email',
+		deleteNikeAccount: 'Delete Nike Account',
+		disableEmailNotifications: 'Disable Email Notifications',
+		updateNikeProfile: 'Update Nike Profile'
+	};
+
+	type states =
+		| 'start'
+		| 'stop'
+		| 'delete'
+		| 'duplicate'
+		| 'editSchedule'
+		| 'editMode'
+		| 'create'
+		| 'runAccountOp';
 
 	const dispatch = createEventDispatcher();
 
@@ -49,6 +72,11 @@
 				break;
 			case 'editSchedule':
 				dispatch('editSchedule', { scheduleName: scheduleValue });
+				break;
+			case 'runAccountOp':
+				let type = titleValueMapOps[accountOpValue];
+
+				dispatch(type);
 				break;
 			case 'delete':
 				dispatch('delete');
@@ -67,15 +95,15 @@
 			<Dropdown
 				id="accountOps"
 				style="width: 160px; height: 32px; margin-right: 10px;"
-				options={Object.values(valueTitleMap)}
-				bind:value={modeValue}
+				options={Object.values(valueTitleMapOps)}
+				bind:value={accountOpValue}
 				on:change={() => {
-					handleTaskAction('editMode');
-					modeValue = '';
+					handleTaskAction('runAccountOp');
+					accountOpValue = '';
 				}}
 				overlay={true}
 				size="lg"
-				title={`Run Account Ops ${buttonTextCount}`}
+				title={`Run Account Ops (${buttonTextCount.replace('(', '').replace(')', '')})`}
 			/>
 			<Button
 				variant="danger"
@@ -85,7 +113,7 @@
 				icon={faTrash}
 				resizable={false}
 				style="button"
-				>Clear Sessions {buttonTextCount}
+				>Clear Sessions ({buttonTextCount.replace('(', '').replace(')', '')})
 			</Button>
 		</div>
 		<div class="button-group">
@@ -125,7 +153,7 @@
 				}}
 				overlay={true}
 				size="lg"
-				title={`Set Modes ${buttonTextCount}`}
+				title={`Set Modes (${buttonTextCount.replace('(', '').replace(')', '')})`}
 			/>
 
 			<Dropdown
@@ -138,7 +166,7 @@
 					scheduleValue = '';
 				}}
 				overlay={true}
-				title={`Set Schedules ${buttonTextCount}`}
+				title={`Set Schedules (${buttonTextCount.replace('(', '').replace(')', '')})`}
 				size="lg"
 			/>
 		</div>

@@ -48,7 +48,7 @@ export const sidebarCollapsed = persistentStore('sidebarCollapsed', true);
 export const privacy = persistentStore('privacy', false);
 export const showTags = persistentStore('showTags', false);
 
-export const isLoading = writable<Record<string, boolean>>({});
+export const isLoading = persistentStore<Record<string, boolean>>('isLoading', {});
 export const shiftPressed = persistentStore('shiftPressed', false);
 export const accessDenied = writable(false);
 export const networkError = writable(false);

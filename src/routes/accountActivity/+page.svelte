@@ -67,6 +67,8 @@
 	let allTags: string[] = [];
 	let tagsCount: { tag: string; count: number }[] = [];
 
+	let emails: string[] = [];
+
 	let headerConfig: HeaderConfigType<ActivityTask> = {
 		Account: (task: ActivityTask) => task?.account?.username ?? '',
 		Proxy: (task: ActivityTask) => task?.account?.proxy ?? '',
@@ -173,9 +175,9 @@
 		}
 	};
 
-	const handleTask = (e: CustomEvent) => {
+	const handleTask = async (e: CustomEvent) => {
 		let state = e.type as states;
-		let taskId: number | null = e.detail?.id || null;
+		let taskId: number | '' = e.detail?.id || '';
 		isLoading.set({ [`${state}${taskId}`]: true });
 
 		let taskIds: number[];
@@ -201,18 +203,13 @@
 					showPasswordModal = true;
 				}
 
-				makeRequest('post', 'http://127.0.0.1:23432/accounts/activity/start', taskIds, () => {
-					isLoading.set({ [`${state}${taskId}`]: false });
-				});
+				await makeRequest('post', 'http://127.0.0.1:23432/accounts/activity/start', taskIds);
 				break;
 			case 'focus':
-				makeRequest(
+				await makeRequest(
 					'get',
 					`http://127.0.0.1:23432/task/${taskId}/focus?type=activity`,
-					taskIds,
-					() => {
-						isLoading.set({ [`${state}${taskId}`]: false });
-					}
+					taskIds
 				);
 				break;
 			case 'stop':
@@ -225,25 +222,21 @@
 					isLoading.set({ [state]: false });
 					return;
 				}
-				makeRequest('post', 'http://127.0.0.1:23432/accounts/activity/stop', taskIds, () => {
-					isLoading.set({ [`${state}${taskId}`]: false });
-				});
+				await makeRequest('post', 'http://127.0.0.1:23432/accounts/activity/stop', taskIds);
 				break;
 			case 'delete':
-				makeRequest('delete', 'http://127.0.0.1:23432/accounts/sessions', taskIds, () => {
-					verboseActivityTasks.update((tasks) => {
-						return tasks.map((task) => {
-							if (taskIds.includes(task.id)) {
-								if (typeof task.account.metadata === 'undefined') {
-									task.account.metadata = { logged_in: false };
-								} else {
-									task.account.metadata.logged_in = false;
-								}
+				await makeRequest('delete', 'http://127.0.0.1:23432/accounts/sessions', taskIds);
+				verboseActivityTasks.update((tasks) => {
+					return tasks.map((task) => {
+						if (taskIds.includes(task.id)) {
+							if (typeof task.account.metadata === 'undefined') {
+								task.account.metadata = { logged_in: false };
+							} else {
+								task.account.metadata.logged_in = false;
 							}
-							return task;
-						});
+						}
+						return task;
 					});
-					isLoading.set({ [`${state}${taskId}`]: false });
 				});
 				break;
 			case 'editActivity':
@@ -257,17 +250,15 @@
 					return task;
 				});
 
-				makeRequest('put', 'http://127.0.0.1:23432/accounts/activity', activityTasks, () => {
-					verboseActivityTasks.update((stateTasks) => {
-						for (let task of activityTasks) {
-							const index = stateTasks.findIndex((t) => t.id === task.id);
-							if (index !== -1) {
-								stateTasks[index] = task;
-							}
+				await makeRequest('put', 'http://127.0.0.1:23432/accounts/activity', activityTasks);
+				verboseActivityTasks.update((stateTasks) => {
+					for (let task of activityTasks) {
+						const index = stateTasks.findIndex((t) => t.id === task.id);
+						if (index !== -1) {
+							stateTasks[index] = task;
 						}
-						return stateTasks;
-					});
-					isLoading.set({ [state]: false });
+					}
+					return stateTasks;
 				});
 				break;
 
@@ -283,20 +274,45 @@
 					}
 					return task;
 				});
-				makeRequest('put', 'http://127.0.0.1:23432/accounts/activity', scheduleTasks, () => {
-					verboseActivityTasks.update((stateTasks) => {
-						for (let task of scheduleTasks) {
-							const index = stateTasks.findIndex((t) => t.id === task.id);
-							if (index !== -1) {
-								stateTasks[index] = task;
+				await makeRequest('put', 'http://127.0.0.1:23432/accounts/activity', scheduleTasks).then(
+					() => {
+						verboseActivityTasks.update((stateTasks) => {
+							for (let task of scheduleTasks) {
+								const index = stateTasks.findIndex((t) => t.id === task.id);
+								if (index !== -1) {
+									stateTasks[index] = task;
+								}
 							}
-						}
-						return stateTasks;
-					});
-					isLoading.set({ [state]: false });
+							return stateTasks;
+						});
+						isLoading.set({ [state]: false });
+					}
+				);
+				break;
+			case 'updateNikeProfile':
+				await makeRequest('post', 'http://127.0.0.1:23432/nike/profiles', taskIds);
+				break;
+			case 'deleteNikeAccount':
+				await makeRequest('delete', 'http://127.0.0.1:23432/nike/accounts', {
+					account_ids: taskIds,
+					create_nac: false
 				});
 				break;
+			case 'disableEmailNotifications':
+				await makeRequest(
+					'post',
+					'http://127.0.0.1:23432/nike/disable-email-notifications',
+					taskIds
+				);
+				break;
+			case 'changeNikeEmail':
+				let data = taskIds.map((id, index) => {
+					return { account_id: id, email: emails[index] };
+				});
+				await makeRequest('post', 'http://127.0.0.1:23432/nike/email', data);
 		}
+
+		isLoading.set({});
 	};
 
 	const clearFilters = () => {
@@ -481,6 +497,10 @@
 	on:editActivity={handleTask}
 	on:editSchedule={handleTask}
 	on:saveSettings={handleSaveSettings}
+	on:disableEmailNotifications={handleTask}
+	on:changeNikeEmail={handleTask}
+	on:deleteNikeAccount={handleTask}
+	on:updateNikeProfile={handleTask}
 	on:delete={() => {
 		showConfirmationModal = true;
 	}}

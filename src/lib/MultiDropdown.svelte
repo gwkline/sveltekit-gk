@@ -79,8 +79,9 @@
 					<Input
 						bind:value={filterText}
 						placeholder="Filter options"
-						style="width: 100%;"
+						style="width: 100%; border-radius: 0;"
 						outline="noOutline"
+						shadow={false}
 					/>
 				</div>
 

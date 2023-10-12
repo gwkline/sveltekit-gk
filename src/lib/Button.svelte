@@ -200,6 +200,12 @@
 		border: solid 1px var(--light-gray-1);
 	}
 
+	button:disabled:active {
+		-webkit-box-shadow: inherit !important;
+		-moz-box-shadow: inherit !important;
+		box-shadow: inherit !important;
+	}
+
 	@media (max-width: 1280px) {
 		button.sm.resizable {
 			padding: 7px 7px;

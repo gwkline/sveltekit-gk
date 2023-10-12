@@ -52,7 +52,6 @@
 	};
 
 	const stateOrder: (CheckoutState | ActivityState)[] = [
-		'Ready',
 		'Queued',
 		'Starting',
 		'Running',
@@ -60,7 +59,8 @@
 		'Error',
 		'AwaitingResults',
 		'Complete',
-		'Winning'
+		'Winning',
+		'Ready'
 	].filter((state) => stateIsRelevant(state as CheckoutState | ActivityState | NacState, page)) as (
 		| CheckoutState
 		| ActivityState

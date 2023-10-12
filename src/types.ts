@@ -55,6 +55,12 @@ export type ActivityMode =
 	| 'addverifiednumber'
 	| 'manual';
 
+export type AccountOpMode =
+	| 'disableEmailNotifications'
+	| 'deleteNikeAccount'
+	| 'changeNikeEmail'
+	| 'updateNikeProfile';
+
 export type OutboundTask = {
 	id: number;
 	account_id: number;
@@ -522,7 +528,11 @@ export type states =
 	| 'stopIndiv'
 	| 'deleteIndiv'
 	| 'editActivity'
-	| 'editSchedule';
+	| 'editSchedule'
+	| 'updateNikeProfile'
+	| 'disableEmailNotifications'
+	| 'deleteNikeAccount'
+	| 'changeNikeEmail';
 
 export type SettingsKeys =
 	| 'max_active_tasks'
